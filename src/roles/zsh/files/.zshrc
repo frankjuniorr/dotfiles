@@ -34,6 +34,8 @@ setopt HIST_IGNORE_SPACE  # Don't save when prefixed with space
 setopt HIST_IGNORE_DUPS   # Don't save duplicate lines
 setopt SHARE_HISTORY      # Share history between sessions
 
+export FZF_BASE="/home/${USER}/bin"
+
 if [ -f "${FZF_BASE}/key-bindings.zsh" ];then
   source "${FZF_BASE}/key-bindings.zsh"
 fi
@@ -94,3 +96,22 @@ source $ZSH/oh-my-zsh.sh
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
+
+################ SSH Configurations
+# carregando o agent ssh, e adicionando as chaves
+if ! ps aux | grep "ssh-agent -s" | grep -v grep > /dev/null;then
+    eval "$(ssh-agent -s)" > /dev/null
+fi
+
+
+# procure tudo que não for:
+# - com o nome de "config"
+# - com o nome de "known_hosts"
+# - com o nome de "authorized_keys"
+# - com o nome de "com formato"
+# Ou seja, procure todas as chaves privadas dentro do diretório do ssh
+ssh_private_keys=($(find ~/.ssh -type f ! -iname "config" ! -iname "known_hosts" ! -iname "authorized_keys" ! -name "*.*"))
+
+for private_key in $ssh_private_keys; do
+    ssh-add "$private_key" > /dev/null 2>&1
+done
