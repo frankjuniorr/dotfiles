@@ -1,0 +1,5 @@
+---
+- name: "1PASSWORD | install"
+  kewlfft.aur.aur:
+    name: 1password
+    state: present

@@ -1,0 +1,6 @@
+---
+- name: "SPOTIFY | Install"
+  become: true
+  community.general.pacman:
+    name: spotify
+    state: present

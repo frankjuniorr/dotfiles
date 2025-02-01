@@ -1,0 +1,6 @@
+---
+- name: "CMATRIX | Install"
+  become: true
+  community.general.pacman:
+    name: cmatrix
+    state: present

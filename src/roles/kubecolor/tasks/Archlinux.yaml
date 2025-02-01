@@ -1,0 +1,5 @@
+---
+- name: "KUBECOLOR | install"
+  kewlfft.aur.aur:
+    name: kubecolor
+    state: present

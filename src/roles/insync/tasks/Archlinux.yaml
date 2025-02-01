@@ -1,0 +1,5 @@
+---
+- name: "INSYNC | install"
+  kewlfft.aur.aur:
+    name: insync
+    state: present

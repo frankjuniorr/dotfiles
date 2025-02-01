@@ -1,0 +1,5 @@
+---
+- name: "SOLAAR | install"
+  kewlfft.aur.aur:
+    name: solaar
+    state: present

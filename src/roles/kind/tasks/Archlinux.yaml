@@ -1,0 +1,5 @@
+---
+- name: "KIND | install"
+  kewlfft.aur.aur:
+    name: kind
+    state: present

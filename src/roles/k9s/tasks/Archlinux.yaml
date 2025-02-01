@@ -1,0 +1,6 @@
+---
+- name: "K9S | Install"
+  become: true
+  community.general.pacman:
+    name: k9s
+    state: present

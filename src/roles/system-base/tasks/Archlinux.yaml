@@ -1,0 +1,19 @@
+---
+- name: "{{ ansible_distribution }} | Install tools"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - stow
+    - curl
+    - wget
+    - meld
+    - jq
+    - yq
+    - ffmpeg
+    - imagemagick
+    - xclip
+    - flameshot
+    - ncdu
+    - figlet

@@ -1,0 +1,6 @@
+---
+- name: "LSD | Install"
+  become: true
+  community.general.pacman:
+    name: lsd
+    state: present

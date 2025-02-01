@@ -1,0 +1,6 @@
+---
+- name: "HELM | Install"
+  become: true
+  community.general.pacman:
+    name: helm
+    state: present

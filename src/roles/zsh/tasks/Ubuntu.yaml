@@ -12,3 +12,19 @@
     name: zsh
     state: present
     install_recommends: yes
+
+# Install Oh-My-ZSH
+##############################################################################
+- name: "Oh-My-ZSH | Install"
+  ansible.builtin.shell: "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
+  args:
+    creates: "{{ ansible_user_dir }}/.oh-my-zsh"
+
+- name: "Oh-My-ZSH | Install Plugins"
+  git:
+    repo: "https://github.com/zsh-users/{{ item }}.git"
+    dest: "{{ ansible_user_dir }}/.oh-my-zsh/custom/plugins/{{ item }}"
+    version: master
+  loop:
+    - zsh-syntax-highlighting
+    - zsh-autosuggestions

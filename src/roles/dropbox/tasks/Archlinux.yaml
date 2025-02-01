@@ -1,0 +1,5 @@
+---
+- name: "DROPBOX | install"
+  kewlfft.aur.aur:
+    name: dropbox
+    state: present

@@ -1,0 +1,5 @@
+---
+- name: "DOCKER | install"
+  kewlfft.aur.aur:
+    name: docker
+    state: present

@@ -7,3 +7,9 @@
 - name: "System | Run Tasks: {{ ansible_distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
+
+# It will install a binary to ~/.atuin/bin
+# See More: https://docs.atuin.sh/guide/installation/
+- name: "ATUIN | install"
+  become_user: yes
+  ansible.builtin.shell: "curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh"

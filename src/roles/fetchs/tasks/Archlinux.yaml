@@ -1,0 +1,6 @@
+---
+- name: "ONEFETCH | Install"
+  become: true
+  community.general.pacman:
+    name: onefetch
+    state: present

@@ -8,22 +8,6 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
 
-# Install Oh-My-ZSH
-##############################################################################
-- name: "Oh-My-ZSH | Install"
-  ansible.builtin.shell: "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
-  args:
-    creates: "{{ ansible_user_dir }}/.oh-my-zsh"
-
-- name: "Oh-My-ZSH | Install Plugins"
-  git:
-    repo: "https://github.com/zsh-users/{{ item }}.git"
-    dest: "{{ ansible_user_dir }}/.oh-my-zsh/custom/plugins/{{ item }}"
-    version: master
-  loop:
-    - zsh-syntax-highlighting
-    - zsh-autosuggestions
-
 # Install ZSH
 ##############################################################################
 - name: "ZSH | Ensure {{ ansible_user_dir }}/config/dotfiles directory exists"
@@ -46,20 +30,6 @@
     state: link
   loop:
     - { src: "{{ role_path }}/files/.zshrc", dest: "{{ ansible_user_dir }}/.zshrc" }
-    - { src: "{{ role_path }}/files/.gitconfig", dest: "{{ ansible_user_dir }}/.gitconfig" }
-    - { src: "{{ role_path }}/files/alias.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/alias.sh" }
-    - { src: "{{ role_path }}/files/functions.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/functions.sh" }
-
-- name: "ZSH | Ensure {{ scripts_installation_path }} directory structure exists"
-  ansible.builtin.file:
-    path: "{{ scripts_installation_path }}"
-    mode: "0755"
-    state: directory
-
-- name: "ZSH | Create symbolic links for commands"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ scripts_installation_path }} ."
-    chdir: "{{ role_path }}/files/commands"
 
 - name: "ZSH | Change to zsh"
   become: yes

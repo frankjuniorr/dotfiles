@@ -1,0 +1,5 @@
+---
+- name: "TMUXINATOR | install"
+  kewlfft.aur.aur:
+    name: tmuxinator
+    state: present

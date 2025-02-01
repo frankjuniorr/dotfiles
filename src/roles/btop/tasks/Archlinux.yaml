@@ -1,0 +1,6 @@
+---
+- name: "BTOP | Install"
+  become: true
+  community.general.pacman:
+    name: btop
+    state: present
