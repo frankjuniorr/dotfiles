@@ -1,5 +1,3 @@
 ---
 - name: "GOOGLE CHROME | install"
-  kewlfft.aur.aur:
-    name: google-chrome
-    state: present
+  ansible.builtin.shell: "yay -S --needed --noconfirm google-chrome"

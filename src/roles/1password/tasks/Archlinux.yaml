@@ -1,5 +1,3 @@
 ---
 - name: "1PASSWORD | install"
-  kewlfft.aur.aur:
-    name: 1password
-    state: present
+  ansible.builtin.shell: "yay -S --needed --noconfirm 1password"

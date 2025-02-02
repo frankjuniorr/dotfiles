@@ -1,5 +1,3 @@
 ---
 - name: "TMUXINATOR | install"
-  kewlfft.aur.aur:
-    name: tmuxinator
-    state: present
+  ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"

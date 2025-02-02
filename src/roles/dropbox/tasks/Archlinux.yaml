@@ -1,5 +1,3 @@
 ---
 - name: "DROPBOX | install"
-  kewlfft.aur.aur:
-    name: dropbox
-    state: present
+  ansible.builtin.shell: "yay -S --needed --noconfirm dropbox"
