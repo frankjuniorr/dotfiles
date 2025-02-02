@@ -15,6 +15,7 @@
     - "{{ ansible_user_dir }}/.config/terminator"
 
 - name: "Terminator | Create symbolic links for configuration files"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/terminator config"
-    chdir: "{{ role_path }}/files/"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config"
+    dest: "{{ ansible_user_dir }}/.config/terminator/config"
+    state: link
