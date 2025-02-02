@@ -53,6 +53,8 @@ default_roles:
 
   - funny-apps
 
+  - dotfiles
+
 go:
   packages:
     - package: github.com/spf13/cobra-cli@latest
