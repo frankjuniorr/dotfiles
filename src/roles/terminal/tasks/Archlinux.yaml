@@ -52,4 +52,5 @@
   ansible.builtin.file:
     src: "{{ role_path }}/files/kitty.conf"
     dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf"
+    force: true
     state: link
