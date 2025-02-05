@@ -1,4 +1,11 @@
 ---
+
+#ATTENTION:
+#########################################################
+# This file is commented bacause it's only necessary in my own Hyprland installation ("vanilla hyprland")
+# in case of install my dotfiles up to HyDE, this file doens't necessary
+#########################################################
+
 # Create symbolic links to add kitty and kitten to PATH
 # - name: "KITTY | Create symlinks for kitty and kitten"
 #   ansible.builtin.file:
@@ -39,18 +46,18 @@
 #     mode: '0644'
 
 # Link the Config File
-- name: "KITTY | Ensure kitty directory structure exists"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/kitty"
+# - name: "KITTY | Ensure kitty directory structure exists"
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     mode: "0755"
+#     state: directory
+#   loop:
+#     - "{{ ansible_user_dir }}/.config"
+#     - "{{ ansible_user_dir }}/.config/kitty"
 
-- name: "KITTY | Copy config file"
-  ansible.builtin.file:
-    src: "{{ role_path }}/files/kitty.conf"
-    dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf"
-    force: true
-    state: link
+# - name: "KITTY | Copy config file"
+#   ansible.builtin.file:
+#     src: "{{ role_path }}/files/kitty.conf"
+#     dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf"
+#     force: true
+#     state: link

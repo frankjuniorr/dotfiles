@@ -55,9 +55,9 @@ export FZF_ALT_C_COMMAND="fdfind --type d . --color=never"
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -n 50'"
 
 # set default editor to vim
-export EDITOR=vim
+#export EDITOR=vim
 
-export TERM="tmux-256color"
+#export TERM="tmux-256color"
 
 # variáveis para colorir manpages
 export LESS_TERMCAP_mb=${bold_green}
@@ -110,8 +110,10 @@ fi
 # - com o nome de "authorized_keys"
 # - com o nome de "com formato"
 # Ou seja, procure todas as chaves privadas dentro do diretório do ssh
-ssh_private_keys=($(find ~/.ssh -type f ! -iname "config" ! -iname "known_hosts" ! -iname "authorized_keys" ! -name "*.*"))
+if [ -d ~/.ssh ];then
+  ssh_private_keys=($(find ~/.ssh -type f ! -iname "config" ! -iname "known_hosts" ! -iname "authorized_keys" ! -name "*.*"))
 
-for private_key in $ssh_private_keys; do
-    ssh-add "$private_key" > /dev/null 2>&1
-done
+  for private_key in $ssh_private_keys; do
+      ssh-add "$private_key" > /dev/null 2>&1
+  done
+fi

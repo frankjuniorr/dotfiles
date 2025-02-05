@@ -1,6 +1,14 @@
 ---
-- name: "CMATRIX | Install"
+- name: "UNIMATRIX | Check if already installed"
+  ansible.builtin.stat:
+    path: "/usr/local/bin/unimatrix"
+  register: unimatrix_file
+
+# https://github.com/will8211/unimatrix?tab=readme-ov-file#install
+- name: "UNIMATRIX | Install"
   become: true
-  community.general.pacman:
-    name: cmatrix
-    state: present
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/will8211/unimatrix/master/unimatrix.py"
+    dest: "/usr/local/bin/unimatrix"
+    mode: "0755"
+  when: not unimatrix_file.stat.exists

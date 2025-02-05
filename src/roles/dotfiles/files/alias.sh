@@ -28,6 +28,8 @@ alias fgrep='fgrep --color=auto'
 # egrep padrão com cores automáticas
 alias egrep='egrep --color=auto'
 
+alias mkdir='mkdir -p'
+
 alias cat='bat'
 alias cd='z'
 cx(){ cd "$@" && ls; }

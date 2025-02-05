@@ -1,0 +1,43 @@
+#!/bin/env bash
+
+machines_list=("proxmox" "local-machine")
+machines_length="${#machines_list[@]}"
+
+machines=$(gum choose \
+        --header "Shutdown machines?" \
+        --header.foreground=7 \
+		--cursor.foreground=1 \
+		--selected.foreground=1 \
+		--no-show-help \
+        --selected=proxmox \
+        --limit "$machines_length" \
+		"${machines_list[@]}")
+
+if [ -z "$machines" ];then
+    exit 0
+fi
+
+for machine in $machines; do
+    case "$machine" in
+        proxmox)
+            # -c 1: Send only 1 ping package
+            # -W 2: Wait only 2 seconds
+            if ping -c 1 -W 2 proxmox &>/dev/null; then
+                echo "Shutting down proxmox..."
+                # ssh proxmox "shutdown -h now"
+            else
+                echo "The machine 'proxmox' is already OFF"
+            fi
+        ;;
+
+        local-machine)
+            echo "shutting down local machine..."
+            # sudo shutdown -h now
+        ;;
+
+        *)
+            echo "$machine not supported"
+            exit 0
+        ;;
+    esac
+done
