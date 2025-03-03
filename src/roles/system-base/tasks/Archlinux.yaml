@@ -9,6 +9,7 @@
     - curl
     - wget
     - meld
+    - less
     - jq
     - yq
     - ffmpeg
@@ -17,3 +18,8 @@
     - flameshot
     - ncdu
     - figlet
+    - emote # emoji picker gtk3
+
+# GUI to control brightness for external monitors
+- name: "{{ ansible_distribution }} | Install tools"
+  ansible.builtin.shell: "yay -S --needed --noconfirm ddcui"

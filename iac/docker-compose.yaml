@@ -3,10 +3,10 @@ version: '3.8'
 services:
   dotfiles-iac:
     container_name: dotfiles-iac
-    image: ghcr.io/frankjuniorr/dotfiles-iac:1.0
+    image: ghcr.io/frankjuniorr/dotfiles-iac:1.1
     command: >
       ansible-playbook main.yaml -i hosts.yaml
-      --extra-vars "os_type_list=${OS_TYPE_LIST}"
+      --extra-vars "os_type_list=${OS_TYPE_LIST} ansible_host=${ANSIBLE_HOST}"
       --tags "${TAGS}"
     volumes:
       - $SSH_AUTH_SOCK:/tmp/ssh_auth_sock

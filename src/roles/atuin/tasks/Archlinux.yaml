@@ -1,0 +1,6 @@
+---
+- name: "ATUIN | install"
+  become: true
+  community.general.pacman:
+    name: atuin
+    state: present

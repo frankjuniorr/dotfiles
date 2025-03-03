@@ -1,3 +1,11 @@
 ---
 - name: "DROPBOX | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm dropbox"
+
+# - name: "DROPBOX | start service"
+#   become: true
+#   ansible.builtin.systemd:
+#     name: "dropbox@{{ host_user }}"
+#     state: started
+#     enabled: yes
+#     scope: system  # Para serviços do sistema (remova se for `--user`)

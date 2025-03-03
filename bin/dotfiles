@@ -11,7 +11,7 @@ IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 
 DOTFILES_REPOSITORY="https://github.com/linux-ricing-project/dotfiles.git"
 
-DOTFILES_VERSION="v1.0"
+DOTFILES_VERSION="v1.1"
 
 
 function show_header(){

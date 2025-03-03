@@ -1,22 +1,5 @@
 ---
 
-# INSTALL and UNINSTALL PACKAGES
-#######################################################################################
-# uninstall packages that I don´t want
-- name: "HYDE | Uninstall some packages"
-  become: true
-  ansible.builtin.shell: |
-    if pacman -Qq | grep "^{{ item }}" &>/dev/null; then
-      yay -Rns --noconfirm {{ item }}
-    fi
-  loop:
-    - pokego-bin
-    - pokego-bin-debug
-    - zsh-theme-powerlevel10k-git
-    - eza
-    - code
-  changed_when: false  # Evita que a task sempre apareça como "changed"
-
 # To enable auto pasting, we can emulate  ctrl v (pasting) shortcut.
 # more info here: https://github.com/HyDE-Project/HyDE/discussions/137#discussioncomment-11952405
 - name: "HYDE | Install some packages"
@@ -40,7 +23,7 @@
    path: "{{ ansible_user_dir }}/Clone"
    state: absent
 
-- name: Comentar a linha ILoveCandy se existir
+- name: "HYDE | Comment 'ILoveCandy' line if it exists"
   become: true
   ansible.builtin.lineinfile:
     path: /etc/pacman.conf
@@ -89,7 +72,7 @@
     - { src: "{{ role_path }}/files/.hyde.zshrc", dest: "{{ ansible_user_dir }}/.hyde.zshrc" }
 
 # Change some environment variables
-- name: Remover o character '#' da linha do $EDITOR
+- name: "HYDE | uncomment '$EDITOR' line"
   ansible.builtin.lineinfile:
     path: "{{ ansible_user_dir }}/.config/hypr/hyde.conf"
     regexp: "{{ item.regex }}"

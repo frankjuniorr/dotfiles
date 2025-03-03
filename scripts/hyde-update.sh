@@ -11,7 +11,7 @@ files_to_be_deleted=(
 
 for file in "${files_to_be_deleted[@]}";do
     if [ -f "$file" ];then
-        echo "removing fastfatch logos..."
+        echo "removing fastfetch logos..."
         rm -rfv "$file"
     fi
 done

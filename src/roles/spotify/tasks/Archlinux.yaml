@@ -2,5 +2,14 @@
 - name: "SPOTIFY | Install"
   become: true
   community.general.pacman:
-    name: spotify
+    name: "{{ item }}"
     state: present
+  loop:
+    - spotify
+    - cava
+
+# TODO: Essa instalação está comentada temporariamente,
+#  porque ela demora muito, e não é prioritária agora
+
+# - name: "SPOTIFY | install TUI"
+#   ansible.builtin.shell: "yay -S --needed --noconfirm spotify-player-full"

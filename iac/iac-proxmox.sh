@@ -39,6 +39,7 @@ os_list="[$os_list]"
 
 export OS_TYPE_LIST="$os_list"
 export TAGS="$command"
+export ANSIBLE_HOST="192.168.0.115"
 
 echo "$OS_TYPE_LIST"
 echo "$TAGS"

@@ -1,3 +1,20 @@
 ---
+- name: "1PASSWORD | Dependencies"
+  become: true
+  community.general.pacman:
+    name: xdg-desktop-portal-gtk
+    state: present
+
+
 - name: "1PASSWORD | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm 1password"
+
+
+- name: "1PASSWORD | Update file /usr/share/applications/1password.desktop"
+  become: true
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/1password.desktop"
+    dest: "/usr/share/applications"
+    mode: '0755'
+    remote_src: true
+    force: true
