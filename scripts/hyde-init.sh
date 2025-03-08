@@ -29,6 +29,7 @@ clear
 cd ~/HyDE/Scripts || return
 ./themepatcher.sh "Greenify" https://github.com/mahaveergurjar/Theme-Gallery/tree/Greenify
 
-
 # Reboot
+echo "rebooting in 5 seconds"
+sleep 5
 reboot

@@ -68,18 +68,6 @@ export LESS_TERMCAP_so=${bold_yellow}
 export LESS_TERMCAP_ue=${text_reset}
 export LESS_TERMCAP_us=${bold_red}
 
-if [ -f "${HOME}/.atuin/bin/env" ];then
-  source "${HOME}/.atuin/bin/env"
-fi
-if which atuin > /dev/null 2>&1 ;then
-  eval "$(atuin init zsh --disable-up-arrow)"
-fi
-
-if which zoxide > /dev/null 2>&1 ;then
-  eval "$(zoxide init zsh)"
-fi
-
-
 ################ OH-MY-ZSH Configurations
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""
@@ -93,16 +81,11 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
-eval "$(starship init zsh)"
-
 ################ SSH Configurations
 # carregando o agent ssh, e adicionando as chaves
 if ! ps aux | grep "ssh-agent -s" | grep -v grep > /dev/null;then
     eval "$(ssh-agent -s)" > /dev/null
 fi
-
 
 # procure tudo que não for:
 # - com o nome de "config"
@@ -116,4 +99,18 @@ if [ -d ~/.ssh ];then
   for private_key in $ssh_private_keys; do
       ssh-add "$private_key" > /dev/null 2>&1
   done
+fi
+
+export STARSHIP_CONFIG=~/.config/starship/starship.toml
+eval "$(starship init zsh)"
+
+if [ -f "${HOME}/.atuin/bin/env" ];then
+  source "${HOME}/.atuin/bin/env"
+fi
+if which atuin > /dev/null 2>&1 ;then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+if which zoxide > /dev/null 2>&1 ;then
+  eval "$(zoxide init zsh)"
 fi
