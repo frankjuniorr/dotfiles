@@ -16,11 +16,12 @@ cd ~/HyDE/Scripts || return
 core_packages_file="pkg_core.lst"
 
 # Removing some packages
+sed -i 's/^eza|zsh/# &/' "$core_packages_file"
 sed -i 's/^eza|fish/# &/' "$core_packages_file"
 sed -i 's/^zsh-theme-powerlevel10k-git|zsh/# &/' "$core_packages_file"
 sed -i 's/^pokego-bin|zsh/# &/' "$core_packages_file"
-sed -i 's/^eza|fish/# &/' "$core_packages_file"
 sed -i 's/^code/# &/' "$core_packages_file"
+sed -i 's/^firefox/# &/' "$core_packages_file"
 
 clear
 ./install.sh
