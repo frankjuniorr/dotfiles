@@ -1,5 +1,12 @@
 ---
 
+# CONFIGURE PACKAGE MANAGERS
+#######################################################################################
+- name: "HYDE | Install additional themes"
+  ansible.builtin.shell: theme.import.py --fetch "{{ item }}"
+  loop:
+    - Greenify
+
 # To enable auto pasting, we can emulate  ctrl v (pasting) shortcut.
 # more info here: https://github.com/HyDE-Project/HyDE/discussions/137#discussioncomment-11952405
 - name: "HYDE | Install some packages"
