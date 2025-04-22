@@ -103,7 +103,7 @@
 
 - name: "HYDE | Remove some fastfecth logos"
   ansible.builtin.file:
-   path: "{{ ansible_user_dir }}/.config/fastfetch/logos/{{ item }}"
+   path: "{{ ansible_user_dir }}/.config/fastfetch/logo/{{ item }}"
    state: absent
   loop:
     - "aisaka.icon"
