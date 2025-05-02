@@ -1,6 +1,3 @@
 ---
-- name: "TERRAFORM | Install"
-  become: true
-  community.general.pacman:
-    name: terraform
-    state: present
+- name: "TFENV | Install"
+  ansible.builtin.shell: "yay -S --needed --noconfirm tfenv"

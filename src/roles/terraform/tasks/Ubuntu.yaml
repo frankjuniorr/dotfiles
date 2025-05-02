@@ -1,19 +1,21 @@
 ---
-- name: Terraform | {{ ansible_distribution }} | Add the HashiCorp GPG key.
-  become: true
-  ansible.builtin.apt_key:
-    url: https://apt.releases.hashicorp.com/gpg
-    keyring: /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    state: present
+- name: "TFENV | Clone repository to tfenv"
+  ansible.builtin.git:
+    repo: https://github.com/tfutils/tfenv.git
+    dest: "{{ ansible_env.HOME }}/.tfenv"
+    depth: 1
 
-- name: Terraform | {{ ansible_distribution }} | Add the official HashiCorp Linux repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
-    state: present
+- name: "TFENV | Create directory ~/.local/bin"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: '0755'
 
-- name: Terraform | {{ ansible_distribution }} | Install Terraform
-  become: true
-  apt:
-    name: terraform
-    state: present
+- name: "TFENV | Create symlinks to tfenv"
+  ansible.builtin.file:
+    src: "{{ item }}"
+    dest: "{{ ansible_env.HOME }}/.local/bin/{{ item | basename }}"
+    state: link
+    force: yes
+  with_fileglob:
+    - "{{ ansible_env.HOME }}/.tfenv/bin/*"
