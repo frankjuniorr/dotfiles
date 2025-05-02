@@ -3,6 +3,7 @@
 cd ~/HyDE/Scripts || return
 ./install.sh -r
 
+# remove some fastfetchs images
 files_to_be_deleted=(
     "$HOME/.config/fastfetch/logos/aisaka.icon"
     "$HOME/.config/fastfetch/logos/loli.icon"

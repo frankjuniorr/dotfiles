@@ -3,7 +3,11 @@
 # This is a good place to load graphic/ascii art, display system information, etc.
 
 # fastfetch --logo-type kitty
-fastfetch.sh
+if [ -n "$TMUX" ]; then
+  fastfetch --logo none
+else
+  fastfetch --logo-type kitty
+fi
 
 #  Plugins 
 # manually add your oh-my-zsh plugins here
