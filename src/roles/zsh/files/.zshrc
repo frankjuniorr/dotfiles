@@ -39,7 +39,7 @@ export FZF_BASE="/home/${USER}/bin"
 if [ -f "${FZF_BASE}/key-bindings.zsh" ];then
   source "${FZF_BASE}/key-bindings.zsh"
 fi
-export FZF_DEFAULT_COMMAND='fdfind --type f --color=never'
+export FZF_DEFAULT_COMMAND="fd --type f --color=never"
 
 # Show fzf in fullscreen
 export FZF_DEFAULT_OPTS="--height=100% --border=rounded --reverse"
@@ -51,7 +51,7 @@ export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :50 {}'"
 
 # ALT + C: call the fzf in current folder
 # with a tree preview
-export FZF_ALT_C_COMMAND="fdfind --type d . --color=never"
+export FZF_ALT_C_COMMAND="fd --type d . --color=never"
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -n 50'"
 
 # set default editor to vim

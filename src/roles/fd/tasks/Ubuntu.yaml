@@ -1,0 +1,6 @@
+---
+- name: "FD | Install"
+  become: yes
+  ansible.builtin.apt:
+    name: "fd-find"
+    state: present

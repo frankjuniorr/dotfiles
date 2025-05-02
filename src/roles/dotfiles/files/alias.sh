@@ -38,7 +38,9 @@ cx(){ cd "$@" && ls; }
 # package used by "fzf" in "FZF_DEFAULT_COMMAND" env variable
 # Installation Ubuntu: sudo apt install fd-find
 # The name of executable is "fdfind". So, only in Ubuntu is necessary this alias below
-alias fd='fdfind'
+if [ "$(grep ^ID= /etc/os-release)" == "ubuntu" ];then
+    alias fd='fdfind'
+fi
 
 # alias de navegação
 alias ..="cd .."
