@@ -1,0 +1,6 @@
+---
+- name: "OBSIDIAN | Install"
+  become: true
+  community.general.pacman:
+    name: obsidian
+    state: present
