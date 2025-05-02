@@ -69,6 +69,9 @@ alias sizer='du -h -c'
 
 alias k="kubecolor"
 
+alias lzd="lazydocker"
+alias lg="lazygit"
+
 ################################################################################
 #  ALIAS AND FUNCTIONS ALIASES
 ################################################################################
