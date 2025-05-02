@@ -19,6 +19,7 @@
     - ncdu
     - figlet
     - emote # emoji picker gtk3
+    - virt-viewer # used by SPICE on Proxmox
 
 # GUI to control brightness for external monitors
 - name: "{{ ansible_distribution }} | Install tools"

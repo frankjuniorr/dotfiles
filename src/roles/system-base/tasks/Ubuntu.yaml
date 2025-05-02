@@ -38,6 +38,7 @@
     - flameshot
     - ncdu
     - figlet
+    - virt-viewer
 
 # This code block will throw an error inside the Docker container because the container doens't use systemd as the init system.
 # That's why the condition at the end is there. This code will only work inside the VM.
