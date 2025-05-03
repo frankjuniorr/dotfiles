@@ -39,6 +39,7 @@
   ansible.builtin.shell: systemd-detect-virt
   register: virt_type
   changed_when: false
+  ignore_errors: yes
 
 - name: "HYDE | Define monitor configuration"
   ansible.builtin.set_fact:

@@ -1,12 +1,11 @@
 name: dotfiles
-root: ~/Dropbox/code/01.github/linux_ricing_project/dotfiles
+root: /home/frank/Dropbox/code/01.github/projects/dotfiles
 
 windows:
   - code:
       layout: main-horizontal
       panes:
         - clear && figlet -k -c -t "Dotfiles" && onefetch && sleep 1 && code .
-        - watch -n 5 incus list
   - docker:
     - lazydocker
   - git:
