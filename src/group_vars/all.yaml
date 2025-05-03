@@ -17,7 +17,9 @@ default_roles:
   - btop
   - fetchs
   - lazygit
+  - lazydocker
   - just
+  - fd
 
   # Terminal
   - fonts

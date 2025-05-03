@@ -9,3 +9,16 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
+
+
+# install Go Packages
+- name: GO | Install GoLang Packages
+  ansible.builtin.command:
+    cmd: "go install {{ item.package }}"
+    creates: "~/go/bin/{{ item.cmd }}"
+  register: go_install
+  changed_when: go_install.rc != 0
+  loop_control:
+    label: "{{ item.package }}"
+  loop: "{{ go.packages }}"
+  when: go.packages is defined
