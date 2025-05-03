@@ -1,0 +1,3 @@
+---
+- name: "UNIMATRIX | install"
+  ansible.builtin.shell: "yay -S --needed --noconfirm unimatrix-git"

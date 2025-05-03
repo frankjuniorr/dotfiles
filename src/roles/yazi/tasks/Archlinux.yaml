@@ -1,0 +1,17 @@
+---
+- name: "YAZI | install"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - yazi
+    # - ffmpeg
+    - 7zip
+    # - jq
+    - poppler
+    # - fd
+    - ripgrep
+    # - fzf
+    # - zoxide
+    # - imagemagick

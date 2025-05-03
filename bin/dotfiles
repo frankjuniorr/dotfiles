@@ -11,7 +11,7 @@ IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 
 DOTFILES_REPOSITORY="https://github.com/linux-ricing-project/dotfiles.git"
 
-DOTFILES_VERSION="v1.0"
+DOTFILES_VERSION="v1.1"
 
 
 function show_header(){
@@ -52,13 +52,22 @@ function print_stats(){
 
 function check_dependencies(){
     if ! type gum >/dev/null 2>&1; then
-    gum_version="0.14.4"
-    gum_filename="gum_${gum_version}_amd64.deb"
 
-    echo "Installing dependencies: gum"
-    wget -q -P /tmp "https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_filename}"
-    sudo dpkg -i /tmp/${gum_filename} > /dev/null && rm -rf /tmp/${gum_filename}
-fi
+      case $os_name in
+        Ubuntu)
+          gum_version="0.14.4"
+          gum_filename="gum_${gum_version}_amd64.deb"
+
+          echo "Installing dependencies: gum"
+          wget -q -P /tmp "https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_filename}"
+          sudo dpkg -i /tmp/${gum_filename} > /dev/null && rm -rf /tmp/${gum_filename}
+        ;;
+        "Arch Linux")
+          sudo pacman -S --noconfirm gum
+        ;;
+      esac
+
+    fi
 }
 
 function ubuntu_setup() {
@@ -93,36 +102,27 @@ function ubuntu_setup() {
 
 function arch_setup() {
 
+  loading "Update System" "sudo pacman -Sy --noconfirm"
+
   if ! pacman -Q python3 >/dev/null 2>&1; then
-    _task "Installing Python3"
-    _cmd "sudo pacman -S --noconfirm python3"
+    loading "Installing Python3" "sudo pacman -S --noconfirm python3"
   fi
 
   if ! pacman -Q python-pip >/dev/null 2>&1; then
-    _task "Installing Python3 Pip"
-    _cmd "sudo pacman -S --noconfirm python-pip"
+    loading "Installing Python3 Pip" "sudo pacman -S --noconfirm python-pip"
   fi
 
   if ! [ -x "$(command -v ansible)" ]; then
-    _task "Installing Ansible"
-    _cmd "sudo pacman -Sy --noconfirm"
-    _cmd "sudo pacman -S --noconfirm ansible"
-    _cmd "sudo pacman -S --noconfirm python-argcomplete"
-    # _cmd "sudo activate-global-python-argcomplete3"
+    loading "Installing Ansible" "sudo pacman -S --noconfirm ansible python-argcomplete"
   fi
 
   if ! pip3 list | grep watchdog >/dev/null 2>&1; then
-    _task "Installing Python3 Watchdog"
-    _cmd "sudo pacman -S --noconfirm python-watchdog"
+    loading "Installing Python3 Watchdog" "sudo pacman -S --noconfirm python-watchdog"
   fi
 
   if ! pacman -Q openssh >/dev/null 2>&1; then
-    _task "Installing OpenSSH"
-    _cmd "sudo pacman -S --noconfirm openssh"
+    loading "Installing OpenSSH" "sudo pacman -S --noconfirm openssh"
   fi
-
-  _task "Setting Locale"
-  _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
 }
 
 update_ansible_galaxy() {
@@ -133,12 +133,13 @@ update_ansible_galaxy() {
 # MAIN
 #########################################################
 
-check_dependencies
 
 tag_name="$1"
 test -z "$tag_name" && tag_name='all'
 
 os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
+
+check_dependencies
 
 show_header
 print_stats
@@ -148,7 +149,7 @@ case $os_name in
     os_color="#E95420"
     ubuntu_setup
     ;;
-  Arch)
+  "Arch Linux")
     os_color="#1793D1"
     arch_setup
     ;;

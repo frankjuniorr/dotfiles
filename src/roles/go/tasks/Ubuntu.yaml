@@ -18,75 +18,9 @@
   retries: 1
   delay: 2
 
-- name: "GO | Define GOARCH"
-  ansible.builtin.set_fact:
-    goarch: "{{ ansible_machine | replace('x86_64', 'amd64') | replace('aarch64', 'arm64') }}"
-
-- name: "GO | Define GOOS"
-  ansible.builtin.set_fact:
-    goos: "{{ ansible_system | lower }}"
-
-- name: "GO | Getting version information"
-  ansible.builtin.command: "/usr/local/go/bin/go version"
-  register: current_go_version
-  changed_when: false
-  failed_when: false
-
-- name: "GO | Querying Latest Version JSON"
-  ansible.builtin.uri:
-    url: https://go.dev/dl/?mode=json
-  register: go_latest_version_json
-  changed_when: false
-
-- name: "GO | Registering go Latest Version"
-  ansible.builtin.set_fact:
-    go_latest_version: "go version {{ go_latest_version_json.json[0].version }} {{ goos }}/{{ goarch }}"
-
-- name: "GO | Registering go Latest Release"
-  ansible.builtin.set_fact:
-    go_latest_release: "{{ go_latest_version_json.json[0].version }}"
-
-- name: "GO | Define go_file"
-  ansible.builtin.set_fact:
-    go_file: "{{ go_latest_release }}.{{ goos }}-{{ goarch }}"
-
-- name: "GO | Show current_go_version debug"
-  ansible.builtin.debug:
-    var: current_go_version.stdout|default('')
-
-- name: "GO | Show go_latest_release debug"
-  ansible.builtin.debug:
-    var: go_latest_release
-
 - name: "GO | Install"
-  block:
-    - name: "GO | Ensure clean Go Installations"
-      become: true
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - "/tmp/{{ go_file }}.tar.gz"
-        - "/usr/local/go"
-
-    - name: "GO | Downloading GoLang Release"
-      become: true
-      ansible.builtin.get_url:
-        url: https://go.dev/dl/{{ go_file }}.tar.gz
-        dest: /tmp/
-        mode: 0644
-        force: true
-
-    - name: "GO | Extract go tar file"
-      become: true
-      ansible.builtin.unarchive:
-        src: "/tmp/{{ go_file }}.tar.gz"
-        dest: /usr/local
-
-    - name: Cleanup go downloaded tar
-      become: true
-      ansible.builtin.file:
-        path: "/tmp/{{ go_file }}.tar.gz"
-        state: absent
-      loop:
-  when: go_latest_version not in current_go_version.stdout|default('')
+  become: true
+  ansible.builtin.apt:
+    name: "golang"
+    state: present
+    update_cache: true

@@ -3,7 +3,22 @@
   ansible.builtin.stat:
     path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
   register: system_distribution_config
+  no_log: true
 
 - name: "System | Run Tasks: {{ ansible_distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
+  no_log: true
+
+
+# install Go Packages
+- name: GO | Install Golang Packages
+  ansible.builtin.command:
+    cmd: "go install {{ item.package }}"
+    creates: "~/go/bin/{{ item.cmd }}"
+  register: go_install
+  changed_when: go_install.rc != 0
+  loop_control:
+    label: "{{ item.package }}"
+  loop: "{{ go.packages }}"
+  when: go.packages is defined

@@ -1,0 +1,6 @@
+---
+- name: "FD | Install"
+  become: true
+  community.general.pacman:
+    name: fd
+    state: present

@@ -1,0 +1,32 @@
+---
+- name: "STARSHIP | Download the install script"
+  ansible.builtin.get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship-install.sh
+    mode: '0755'
+
+- name: "STARSHIP | Run the install script"
+  ansible.builtin.shell:
+    cmd: /tmp/starship-install.sh --bin-dir "{{ primary_installation_path }}" --yes
+  args:
+    chdir: /tmp
+
+- name: "STARSHIP | Ensure clean Starship Installations file"
+  ansible.builtin.file:
+    path: "/tmp/starship-install.sh"
+    state: absent
+
+# Link the Config File
+- name: "STARSHIP | Ensure starship directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config"
+    - "{{ ansible_user_dir }}/.config/starship"
+
+- name: "STARSHIP | Copy config file"
+  ansible.builtin.shell:
+    cmd: "stow -t {{ ansible_user_dir }}/.config/starship ."
+    chdir: "{{ role_path }}/files"

@@ -45,24 +45,3 @@
       - docker-compose-plugin
     state: present
     update_cache: true
-
-- name: "Docker | Enable service"
-  become: true
-  ansible.builtin.systemd:
-    enabled: true
-    name: docker
-    state: started
-
-- name: "Docker | Add to group"
-  become: true
-  ansible.builtin.user:
-    append: true
-    groups: docker
-    name: "{{ ansible_user_id }}"
-
-- name: "Docker | Ensure docker data directory exists"
-  become: true
-  ansible.builtin.file:
-    path: "{{  ansible_user_dir }}/.local/lib/docker"
-    state: directory
-    mode: "0710"

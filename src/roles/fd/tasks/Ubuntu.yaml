@@ -1,0 +1,25 @@
+---
+- name: "FD | Install"
+  become: yes
+  ansible.builtin.apt:
+    name: "fd-find"
+    state: present
+
+- name: "FD | Get path of binary"
+  ansible.builtin.command: "which fdfind"
+  register: binary_path
+  changed_when: false
+  failed_when: binary_path.rc != 0
+
+- name: "FD | Ensure ~/.local/bin exists"
+  ansible.builtin.file:
+    path: "{{ primary_installation_path }}"
+    state: directory
+    mode: '0755'
+
+- name: "FD | Create symlink to ~/.local/bin/fdfind"
+  ansible.builtin.file:
+    src: "{{ binary_path.stdout }}"
+    dest: "{{ primary_installation_path }}/fd"
+    state: link
+    force: true

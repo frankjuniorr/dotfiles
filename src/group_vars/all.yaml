@@ -17,7 +17,10 @@ default_roles:
   - btop
   - fetchs
   - lazygit
+  - lazydocker
   - just
+  - fd
+  - yazi
 
   # Terminal
   - fonts
@@ -29,6 +32,7 @@ default_roles:
 
   # utilities to connect Logitech devices
   - solaar
+  - funny-apps
 
   # Devops tools
   - docker
@@ -50,8 +54,11 @@ default_roles:
   - google-chrome
   - telegram
   - spotify
+  - obsidian
 
-  - funny-apps
+  # Environment
+  - dotfiles
+  - hyde
 
 go:
   packages:

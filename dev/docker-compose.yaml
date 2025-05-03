@@ -1,9 +1,0 @@
-version: '3'
-services:
-
-  dotfiles:
-    image: dotfiles-ubuntu
-    container_name: dotfiles-ubuntu
-    build:
-      context: ..
-      dockerfile: dev/Dockerfile.ubuntu

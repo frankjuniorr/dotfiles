@@ -1,0 +1,6 @@
+---
+- name: "BAT | Install"
+  become: true
+  community.general.pacman:
+    name: bat
+    state: present

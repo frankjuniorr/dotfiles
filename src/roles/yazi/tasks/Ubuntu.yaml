@@ -1,0 +1,17 @@
+---
+- name: "BAT | Install"
+  become: yes
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - yazi
+    # - ffmpeg
+    - 7zip
+    # - jq
+    - poppler-utils
+    # - fd
+    - ripgrep
+    # - fzf
+    # - zoxide
+    # - imagemagick

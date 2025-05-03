@@ -1,0 +1,6 @@
+---
+- name: "TMUX | Install"
+  become: true
+  community.general.pacman:
+    name: tmux
+    state: present

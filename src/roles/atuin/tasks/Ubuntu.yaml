@@ -1,5 +1,4 @@
 ---
-
 # It will install a binary to ~/.atuin/bin
 # See More: https://docs.atuin.sh/guide/installation/
 - name: "ATUIN | install"

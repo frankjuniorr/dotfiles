@@ -1,0 +1,63 @@
+---
+
+#ATTENTION:
+#########################################################
+# This file is commented bacause it's only necessary in my own Hyprland installation ("vanilla hyprland")
+# in case of install my dotfiles up to HyDE, this file doens't necessary
+#########################################################
+
+# Create symbolic links to add kitty and kitten to PATH
+# - name: "KITTY | Create symlinks for kitty and kitten"
+#   ansible.builtin.file:
+#     src: "{{ item.src }}"
+#     dest: "{{ primary_installation_path }}/{{ item.dest }}"
+#     state: link
+#     force: yes
+#   loop:
+#     - { src: "{{ ansible_user_dir }}/.local/kitty.app/bin/kitty", dest: "kitty" }
+#     - { src: "{{ ansible_user_dir }}/.local/kitty.app/bin/kitten", dest: "kitten" }
+
+# # Place the kitty.desktop file somewhere it can be found by the OS
+# # If you want to open text files and images in kitty via your file manager also add the kitty-open.desktop file
+# - name: "KITTY | Copy kitty.desktop to local applications folder"
+#   ansible.builtin.copy:
+#     src: "{{ item }}"
+#     dest: "{{ ansible_user_dir }}/.local/share/applications/"
+#   loop:
+#     - "{{ ansible_user_dir }}/.local/kitty.app/share/applications/kitty.desktop"
+#     - "{{ ansible_user_dir }}/.local/kitty.app/share/applications/kitty-open.desktop"
+
+# # Update the paths to the kitty and its icon in the kitty desktop file(s)
+# - name: "KITTY | Update the Icon path in kitty.desktop files"
+#   ansible.builtin.lineinfile:
+#     path: "{{ ansible_user_dir }}/.local/share/applications/{{ item.kitty_file }}"
+#     regexp: "{{ item.regex }}"
+#     line: "Icon={{ item.dest }}"
+#     backrefs: yes
+#   loop:
+#     - { kitty_file: "kitty.desktop", regex: "^Icon=kitty", dest: "{{ ansible_user_dir }}/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png" }
+#     - { kitty_file: "kitty-open.desktop", regex: "^Exec=kitty", dest: "{{ ansible_user_dir }}/.local/kitty.app/bin/kitty" }
+
+# # Make xdg-terminal-exec (and hence desktop environments that support it use kitty)
+# - name: "KITTY | Add kitty.desktop to xdg-terminals list"
+#   ansible.builtin.copy:
+#     content: "kitty.desktop\n"
+#     dest: "{{ ansible_user_dir }}/.config/xdg-terminals.list"
+#     mode: '0644'
+
+# Link the Config File
+# - name: "KITTY | Ensure kitty directory structure exists"
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     mode: "0755"
+#     state: directory
+#   loop:
+#     - "{{ ansible_user_dir }}/.config"
+#     - "{{ ansible_user_dir }}/.config/kitty"
+
+# - name: "KITTY | Copy config file"
+#   ansible.builtin.file:
+#     src: "{{ role_path }}/files/kitty.conf"
+#     dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf"
+#     force: true
+#     state: link

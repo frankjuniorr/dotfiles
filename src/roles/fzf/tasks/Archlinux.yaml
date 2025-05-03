@@ -1,0 +1,6 @@
+---
+- name: "FZF | Install"
+  become: true
+  community.general.pacman:
+    name: fzf
+    state: present

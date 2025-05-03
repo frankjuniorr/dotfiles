@@ -1,30 +1,6 @@
 ---
-- name: "LSD | Download Latest Version JSON"
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/lsd-rs/lsd/releases/latest
-  register: lsd_latest_version_json
-  changed_when: false
-
-- name: "LSD | Registering LSD Latest Release"
-  ansible.builtin.set_fact:
-    lsd_latest_release: "{{ lsd_latest_version_json.json.tag_name }}"
-
-- name: "LSD | Registering LSD Latest Version"
-  ansible.builtin.set_fact:
-    lsd_latest_version: "{{ lsd_latest_release | replace('v', '') }}"
-
-- name: "LSD | Download .deb package"
-  ansible.builtin.get_url:
-    url: "https://github.com/lsd-rs/lsd/releases/download/v{{ lsd_latest_version }}/lsd-musl_{{ lsd_latest_version }}_amd64.deb"
-    dest: /tmp/lsd.deb
-
-- name: "LSD | Install .deb package"
+- name: "LSD | Install"
   become: yes
-  ansible.builtin.command:
-    cmd: dpkg -i /tmp/lsd.deb
-  ignore_errors: yes
-
-- name: "LSD | Clean up the downloaded .deb file"
-  ansible.builtin.file:
-    path: /tmp/lsd.deb
-    state: absent
+  ansible.builtin.apt:
+    name: "lsd"
+    state: present
