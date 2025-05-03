@@ -34,15 +34,6 @@ alias cat='bat'
 alias cd='z'
 cx(){ cd "$@" && ls; }
 
-# fd = package to replace "find" command
-# package used by "fzf" in "FZF_DEFAULT_COMMAND" env variable
-# Installation Ubuntu: sudo apt install fd-find
-# The name of executable is "fdfind". So, only in Ubuntu is necessary this alias below
-source /etc/os-release
-if [ "$ID" = "ubuntu" ]; then
-    alias fd='fdfind'
-fi
-
 # alias de navegação
 alias ..="cd .."
 alias cd..="cd .."

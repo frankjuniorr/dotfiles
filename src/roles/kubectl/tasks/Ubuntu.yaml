@@ -1,22 +1,29 @@
 ---
-- name: Kubectl | Adding kubernetes apt key
-  become: true
-  ansible.builtin.apt_key:
-    url: "https://pkgs.k8s.io/core:/stable:/{{ k8s.kubectl_version }}/deb/Release.key"
-    state: present
-    keyring: "/etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+- name: "KUBECTL | Get latest kubectl version"
+  ansible.builtin.uri:
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: yes
+  register: kubectl_version
 
-- name: Kubectl | Adding kubernetes apt repo
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s.kubectl_version }}/deb/ /"
-    filename: pkgs.k8s.io_core_stable_deb
+- name: "KUBECTL | Set kubectl download URL"
+  ansible.builtin.set_fact:
+    kubectl_url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/amd64/kubectl"
 
-- name: Kubectl | Installing Kubectl
-  become: true
-  ansible.builtin.apt:
-    name: "{{ item }}"
-    state: present
-    force: true
-  loop:
-    - kubectl
+- name: "KUBECTL | Download kubectl to /tmp"
+  ansible.builtin.get_url:
+    url: "{{ kubectl_url }}"
+    dest: "/tmp/kubectl"
+    mode: '0755'
+
+- name: "KUBECTL | Ensure ~/.local/bin directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+- name: "KUBECTL | Move kubectl to ~/.local/bin"
+  ansible.builtin.copy:
+    src: "/tmp/kubectl"
+    dest: "{{ ansible_env.HOME }}/.local/bin/kubectl"
+    remote_src: yes
+    mode: '0755'

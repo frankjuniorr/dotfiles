@@ -1,28 +1,6 @@
 ---
-- name: "Spotify | Download Spotify GPG key"
-  ansible.builtin.get_url:
-    url: "https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg"
-    dest: /tmp/spotify.gpg
-
-- name: "Spotify | Add Spotify GPG key to the trusted keyring"
+- name: "SPOTIFY | Install"
   become: yes
-  ansible.builtin.command:
-    cmd: "gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg /tmp/spotify.gpg"
-
-- name: "Spotify | Add Spotify repository"
-  become: yes
-  ansible.builtin.apt_repository:
-    repo: "deb http://repository.spotify.com stable non-free"
-    state: present
-    filename: "spotify"
-
-- name: "Spotify | Update apt cache"
-  become: yes
-  ansible.builtin.apt:
-    update_cache: yes
-
-- name: "Spotify | Install Spotify client"
-  become: yes
-  ansible.builtin.apt:
-    name: spotify-client
+  community.general.snap:
+    name: spotify
     state: present

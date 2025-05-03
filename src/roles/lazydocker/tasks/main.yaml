@@ -9,17 +9,3 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
-
-- name: "LSD | Ensure lsd directory structure exists"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/lsd"
-
-- name: "LSD | Create symbolic links for configuration files"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/lsd ."
-    chdir: "{{ role_path }}/files"
