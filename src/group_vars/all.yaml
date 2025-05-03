@@ -20,6 +20,7 @@ default_roles:
   - lazydocker
   - just
   - fd
+  - yazi
 
   # Terminal
   - fonts
