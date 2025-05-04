@@ -1,12 +1,5 @@
 #!/bin/bash
 
-alias matrix="cmatrix -b -s -u 6"
-
-# Clipboard
-# use: "echo mensagem | copiar"
-alias cp_copy='xclip -selection c'
-alias cp_paste='xclip -selection clipboard -o'
-
 # Ref: https://github.com/paulmillr/dotfiles/blob/master/home/.zshrc.sh
 # alias to get weather
 alias clima='curl pt.wttr.in'

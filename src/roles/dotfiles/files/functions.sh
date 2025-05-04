@@ -1,5 +1,40 @@
 #!/bin/bash
 
+matrix() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v unimatrix >/dev/null 2>&1; then
+    unimatrix -b -s 80
+  elif [ -n "$DISPLAY" ] && command -v cmatrix >/dev/null 2>&1; then
+    cmatrix -b -s -u 6
+  else
+    echo "Nenhum comando de Matrix disponível (unimatrix ou cmatrix)." >&2
+    return 1
+  fi
+}
+
+# Função para copiar pro clipboard
+copy() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+    wl-copy
+  elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard
+  else
+    echo "Nenhuma ferramenta de clipboard disponível (wl-copy ou xclip)." >&2
+    return 1
+  fi
+}
+
+# Função para colar do clipboard
+paste() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-paste >/dev/null 2>&1; then
+    wl-paste
+  elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard -o
+  else
+    echo "Nenhuma ferramenta de clipboard disponível (wl-paste ou xclip)." >&2
+    return 1
+  fi
+}
+
 # funcção que imrpime o conteúdo de um alias ou função no terminal.
 show_my_alias(){
     my_alias=$(echo "$1" | sed 's/()//g' | sed 's/alias //g')
