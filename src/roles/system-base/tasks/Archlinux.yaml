@@ -15,11 +15,17 @@
     - ffmpeg
     - imagemagick
     - xclip
-    - flameshot
     - ncdu
     - figlet
+    - bc
     - emote # emoji picker gtk3
     - virt-viewer # used by SPICE on Proxmox
+
+# This installation takes a while because it compiles the source code.
+# But this package at least works.
+# Because the tradicional package by `pacman` doesn't work on Wayland.
+- name: "FLAMESHOT | install"
+  ansible.builtin.shell: "yay -S --needed --noconfirm flameshot-git"
 
 # GUI to control brightness for external monitors
 - name: "{{ ansible_distribution }} | Install tools"
