@@ -8,6 +8,7 @@ files_to_be_deleted=(
     "$HOME/.config/fastfetch/logos/aisaka.icon"
     "$HOME/.config/fastfetch/logos/loli.icon"
     "$HOME/.config/fastfetch/logos/pochita.icon"
+    "$HOME/.config/fastfetch/logos/geass.icon"
 )
 
 for file in "${files_to_be_deleted[@]}";do
