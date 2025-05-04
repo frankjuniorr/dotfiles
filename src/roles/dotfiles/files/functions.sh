@@ -166,6 +166,16 @@ dps(){
 #################################################################
 # Git Functions
 #################################################################
+
+# Alias para quando eu quero dar um 'git pull', levando em conta
+# APENAS o que tem no repositório.
+# útil, pra quando eu faço um Amend em um commit, e quero dar um 'git pull' depois
+git_force_pull(){
+  current_branch=$(git branch | grep "^*" | awk '{print $2}')
+  git fetch origin
+  git reset --hard origin/${current_branch}
+}
+
 # alias rápido para commitar e dar git push ao mesmo tempo
 git_commit_push(){
   local commit_msg=$1

@@ -2,7 +2,9 @@
 
 # Ref: https://github.com/paulmillr/dotfiles/blob/master/home/.zshrc.sh
 # alias to get weather
-alias clima='curl pt.wttr.in'
+alias weather='curl pt.wttr.in'
+
+alias file_preview="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
 
 ################################################################################
 #  COMMAND SHADOWS
@@ -22,6 +24,12 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 alias mkdir='mkdir -p'
+
+alias lg='lazygit'
+alias ld='lazydocker'
+
+alias mux='tmuxinator'
+alias tx='tmux'
 
 alias cat='bat'
 alias cd='z'
@@ -52,9 +60,6 @@ alias free="free -mth"
 alias sizer='du -h -c'
 
 alias k="kubecolor"
-
-alias lzd="lazydocker"
-alias lg="lazygit"
 
 ################################################################################
 #  ALIAS AND FUNCTIONS ALIASES

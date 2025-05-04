@@ -17,6 +17,7 @@
     - ncdu
     - figlet
     - bc
+    - sshs
     - emote # emoji picker gtk3
     - virt-viewer # used by SPICE on Proxmox
 
