@@ -108,3 +108,12 @@
     - "loli.icon"
     - "pochita.icon"
     - "geass.icon"
+
+- name: "HYDE | Copy new fastfetch icons"
+  become_user: yes
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: "{{ role_path }}/files/fastfetch_icons/arch-sticker.icon", dest: "{{ ansible_user_dir }}/.config/fastfetch/logo/arch-sticker.icon" }
