@@ -19,6 +19,10 @@
     - "{{ ansible_user_dir }}/.config/atuin"
 
 - name: "ATUIN | Copy atuin config"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/atuin ."
-    chdir: "{{ role_path }}/files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item | basename }}"
+    dest: "{{ ansible_user_dir }}/.config/atuin/{{ item | basename }}"
+    state: link
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/*"

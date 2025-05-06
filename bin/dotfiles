@@ -5,11 +5,9 @@ set -e
 
 # Paths
 CONFIG_DIR="$HOME/.config/dotfiles"
-DOTFILES_DIR="$HOME/dotfiles"
-# DOTFILES_DIR="${HOME}"
+# This command return 'git-root' folder
+DOTFILES_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
-
-DOTFILES_REPOSITORY="https://github.com/linux-ricing-project/dotfiles.git"
 
 DOTFILES_VERSION="v1.1"
 
@@ -158,12 +156,6 @@ case $os_name in
     exit 1
     ;;
 esac
-
-
-# if ! [[ -d "$DOTFILES_DIR" ]] && [[ -f "$IS_FIRST_RUN" ]]; then
-#   _task "Cloning repository"
-#   _cmd "git clone --quiet "$DOTFILES_REPOSITORY" $DOTFILES_DIR"
-# fi
 
 # shellcheck disable=SC2069
 pushd "$DOTFILES_DIR" 2>&1 > /dev/null

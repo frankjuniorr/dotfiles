@@ -26,7 +26,19 @@
     mode: "0755"
     state: directory
 
+- name: "ZSH | Ensure that all the commands have execution permission"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: '0755'
+  with_fileglob:
+    - "{{ role_path }}/files/commands/*"
+
 - name: "ZSH | Create symbolic links for commands"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ scripts_installation_path }} ."
-    chdir: "{{ role_path }}/files/commands"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/commands/{{ item | basename }}"
+    dest: "{{ scripts_installation_path }}/{{ item | basename }}"
+    state: link
+    mode: "0755"
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/commands/*"
