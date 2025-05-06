@@ -6,7 +6,6 @@ windows:
       layout: main-horizontal
       panes:
         - clear && figlet -k -c -t "Dotfiles Repo" && onefetch && sleep 1 && code .
-        - cd ~/dotfiles && clear && figlet -k -c -t "Dotfiles User" && pwd
   - docker:
     - lazydocker
   - git:
