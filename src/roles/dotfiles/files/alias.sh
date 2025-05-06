@@ -101,3 +101,6 @@ alias git_clean_branches="git branch | grep -v \"\*\" | xargs -n 1 git branch -D
 
 # undo commit, and files back to the 'stage area'
 alias git_undo_commit="git reset --soft HEAD^"
+
+# got to git-root folder
+alias git_root="git rev-parse --show-toplevel"

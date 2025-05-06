@@ -1,0 +1,9 @@
+[[session]]
+name = "Downloads"
+path = "~/Downloads"
+startup_command = "yazi"
+
+[[session]]
+name = "Tmuxinator"
+path = "~/.config/tmuxinator"
+startup_command = "$EDITOR ."
