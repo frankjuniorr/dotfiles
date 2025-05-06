@@ -1,0 +1,34 @@
+#!/bin/env bash
+
+ws1=$1
+ws2=$2
+
+if [ -z "$ws1" ] || [ -z "$ws2" ]; then
+    echo "Uso: $0 <workspace1> <workspace2>"
+    exit 1
+fi
+
+# Detecta o próximo workspace vazio
+next_empty_ws=$(hyprctl workspaces -j | jq '[.[].id] | max + 1')
+
+# Coleta os clientes dos workspaces
+clients_ws1=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $ws1) | .address")
+clients_ws2=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $ws2) | .address")
+
+# Move janelas de ws1 para o workspace vazio
+for client in $clients_ws1; do
+    hyprctl -q dispatch movetoworkspace "$next_empty_ws,address:$client"
+done
+
+# Move janelas de ws2 para ws1
+for client in $clients_ws2; do
+    hyprctl -q dispatch movetoworkspace "$ws1,address:$client"
+done
+
+# Move janelas do workspace vazio (ex-ws1) para ws2
+clients_temp=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $next_empty_ws) | .address")
+for client in $clients_temp; do
+    hyprctl -q dispatch movetoworkspace "$ws2,address:$client"
+done
+
+# (Opcional) Foca no workspace atual depois, se quiser

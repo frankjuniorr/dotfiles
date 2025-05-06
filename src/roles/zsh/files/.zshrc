@@ -55,7 +55,7 @@ export FZF_ALT_C_COMMAND="fd --type d . --color=never"
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -n 50'"
 
 # set default editor to vim
-#export EDITOR=vim
+export EDITOR=code
 
 #export TERM="tmux-256color"
 
