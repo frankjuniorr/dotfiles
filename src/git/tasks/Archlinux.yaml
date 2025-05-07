@@ -1,0 +1,10 @@
+---
+- name: "GIT | Install packages"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - lazygit # TUI for git (see more: https://github.com/jesseduffield/lazygit)
+    - git-delta # for diffs (see more: https://github.com/dandavison/delta)
+    - meld # for diffs in GUI

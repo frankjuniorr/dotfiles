@@ -15,8 +15,8 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     state: link
+    force: yes
   loop:
-    - { src: "{{ role_path }}/files/.gitconfig", dest: "{{ ansible_user_dir }}/.gitconfig" }
     - { src: "{{ role_path }}/files/alias.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/alias.sh" }
     - { src: "{{ role_path }}/files/functions.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/functions.sh" }
     - { src: "{{ role_path }}/files/env.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/env.sh" }

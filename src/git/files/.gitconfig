@@ -16,7 +16,14 @@
     # esse parametro serve pros comandos ('git branch' ou 'git log' por exemplo)
     # não se comportarem interativamente feito o comando 'less' por exemplo
     # Essa linha pode ser adicionado com o comando "git config --global core.pager '' "
-	pager =
+	pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true  # use n and N to move between diff sections
+    dark = true      # or light = true, or omit for auto-detection
 
 
 # Cores
@@ -37,7 +44,6 @@
 # Alias
 # --------------------------------------------
 [alias]
-  visual = !gitk
   progress = diff --stat
   pg = diff --shortstat
 
@@ -46,6 +52,7 @@
 # --------------------------------------------
 [merge]
     tool = meld
+    conflictstyle = zdiff3
 
 [mergetool "meld"]
     cmd = meld --auto-merge "\"$LOCAL\" \"$BASE\" \"$REMOTE\" --output \"$MERGED\" --label \"MERGE (REMOTE BASE MY)\""

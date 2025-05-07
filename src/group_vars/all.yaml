@@ -9,6 +9,7 @@ default_roles:
   - vim           # TODO: substituir depois por 'neovim'
 
   # CLI Tools
+  - git
   - fzf
   - atuin
   - bat
@@ -16,7 +17,6 @@ default_roles:
   - lsd
   - btop
   - fetchs
-  - lazygit
   - lazydocker
   - just
   - fd

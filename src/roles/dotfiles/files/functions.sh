@@ -388,14 +388,14 @@ ssh_create_new_key(){
         return 1
     fi
 
-    ssh_key_file="${HOME}/.ssh/id_rsa_${key_name}"
+    ssh_key_file="${HOME}/.ssh/id_ed25519_${key_name}"
     # -t rsa: O tipo de algoritmo usado, o RSA
     # -b 4096: O tamanho da chave em bits
     # -N '': diz para criar um empty passprashe
     # -C <comentário>: Adiciona um comentário a chave.
     # -f <file>: Nome do arquivo que será salvo a chave
     if [ ! -f $ssh_key_file ];then
-        ssh-keygen -t rsa -b 4096 -N '' -C "$ssh_key_comment" -f "$ssh_key_file"
+        ssh-keygen -t ed25519 -b 4096 -N '' -C "$ssh_key_comment" -f "$ssh_key_file"
     fi
     echo "OK: chave $ssh_key_file criada em: $HOME/.ssh"
 }
