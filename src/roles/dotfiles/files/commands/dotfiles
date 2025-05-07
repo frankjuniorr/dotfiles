@@ -8,7 +8,8 @@ if [ ! -f "$dotfiles_project_bin" ];then
     exit 1
 fi
 
-folder_bin="$(dirname $dotfiles_project_bin)"
-cd "$folder_bin"
- ./dotfiles "$1"
-cd -
+# this subshell is necessary to avoid return to the original directory ('cd -')
+(
+  cd "$(dirname "$dotfiles_project_bin")" || exit 1
+  ./dotfiles "$1"
+)
