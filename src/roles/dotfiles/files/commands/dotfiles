@@ -1,0 +1,14 @@
+#!/bin/env bash
+
+dotfiles_project_bin="${HOME}/Dropbox/code/01.github/projects/dotfiles/bin/dotfiles"
+
+if [ ! -f "$dotfiles_project_bin" ];then
+    echo "the binary file: $dotfiles_project_bin"
+    echo "doens't exists!"
+    exit 1
+fi
+
+folder_bin="$(dirname $dotfiles_project_bin)"
+cd "$folder_bin"
+ ./dotfiles "$1"
+cd -

@@ -100,7 +100,11 @@ function ubuntu_setup() {
 
 function arch_setup() {
 
-  loading "Update System" "sudo pacman -Sy --noconfirm"
+  if ! type yay >/dev/null 2>&1; then
+    loading "Update System" "sudo pacman -Sy --noconfirm"
+  else
+    loading "Update System" "yay -Syu --noconfirm"
+  fi
 
   if ! pacman -Q python3 >/dev/null 2>&1; then
     loading "Installing Python3" "sudo pacman -S --noconfirm python3"
