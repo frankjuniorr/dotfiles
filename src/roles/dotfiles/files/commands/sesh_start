@@ -12,6 +12,7 @@ sesh connect "$(
     --ansi \
     --list-border \
     --no-sort --prompt '⚡  ' \
+    --header '📌  ^A:All | ^T:Tmux | ^P:Tmuxinator | ^G:configs | ^X:zoxide' \
     --color 'list-border:6,input-border:3,preview-border:4,header-bg:-1,header-border:6' \
     --input-border \
     --header-border \
