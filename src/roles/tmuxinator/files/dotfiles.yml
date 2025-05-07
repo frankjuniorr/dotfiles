@@ -5,7 +5,7 @@ windows:
   - code:
       layout: main-horizontal
       panes:
-        - clear && figlet -k -c -t "Dotfiles Repo" && onefetch && sleep 1 && code .
+        - clear && figlet -k -c -t "Dotfiles" && onefetch && sleep 1 && code .
   - docker:
     - lazydocker
   - git:
