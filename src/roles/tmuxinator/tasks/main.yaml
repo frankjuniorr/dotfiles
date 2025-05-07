@@ -10,6 +10,11 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
+- name: "Tmuxinator | Refresh {{ ansible_user_dir }}/.config/tmuxinator folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/tmuxinator"
+    state: absent
+
 - name: "Tmuxinator | Ensure tmuxinator directory structure exists"
   ansible.builtin.file:
     path: "{{ item }}"

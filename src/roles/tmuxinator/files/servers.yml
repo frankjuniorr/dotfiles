@@ -1,0 +1,5 @@
+name: servers
+root: /home/frank/Dropbox/code/01.github/projects/
+
+windows:
+  - servers: sshs
