@@ -1,7 +1,7 @@
 [[session]]
 name = "Downloads"
 path = "~/Downloads"
-startup_command = "yazi"
+startup_command = "y"
 
 [[session]]
 name = "Tmuxinator"

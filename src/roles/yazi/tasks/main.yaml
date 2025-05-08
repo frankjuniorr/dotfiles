@@ -9,3 +9,36 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
+
+# pre-requirements to use plugin
+- name: "YAZI | DuckDB install only if not present"
+  ansible.builtin.shell: |
+    if ! which duckdb >/dev/null 2>&1; then
+      curl -fsSL https://install.duckdb.org | sh
+    fi
+
+# ya pack -a Reledia/glow
+- name: "YAZI | install plugins if not already installed"
+  ansible.builtin.shell: |
+    if ! ya pack --list | grep -q "{{ item }}"; then
+      ya pack -a {{ item }}
+    fi
+  loop:
+    - "Reledia/glow"
+    - "wylie102/duckdb"
+
+- name: "YAZI | Ensure {{ ansible_user_dir }}/.config/yazi directory structure exists"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/yazi"
+    mode: "0755"
+    state: directory
+
+- name: "YAZI | Create config files symlinks"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item | basename }}"
+    dest: "{{ ansible_user_dir }}/.config/yazi/{{ item | basename }}"
+    state: link
+    mode: "0755"
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/*"

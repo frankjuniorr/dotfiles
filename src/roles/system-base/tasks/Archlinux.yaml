@@ -5,20 +5,21 @@
     name: "{{ item }}"
     state: present
   loop:
-    - stow
-    - curl
-    - wget
-    - less
-    - jq
-    - yq
-    - ffmpeg
-    - imagemagick
-    - ncdu
-    - figlet
-    - bc
-    - sshs
-    - emote # emoji picker gtk3
+    - stow        # symlink manager
+    - curl        # request and donwload CLI (like "wget")
+    - wget        # request and donwload CLI (like "curl")
+    - less        # pager on CLI (like "more")
+    - jq          # JSON processor (https://github.com/jqlang/jq)
+    - yq          # "JSON, XML, CSV, TOML and properties processor" (https://github.com/mikefarah/yq)
+    - ffmpeg      # media manipulation on CLI
+    - imagemagick # image manipulation on CLI
+    - ncdu        # Disk Usage on CLI
+    - figlet      # write ASCII texts on terminal
+    - bc          # simple calculator CLI
+    - sshs        # TUI for SSH (https://github.com/quantumsheep/sshs)
+    - emote       # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
     - virt-viewer # used by SPICE on Proxmox
+    - gum         # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
 
 # This installation takes a while because it compiles the source code.
 # But this package at least works.
