@@ -3,9 +3,7 @@ root: /home/frank/Dropbox/code/01.github/projects/dotfiles
 
 windows:
   - code:
-      layout: main-horizontal
-      panes:
-        - clear && figlet -k -c -t "Dotfiles" && onefetch && sleep 1 && code .
+      - clear && figlet -k -c -t "Dotfiles" && onefetch && sleep 1 && code .
   - docker:
     - lazydocker
   - git:

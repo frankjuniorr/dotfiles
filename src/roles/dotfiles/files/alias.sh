@@ -4,7 +4,11 @@
 # alias to get weather
 alias weather='curl pt.wttr.in'
 
+# used only with STDIN, to preview any file list
+# example: ls | file_preview
 alias file_preview="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
+
+alias servers="sshs --config ~/.ssh/config"
 
 ################################################################################
 #  COMMAND SHADOWS

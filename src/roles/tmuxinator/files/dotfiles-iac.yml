@@ -1,0 +1,10 @@
+name: dotfiles-iac
+root: /home/frank/Dropbox/code/01.github/projects/dotfiles-iac
+
+windows:
+  - code:
+      - clear && figlet -k -c -t "Dotfiles IaC" && onefetch && sleep 1 && code .
+  - docker:
+    - lazydocker
+  - git:
+    - lazygit
