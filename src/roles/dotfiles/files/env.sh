@@ -6,6 +6,10 @@
 # export EDITOR=nvim
 export EDITOR=code
 
+# SSH
+############################################################
+export SSH_AUTH_SOCK=~/.1password/agent.sock
+
 # Terminal
 ############################################################
 # PS: Apparently this car only necessary on Ubuntu.

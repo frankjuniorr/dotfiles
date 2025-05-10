@@ -5,16 +5,23 @@
     name: xdg-desktop-portal-gtk
     state: present
 
+# this 2 tasks, is same thing to import the GPG key, with this command:
+# 'curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import'
+# This is necessary as a pre-requirements to 1password-cli works
+# see more: https://support.1password.com/install-linux/#arch-linux
+- name: "1PASSWORD | Download 1Password GPG key"
+  ansible.builtin.get_url:
+    url: https://downloads.1password.com/linux/keys/1password.asc
+    dest: /tmp/1password.asc
+    mode: '0644'
+
+- name: "1PASSWORD | Import 1Password GPG key"
+  ansible.builtin.command: gpg --import /tmp/1password.asc
+  args:
+    creates: "{{ ansible_env.HOME }}/.gnupg/pubring.kbx"
 
 - name: "1PASSWORD | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm 1password"
-
-
-- name: "1PASSWORD | Update file /usr/share/applications/1password.desktop"
-  become: true
-  ansible.builtin.copy:
-    src: "{{ role_path }}/files/1password.desktop"
-    dest: "/usr/share/applications"
-    mode: '0755'
-    remote_src: true
-    force: true
+  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+  loop:
+    - "1password"
+    - "1password-cli"
