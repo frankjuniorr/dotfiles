@@ -85,6 +85,8 @@ alias ips='ip -c -br a'
 ################################################################################
 # olhe: http://opensource.apple.com/source/Git/Git-19/src/git-htmldocs/pretty-formats.txt
 
+alias gs="git status"
+
 # <hash> <date> <user name> <commit message>
 alias gl='git log -n 20 --oneline --date=short --pretty=format:"%Cgreen%h%Creset %Cred%ad%Creset %Cblue% %aN%Creset %s"'
 

@@ -1,0 +1,123 @@
+#   ██████╗ ██╗████████╗     ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗
+#  ██╔════╝ ██║╚══██╔══╝    ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝
+#  ██║  ███╗██║   ██║       ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗
+#  ██║   ██║██║   ██║       ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
+#  ╚██████╔╝██║   ██║       ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
+#   ╚═════╝ ╚═╝   ╚═╝        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝
+#
+
+# Core
+#########################################################################
+[status]
+    branch = true
+    showStash = true
+    showUntrackedFiles = all    # show individual untracked files
+
+[log]
+#    abbrevCommit = true        # short commits
+    graphColors = blue,yellow,cyan,magenta,green,red
+
+[core]
+    autocrlf = input        # Converte CTRL(Windows) para LF(Linux/Mac)
+    whitespace = error      # threat incorrect whitespace as errors
+	editor = vim
+	pager = delta           # pager customizado. Precisa de uma instalação prévia
+
+[commit]
+    status = false  # no `git status` output in commit template
+    [commit]
+    template = ~/.config/git/template
+    gpgsign = true
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/opt/1Password/op-ssh-sign"
+
+[http]
+	sslVerify = false
+
+[credential]
+	helper = store
+	useHttpPath = true
+
+[include]
+    path = ~/.config/git/.git-credentials-personal
+
+[push]
+    autoSetupRemote = true      # easier to push new branches
+    default = current           # push only current branch by default
+    followTags = true           # push also tags
+
+[remote "origin"]
+    prune = true                # Autoremove already deleted remote branches
+
+[remote "upstream"]
+    prune = true                # Autoremove already deleted remote branches
+
+[blame]
+    coloring = highlightRecent
+    date = relative
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true  # use n and N to move between diff sections
+    dark = true      # or light = true, or omit for auto-detection
+
+
+# Colors
+#########################################################################
+[color "blame"]
+    highlightRecent = black bold,1 year ago,white,1 month ago,default,7 days ago,blue
+
+[color "branch"]
+  current = blue bold
+  local = green bold
+  remote = red bold
+
+[color "decorate"]
+	HEAD = reverse
+
+[color "status"]
+	added = green bold
+	changed = yellow bold
+	untracked = red bold
+
+
+# Merge
+#########################################################################
+[merge]
+    tool = meld
+    conflictstyle = zdiff3
+
+[mergetool "meld"]
+    cmd = meld --auto-merge "\"$LOCAL\" \"$BASE\" \"$REMOTE\" --output \"$MERGED\" --label \"MERGE (REMOTE BASE MY)\""
+    trustExitCode = false
+
+[mergetool]
+    # don't ask if we want to skip merge
+    prompt = false
+
+    # don't create backup *.orig files
+    keepBackup = false
+
+
+# Diff
+#########################################################################
+[diff]
+    tool = meld
+[difftool]
+    prompt = false
+[difftool "meld"]
+    cmd = meld "\"$LOCAL\" \"$REMOTE\" --label \"DIFF (ORIGINAL MY)\""
+
+
+# Others configurations
+#########################################################################
+# URL shortcuts
+# Example: git clone gh:frankjuniorr/dotfiles
+[url "git@github.com:"]
+    insteadOf = "gh:"

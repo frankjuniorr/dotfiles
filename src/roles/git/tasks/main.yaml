@@ -10,11 +10,32 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "GIT | Ensure {{ ansible_user_dir }}/.config/lazygit directory structure exists"
+- name: "GIT | Read email from vault"
+  ansible.builtin.shell: op read "op://Personal/GitHub/email"
+  register: github_email
+  changed_when: false
+  when: op_installed
+
+- name: "GIT | Read ssh key from vault"
+  ansible.builtin.shell: op read "op://Personal/GitHub SSH/public key"
+  register: github_ssh_public_key
+  changed_when: false
+  when: op_installed
+
+- name: "GIT | Ensure directories structure exists"
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/lazygit"
+    path: "{{ item }}"
     mode: "0755"
     state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config/lazygit"
+    - "{{ ansible_user_dir }}/.config/git"
+
+- name: "GIT | Copy the credential file"
+  ansible.builtin.template:
+    src: "git-credentials-personal.j2"
+    dest: "{{ ansible_user_dir }}/.config/git/.git-credentials-personal"
+  when: op_installed
 
 - name: "GIT | Create symbolic links"
   ansible.builtin.file:
@@ -23,5 +44,6 @@
     state: link
     force: yes
   loop:
-    - { src: "{{ role_path }}/files/.gitconfig", dest: "{{ ansible_user_dir }}/.gitconfig" }
+    - { src: "{{ role_path }}/files/config", dest: "{{ ansible_user_dir }}/.config/git/config" }
+    - { src: "{{ role_path }}/files/template", dest: "{{ ansible_user_dir }}/.config/git/template" }
     - { src: "{{ role_path }}/files/config.yml", dest: "{{ ansible_user_dir }}/.config/lazygit/config.yml" }
