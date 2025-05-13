@@ -166,7 +166,7 @@ pushd "$DOTFILES_DIR" 2>&1 > /dev/null
 update_ansible_galaxy
 
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" > /dev/null && ansible-playbook "main.yml" --tags "$tag_name"
+cd "${DOTFILES_DIR}/src" > /dev/null && ansible-playbook -i hosts.ini "main.yml" --tags "$tag_name"
 
 # shellcheck disable=SC2069
 popd 2>&1 > /dev/null
