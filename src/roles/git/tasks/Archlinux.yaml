@@ -5,6 +5,7 @@
     name: "{{ item }}"
     state: present
   loop:
-    - lazygit # TUI for git (see more: https://github.com/jesseduffield/lazygit)
-    - git-delta # for diffs (see more: https://github.com/dandavison/delta)
-    - meld # for diffs in GUI
+    - lazygit         # TUI for git (see more: https://github.com/jesseduffield/lazygit)
+    - git-delta       # for diffs (see more: https://github.com/dandavison/delta)
+    - meld            # for diffs in GUI
+    - github-cli      # Github CLI (see more: https://cli.github.com/manual/)

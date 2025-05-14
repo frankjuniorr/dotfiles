@@ -7,10 +7,9 @@ scripts_installation_path: "{{ ansible_user_dir }}/.bin"
 default_roles:
   - system-base
   - 1password     # password manager first
-  - vim           # TODO: substituir depois por 'neovim'
+  - git
 
   # CLI Tools
-  - git
   - fzf
   - atuin
   - bat
@@ -23,6 +22,7 @@ default_roles:
   - fd
   - yazi
   - sesh
+  - vim           # TODO: substituir depois por 'neovim'
 
   # Terminal
   - fonts
