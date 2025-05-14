@@ -21,6 +21,7 @@
     - virt-viewer         # used by SPICE on Proxmox
     - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
     - gnome-calculator    # default Gnome Calculator
+    - zip                 # for compact files
 
 # This installation takes a while because it compiles the source code.
 # But this package at least works.

@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 set -e
 
 # Paths
@@ -8,7 +6,6 @@ CONFIG_DIR="$HOME/.config/dotfiles"
 # This command return 'git-root' folder
 DOTFILES_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
-
 DOTFILES_VERSION="v1.1.1"
 
 
