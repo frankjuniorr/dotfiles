@@ -4,6 +4,16 @@ path = "~/Downloads"
 startup_command = "y"
 
 [[session]]
+name = "Dropbox"
+path = "~/Dropbox"
+startup_command = "y"
+
+[[session]]
+name = "Code"
+path = "~/Dropbox/code"
+startup_command = "y"
+
+[[session]]
 name = "Tmuxinator"
 path = "~/.config/tmuxinator"
 startup_command = "$EDITOR ."

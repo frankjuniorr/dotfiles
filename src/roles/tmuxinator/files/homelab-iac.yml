@@ -1,5 +1,5 @@
 name: homelab-iac
-root: ~/Dropbox/code/01.github/homelab/iac
+root: ~/Dropbox/code/01.github/homelab/homelab-iac
 
 windows:
     - code:
