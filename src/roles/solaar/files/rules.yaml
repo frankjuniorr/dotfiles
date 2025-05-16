@@ -5,7 +5,7 @@
   - Execute: [flameshot, gui]
 - Rule:
   - Key: [Calculator, pressed]
-  - Execute: kcalc
+  - Execute: gnome-calculator
 - Rule:
   - Key: [App Contextual Menu/Right Click, pressed]
   - Execute: terminator

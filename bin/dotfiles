@@ -1,17 +1,12 @@
 #!/bin/bash
-
-
 set -e
 
 # Paths
 CONFIG_DIR="$HOME/.config/dotfiles"
-DOTFILES_DIR="$HOME/dotfiles"
-# DOTFILES_DIR="${HOME}"
+# This command return 'git-root' folder
+DOTFILES_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
-
-DOTFILES_REPOSITORY="https://github.com/linux-ricing-project/dotfiles.git"
-
-DOTFILES_VERSION="v1.1"
+DOTFILES_VERSION="v1.1.1"
 
 
 function show_header(){
@@ -102,7 +97,11 @@ function ubuntu_setup() {
 
 function arch_setup() {
 
-  loading "Update System" "sudo pacman -Sy --noconfirm"
+  if ! type yay >/dev/null 2>&1; then
+    loading "Update System" "sudo pacman -Sy --noconfirm"
+  else
+    loading "Update System" "yay -Syu --noconfirm"
+  fi
 
   if ! pacman -Q python3 >/dev/null 2>&1; then
     loading "Installing Python3" "sudo pacman -S --noconfirm python3"
@@ -159,18 +158,12 @@ case $os_name in
     ;;
 esac
 
-
-# if ! [[ -d "$DOTFILES_DIR" ]] && [[ -f "$IS_FIRST_RUN" ]]; then
-#   _task "Cloning repository"
-#   _cmd "git clone --quiet "$DOTFILES_REPOSITORY" $DOTFILES_DIR"
-# fi
-
 # shellcheck disable=SC2069
 pushd "$DOTFILES_DIR" 2>&1 > /dev/null
 update_ansible_galaxy
 
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" > /dev/null && ansible-playbook "main.yml" --tags "$tag_name"
+cd "${DOTFILES_DIR}/src" > /dev/null && ansible-playbook -i hosts.ini "main.yml" --tags "$tag_name"
 
 # shellcheck disable=SC2069
 popd 2>&1 > /dev/null

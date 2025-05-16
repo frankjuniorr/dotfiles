@@ -20,6 +20,10 @@
     - "{{ ansible_user_dir }}/.config/lsd"
 
 - name: "LSD | Create symbolic links for configuration files"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/lsd ."
-    chdir: "{{ role_path }}/files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item | basename }}"
+    dest: "{{ ansible_user_dir }}/.config/lsd/{{ item | basename }}"
+    state: link
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/*"

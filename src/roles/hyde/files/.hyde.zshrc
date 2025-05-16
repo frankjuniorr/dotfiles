@@ -3,9 +3,7 @@
 # This is a good place to load graphic/ascii art, display system information, etc.
 
 # fastfetch --logo-type kitty
-if [ -n "$TMUX" ]; then
-  fastfetch --logo none
-else
+if [ -z "$TMUX" ]; then
   fastfetch --logo-type kitty
 fi
 

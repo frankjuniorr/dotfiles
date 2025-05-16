@@ -15,18 +15,48 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     state: link
+    force: yes
   loop:
-    - { src: "{{ role_path }}/files/.gitconfig", dest: "{{ ansible_user_dir }}/.gitconfig" }
     - { src: "{{ role_path }}/files/alias.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/alias.sh" }
     - { src: "{{ role_path }}/files/functions.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/functions.sh" }
+    - { src: "{{ role_path }}/files/env.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/env.sh" }
 
-- name: "ZSH | Ensure {{ scripts_installation_path }} directory structure exists"
+- name: "DOTFILES | Refresh {{ scripts_installation_path }} folder"
+  ansible.builtin.file:
+    path: "{{ scripts_installation_path }}"
+    state: absent
+
+- name: "DOTFILES | Ensure {{ scripts_installation_path }} directory structure exists"
   ansible.builtin.file:
     path: "{{ scripts_installation_path }}"
     mode: "0755"
     state: directory
 
-- name: "ZSH | Create symbolic links for commands"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ scripts_installation_path }} ."
-    chdir: "{{ role_path }}/files/commands"
+- name: "DOTFILES | Ensure that all the commands have execution permission"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: '0755'
+  with_fileglob:
+    - "{{ role_path }}/files/commands/*"
+
+- name: "DOTFILES | Create symbolic links for commands"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/commands/{{ item | basename }}"
+    dest: "{{ scripts_installation_path }}/{{ item | basename }}"
+    state: link
+    mode: "0755"
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/commands/*"
+
+- name: "DOTFILES | generate GITHUB_TOKEN environment variables"
+  ansible.builtin.shell: op read "op://Personal/GitHub Token/credential"
+  register: github_token
+  changed_when: false
+  when: op_installed
+
+- name: "DOTFILES | generate private environment variables"
+  ansible.builtin.template:
+    src: "private-env.sh.j2"
+    dest: "{{ ansible_user_dir }}/.config/dotfiles/private-env.sh"
+  when: op_installed

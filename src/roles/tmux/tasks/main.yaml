@@ -10,11 +10,6 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "Tmux | Install TPM"
-  ansible.builtin.git:
-    repo: https://github.com/tmux-plugins/tpm
-    dest: "{{ ansible_user_dir }}/.tmux/plugins/tpm"
-
 - name: "Tmux | Ensure tmux directory structure exists"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -23,12 +18,22 @@
   loop:
     - "{{ ansible_user_dir }}/.config"
     - "{{ ansible_user_dir }}/.config/tmux"
+    - "{{ ansible_user_dir }}/.config/tmux/plugins"
+
+- name: "Tmux | Install TPM"
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm
+    dest: "{{ ansible_user_dir }}/.config/tmux/plugins/tpm"
 
 - name: "Tmux | Create symbolic links for configuration files"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/tmux ."
-    chdir: "{{ role_path }}/files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item | basename }}"
+    dest: "{{ ansible_user_dir }}/.config/tmux/{{ item | basename }}"
+    state: link
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/*"
 
 - name: "Tmux | install plugins"
   ansible.builtin.shell:
-    cmd: "{{ ansible_user_dir }}/.tmux/plugins/tpm/scripts/install_plugins.sh"
+    cmd: "{{ ansible_user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"

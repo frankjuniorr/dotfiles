@@ -1,4 +1,6 @@
 ---
+
+# Yazi dependencies
 - name: "YAZI | install"
   become: true
   community.general.pacman:
@@ -12,6 +14,7 @@
     - poppler
     # - fd
     - ripgrep
+    - glow        # Charm's utility to read Markdown (https://github.com/charmbracelet/glow)
     # - fzf
     # - zoxide
     # - imagemagick

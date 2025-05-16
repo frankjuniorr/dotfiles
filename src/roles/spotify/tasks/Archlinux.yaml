@@ -8,6 +8,20 @@
     - spotify
     - cava
 
+- name: "SPOTIFY | Ensure config directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/spotify"
+    mode: "0755"
+    state: directory
+
+- name: "SPOTIFY | Fix Wayland issue"
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/spotify-launcher.conf"
+    dest: "{{ ansible_user_dir }}/.config/spotify"
+    mode: '0755'
+    remote_src: true
+    force: true
+
 # TODO: Essa instalação está comentada temporariamente,
 #  porque ela demora muito, e não é prioritária agora
 

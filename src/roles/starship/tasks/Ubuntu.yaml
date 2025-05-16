@@ -27,6 +27,10 @@
     - "{{ ansible_user_dir }}/.config/starship"
 
 - name: "STARSHIP | Copy config file"
-  ansible.builtin.shell:
-    cmd: "stow -t {{ ansible_user_dir }}/.config/starship ."
-    chdir: "{{ role_path }}/files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item | basename }}"
+    dest: "{{ ansible_user_dir }}/.config/starship/{{ item | basename }}"
+    state: link
+    force: yes
+  with_fileglob:
+    - "{{ role_path }}/files/*"

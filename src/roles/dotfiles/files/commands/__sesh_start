@@ -1,0 +1,56 @@
+#!/bin/env bash
+
+# FZF - ENVIRONMENT VARIABLES
+# PS: this is necessary to fzf config works together 'sesh' into kitty keybing.
+# But this environment variables are duplicated, and there are on '~/.bin/env.sh' (loaded by '~/.zshrc')
+############################################################
+export FZF_BASE="/home/${USER}/bin"
+
+if [ -f "${FZF_BASE}/key-bindings.zsh" ];then
+  source "${FZF_BASE}/key-bindings.zsh"
+fi
+export FZF_DEFAULT_COMMAND="fd --type f --color=never"
+
+# Show fzf in fullscreen
+# export FZF_DEFAULT_OPTS="--height=100% --border=rounded --reverse"
+
+export FZF_DEFAULT_OPTS="
+  --border rounded
+  --border-label-pos center
+  --layout reverse
+  --info right
+  --prompt ' : '
+  --pointer ''
+  --marker '✓'
+  --preview-window 'right:65%'
+  --ansi
+  --tmux 90%"
+  ############################################################
+
+# CTRL + a: all
+# CTRL + t: tmux
+# CTRL + p: tmuxinator
+# CTRL + g: sesh custom command
+# CTRL + x: zoxide
+# CTRL + f: find file
+# CTRL + d: delete tmux session
+sesh connect "$(
+  sesh list --icons --hide-duplicates | fzf --no-border \
+    --ansi \
+    --list-border \
+    --no-sort --prompt '⚡  ' \
+    --header '📌  ^A:All | ^T:Tmux | ^P:Tmuxinator | ^G:configs | ^X:zoxide' \
+    --color 'list-border:6,input-border:3,preview-border:4,header-bg:-1,header-border:6' \
+    --input-border \
+    --header-border \
+    --bind 'tab:down,btab:up' \
+    --bind 'ctrl-a:change-prompt(⚡  )+reload(sesh list --icons)' \
+    --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list --tmux --icons)' \
+    --bind 'ctrl-p:change-prompt(🪟  )+reload(sesh list --tmuxinator --icons)' \
+    --bind 'ctrl-g:change-prompt(⚙️  )+reload(sesh list --config --icons)' \
+    --bind 'ctrl-x:change-prompt(📁  )+reload(sesh list --zoxide --icons)' \
+    --bind 'ctrl-f:change-prompt(🔎  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
+    --bind 'ctrl-d:execute(tmux kill-session -t {2..})+change-prompt(⚡  )+reload(sesh list --icons)' \
+    --preview-window 'right:70%' \
+    --preview 'sesh preview {}' \
+)"

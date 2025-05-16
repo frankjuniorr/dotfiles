@@ -6,7 +6,8 @@ scripts_installation_path: "{{ ansible_user_dir }}/.bin"
 
 default_roles:
   - system-base
-  - vim           # TODO: substituir depois por 'neovim'
+  - 1password     # password manager first
+  - git
 
   # CLI Tools
   - fzf
@@ -16,17 +17,18 @@ default_roles:
   - lsd
   - btop
   - fetchs
-  - lazygit
   - lazydocker
   - just
   - fd
   - yazi
+  - sesh
+  - vim           # TODO: substituir depois por 'neovim'
 
   # Terminal
   - fonts
   - starship
   - terminal
-  - zsh           # TODO: remover o Powerlevel10k daqui, e cria ruma nova role para "spaceship"
+  - zsh
   - tmux
   - tmuxinator
 
@@ -47,7 +49,6 @@ default_roles:
   - k9s
 
   # GUI softwares
-  - 1password
   - dropbox
   - insync
   - vscode

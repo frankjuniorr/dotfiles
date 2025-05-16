@@ -1,6 +1,0 @@
----
-- name: "LAZYGIT | Install"
-  become: true
-  community.general.pacman:
-    name: lazygit
-    state: present

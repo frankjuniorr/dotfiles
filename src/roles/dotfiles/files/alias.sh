@@ -1,15 +1,14 @@
 #!/bin/bash
 
-alias matrix="cmatrix -b -s -u 6"
-
-# Clipboard
-# use: "echo mensagem | copiar"
-alias cp_copy='xclip -selection c'
-alias cp_paste='xclip -selection clipboard -o'
-
 # Ref: https://github.com/paulmillr/dotfiles/blob/master/home/.zshrc.sh
 # alias to get weather
-alias clima='curl pt.wttr.in'
+alias weather='curl pt.wttr.in'
+
+# used only with STDIN, to preview any file list
+# example: ls | file_preview
+alias file_preview="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
+
+alias servers="sshs --config ~/.ssh/config"
 
 ################################################################################
 #  COMMAND SHADOWS
@@ -29,6 +28,12 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 alias mkdir='mkdir -p'
+
+alias lg='lazygit'
+alias ld='lazydocker'
+
+alias mux='tmuxinator'
+alias tx='tmux'
 
 alias cat='bat'
 alias cd='z'
@@ -60,9 +65,6 @@ alias sizer='du -h -c'
 
 alias k="kubecolor"
 
-alias lzd="lazydocker"
-alias lg="lazygit"
-
 ################################################################################
 #  ALIAS AND FUNCTIONS ALIASES
 ################################################################################
@@ -82,6 +84,8 @@ alias ips='ip -c -br a'
 #  GIT ALIAS
 ################################################################################
 # olhe: http://opensource.apple.com/source/Git/Git-19/src/git-htmldocs/pretty-formats.txt
+
+alias gs="git status"
 
 # <hash> <date> <user name> <commit message>
 alias gl='git log -n 20 --oneline --date=short --pretty=format:"%Cgreen%h%Creset %Cred%ad%Creset %Cblue% %aN%Creset %s"'
@@ -103,3 +107,6 @@ alias git_clean_branches="git branch | grep -v \"\*\" | xargs -n 1 git branch -D
 
 # undo commit, and files back to the 'stage area'
 alias git_undo_commit="git reset --soft HEAD^"
+
+# got to git-root folder
+alias git_root="git rev-parse --show-toplevel"

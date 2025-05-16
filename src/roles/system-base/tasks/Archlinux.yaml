@@ -5,21 +5,29 @@
     name: "{{ item }}"
     state: present
   loop:
-    - stow
-    - curl
-    - wget
-    - meld
-    - less
-    - jq
-    - yq
-    - ffmpeg
-    - imagemagick
-    - xclip
-    - flameshot
-    - ncdu
-    - figlet
-    - emote # emoji picker gtk3
-    - virt-viewer # used by SPICE on Proxmox
+    - stow                # symlink manager
+    - curl                # request and donwload CLI (like "wget")
+    - wget                # request and donwload CLI (like "curl")
+    - less                # pager on CLI (like "more")
+    - jq                  # JSON processor (https://github.com/jqlang/jq)
+    - yq                  # "JSON, XML, CSV, TOML and properties processor" (https://github.com/mikefarah/yq)
+    - ffmpeg              # media manipulation on CLI
+    - imagemagick         # image manipulation on CLI
+    - ncdu                # Disk Usage on CLI
+    - figlet              # write ASCII texts on terminal
+    - bc                  # simple calculator CLI
+    - sshs                # TUI for SSH (https://github.com/quantumsheep/sshs)
+    - emote               # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
+    - virt-viewer         # used by SPICE on Proxmox
+    - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
+    - gnome-calculator    # default Gnome Calculator
+    - zip                 # for compact files
+
+# This installation takes a while because it compiles the source code.
+# But this package at least works.
+# Because the tradicional package by `pacman` doesn't work on Wayland.
+- name: "FLAMESHOT | install"
+  ansible.builtin.shell: "yay -S --needed --noconfirm flameshot-git"
 
 # GUI to control brightness for external monitors
 - name: "{{ ansible_distribution }} | Install tools"

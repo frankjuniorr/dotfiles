@@ -22,6 +22,7 @@ function ubuntu_upgrade(){
 
 function arch_upgrade(){
     echo "==> Atualizando o sistema..."
+    sudo pacman -Syu --noconfirm
     yay -Syu --noconfirm
 
     echo "==> Limpando o cache do yay..."

@@ -1,6 +1,0 @@
-name: iac
-root: ~/Dropbox/code/01.github/homelab/iac
-
-windows:
-    - Ansible: sleep 1 && code .
-    - git: lazygit

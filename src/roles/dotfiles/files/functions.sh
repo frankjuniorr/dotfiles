@@ -1,5 +1,50 @@
 #!/bin/bash
 
+# yazi: recommended by docs: https://yazi-rs.github.io/docs/quick-start#shell-wrapper
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+matrix() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v unimatrix >/dev/null 2>&1; then
+    unimatrix -b -s 80
+  elif [ -n "$DISPLAY" ] && command -v cmatrix >/dev/null 2>&1; then
+    cmatrix -b -s -u 6
+  else
+    echo "Nenhum comando de Matrix disponível (unimatrix ou cmatrix)." >&2
+    return 1
+  fi
+}
+
+# Função para copiar pro clipboard
+copy() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+    wl-copy
+  elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard
+  else
+    echo "Nenhuma ferramenta de clipboard disponível (wl-copy ou xclip)." >&2
+    return 1
+  fi
+}
+
+# Função para colar do clipboard
+paste() {
+  if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-paste >/dev/null 2>&1; then
+    wl-paste
+  elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard -o
+  else
+    echo "Nenhuma ferramenta de clipboard disponível (wl-paste ou xclip)." >&2
+    return 1
+  fi
+}
+
 # funcção que imrpime o conteúdo de um alias ou função no terminal.
 show_my_alias(){
     my_alias=$(echo "$1" | sed 's/()//g' | sed 's/alias //g')
@@ -95,23 +140,6 @@ tstart(){
     tmux start && tmux a -t "$(tmux ls -F "#{session_name}" | fzf --height 40% --prompt="Select a tmux session: ")"
 }
 
-projects(){
-  project_list=($(tmuxinator list | sed -n '2p' | sed 's/ \+/ /g'))
-
-  selected_project=$(printf "%s\n" "${project_list[@]}" | grep -v "generic" |
-      fzf --header-first --header="Projects" --height=30%
-  )
-
-  # Verifica se um projeto foi selecionado
-  if [ -n "$selected_project" ]; then
-    # Inicia o projeto selecionado
-    tmuxinator start "$selected_project"
-  else
-    echo "Nenhum projeto selecionado."
-    return 0
-  fi
-}
-
 tnew_session(){
     local session_name="$1"
     if [ -z "$session_name"  ];then
@@ -148,6 +176,16 @@ dps(){
 #################################################################
 # Git Functions
 #################################################################
+
+# Alias para quando eu quero dar um 'git pull', levando em conta
+# APENAS o que tem no repositório.
+# útil, pra quando eu faço um Amend em um commit, e quero dar um 'git pull' depois
+git_force_pull(){
+  current_branch=$(git branch | grep "^*" | awk '{print $2}')
+  git fetch origin
+  git reset --hard origin/${current_branch}
+}
+
 # alias rápido para commitar e dar git push ao mesmo tempo
 git_commit_push(){
   local commit_msg=$1
@@ -360,14 +398,14 @@ ssh_create_new_key(){
         return 1
     fi
 
-    ssh_key_file="${HOME}/.ssh/id_rsa_${key_name}"
+    ssh_key_file="${HOME}/.ssh/id_ed25519_${key_name}"
     # -t rsa: O tipo de algoritmo usado, o RSA
     # -b 4096: O tamanho da chave em bits
     # -N '': diz para criar um empty passprashe
     # -C <comentário>: Adiciona um comentário a chave.
     # -f <file>: Nome do arquivo que será salvo a chave
     if [ ! -f $ssh_key_file ];then
-        ssh-keygen -t rsa -b 4096 -N '' -C "$ssh_key_comment" -f "$ssh_key_file"
+        ssh-keygen -t ed25519 -b 4096 -N '' -C "$ssh_key_comment" -f "$ssh_key_file"
     fi
     echo "OK: chave $ssh_key_file criada em: $HOME/.ssh"
 }
