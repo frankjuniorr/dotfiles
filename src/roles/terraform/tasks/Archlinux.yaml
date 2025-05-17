@@ -1,3 +1,10 @@
 ---
 - name: "TFENV | Install"
   ansible.builtin.shell: "yay -S --needed --noconfirm tfenv"
+
+- name: "TFENV | Add to group"
+  become: true
+  ansible.builtin.user:
+    append: true
+    groups: tfenv
+    name: "{{ ansible_user_id }}"
