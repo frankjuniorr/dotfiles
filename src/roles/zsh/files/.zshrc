@@ -40,23 +40,23 @@ source $ZSH/oh-my-zsh.sh
 # SSH
 ############################################################
 # carregando o agent ssh, e adicionando as chaves
-if ! ps aux | grep "ssh-agent -s" | grep -v grep > /dev/null;then
-    eval "$(ssh-agent -s)" > /dev/null
-fi
+# if ! ps aux | grep "ssh-agent -s" | grep -v grep > /dev/null;then
+#     eval "$(ssh-agent -s)" > /dev/null
+# fi
 
-# procure tudo que não for:
-# - com o nome de "config"
-# - com o nome de "known_hosts"
-# - com o nome de "authorized_keys"
-# - com o nome de "com formato"
-# Ou seja, procure todas as chaves privadas dentro do diretório do ssh
-if [ -d ~/.ssh ];then
-  ssh_private_keys=($(find ~/.ssh -type f ! -iname "config" ! -iname "known_hosts" ! -iname "authorized_keys" ! -name "*.*"))
+# # procure tudo que não for:
+# # - com o nome de "config"
+# # - com o nome de "known_hosts"
+# # - com o nome de "authorized_keys"
+# # - com o nome de "com formato"
+# # Ou seja, procure todas as chaves privadas dentro do diretório do ssh
+# if [ -d ~/.ssh ];then
+#   ssh_private_keys=($(find ~/.ssh -type f ! -iname "config" ! -iname "known_hosts" ! -iname "authorized_keys" ! -name "*.*"))
 
-  for private_key in $ssh_private_keys; do
-      ssh-add "$private_key" > /dev/null 2>&1
-  done
-fi
+#   for private_key in $ssh_private_keys; do
+#       ssh-add "$private_key" > /dev/null 2>&1
+#   done
+# fi
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
