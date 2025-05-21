@@ -24,7 +24,7 @@ for machine in $machines; do
             # -W 2: Wait only 2 seconds
             if ping -c 1 -W 2 proxmox &>/dev/null; then
                 echo "Shutting down proxmox..."
-                # ssh proxmox "shutdown -h now"
+                ssh proxmox "shutdown -h now"
             else
                 echo "The machine 'proxmox' is already OFF"
             fi
@@ -32,7 +32,7 @@ for machine in $machines; do
 
         local-machine)
             echo "shutting down local machine..."
-            # sudo shutdown -h now
+            sudo shutdown -h now
         ;;
 
         *)
