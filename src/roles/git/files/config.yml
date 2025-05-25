@@ -50,8 +50,8 @@ promptToReturnFromSubprocess: false
 #   showRandomTip: false
 # os:
 #   editPreset: "nvim"
-  # editCommand: "$XDG_CONFIG_HOME/lazygit/edit-nvim"
-  # editCommandTemplate: "{{editor}} {{filename}}"
+# editCommand: "$XDG_CONFIG_HOME/lazygit/edit-nvim"
+# editCommandTemplate: "{{editor}} {{filename}}"
 git:
   log:
     showGraph: always
@@ -61,13 +61,13 @@ git:
   #   --pretty=format:"%C(auto)%h: %s (%C(blue)%an %C(white)|
   #   %C(cyan)%ad%C(white))" {{branchName}} --'
   branchLogCmd: "git log --color=always --graph --date=relative --pretty=format:'%C(dim yellow)%h %C(reset)%<|(70,trunc)%s %C(dim white)@%an%C(reset) %C(dim white)(%cd)%C(reset)%C(auto)'"
-  allBranchesLogCmd: "git log --color=always --graph --all --date=relative --pretty=format:'%C(auto)%h %C(reset)%<|(50,trunc)%s %C(bold blue)<%an>%C(reset) %C(green)(%cd)%C(reset)%C(auto)%d'"
   overrideGpg: true
   paging:
     colorArg: always
     pager: delta --dark --paging=never
   skipHookPrefix: WIP
-
+  allBranchesLogCmds:
+    - git log --color=always --graph --all --date=relative --pretty=format:'%C(auto)%h %C(reset)%<|(50,trunc)%s %C(bold blue)<%an>%C(reset) %C(green)(%cd)%C(reset)%C(auto)%d'
 
 # customCommands:
 #   - key: "J"

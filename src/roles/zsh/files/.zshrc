@@ -1,3 +1,15 @@
+if [ -f "${HOME}/.atuin/bin/env" ];then
+  source "${HOME}/.atuin/bin/env"
+fi
+
+if which atuin > /dev/null 2>&1 ;then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+if which zoxide > /dev/null 2>&1 ;then
+  eval "$(zoxide init zsh)"
+fi
+
 
 # PATH
 ############################################################
@@ -25,17 +37,17 @@ fi
 
 # OH-MY-ZSH
 ############################################################
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME=""
+#export ZSH="$HOME/.oh-my-zsh"
+#ZSH_THEME=""
 
-DISABLE_AUTO_TITLE="true"
+#DISABLE_AUTO_TITLE="true"
 
-plugins=(
-    zsh-syntax-highlighting
-    zsh-autosuggestions
-   )
+#plugins=(
+#    zsh-syntax-highlighting
+#    zsh-autosuggestions
+#   )
 
-source $ZSH/oh-my-zsh.sh
+# source $ZSH/oh-my-zsh.sh
 
 # SSH
 ############################################################
@@ -58,16 +70,5 @@ source $ZSH/oh-my-zsh.sh
 #   done
 # fi
 
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
-eval "$(starship init zsh)"
-
-if [ -f "${HOME}/.atuin/bin/env" ];then
-  source "${HOME}/.atuin/bin/env"
-fi
-if which atuin > /dev/null 2>&1 ;then
-  eval "$(atuin init zsh --disable-up-arrow)"
-fi
-
-if which zoxide > /dev/null 2>&1 ;then
-  eval "$(zoxide init zsh)"
-fi
+# export STARSHIP_CONFIG=~/.config/starship/starship.toml
+# eval "$(starship init zsh)"
