@@ -2,7 +2,10 @@ name: homelab-iac
 root: ~/Dropbox/code/01.github/homelab/homelab-iac
 
 windows:
-    - code:
-      - clear && figlet -k -c -t "Homelab IaC" && onefetch && sleep 1 && code .
-    - git: lazygit
-    - servers: sshs --config ~/.ssh/config
+  - code:
+      layout: 8799,171x68,0,0[171x53,0,0,31,171x14,0,54,33] 
+      panes:
+      - $EDITOR .
+      - clear && figlet -k -c -t "Homelab IaC" 
+  - git: lazygit
+  - servers: sshs --config ~/.ssh/config

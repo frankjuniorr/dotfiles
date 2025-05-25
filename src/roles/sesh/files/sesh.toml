@@ -1,19 +1,36 @@
+#############################################################
+# Folders opened with by file manager (yazi)
+#############################################################
+
 [[session]]
-name = "Downloads"
+name = "Downloads folder"
 path = "~/Downloads"
 startup_command = "y"
 
 [[session]]
-name = "Dropbox"
+name = "Dropbox folder"
 path = "~/Dropbox"
 startup_command = "y"
 
 [[session]]
-name = "Code"
-path = "~/Dropbox/code"
+name = "Code folder"
+path = "~/Dropbox/code folder"
 startup_command = "y"
 
+#############################################################
+#  Folder or files open by $EDITOR (neovim)
+#############################################################
 [[session]]
-name = "Tmuxinator"
+name = "tmuxinator config"
 path = "~/.config/tmuxinator"
-startup_command = "$EDITOR ."
+startup_command = "nvim ."
+
+[[session]]
+name = "neovim config"
+path = "~/.config/nvim"
+startup_command = "nvim ."
+
+[[session]]
+name = "sesh config"
+path = "~/.config/sesh"
+startup_command = "nvim ~/.config/sesh/sesh.toml"

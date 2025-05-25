@@ -1,0 +1,38 @@
+---
+- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+  register: system_distribution_config
+  no_log: true
+
+- name: "System | Run Tasks: {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+  when: system_distribution_config.stat.exists
+  no_log: true
+
+
+- name: "NEOVIM | Refresh {{ ansible_user_dir }}/.config/nvim folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/nvim"
+    state: absent
+
+
+- name: "NEOVIM | Ensure the config fodler already exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config/nvim"
+
+- name: "NEOVIM | Create symlink to role files directory"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_user_dir }}/.config/nvim"
+    state: link
+    force: true
+
+- name: "NEOVIM | Sync and update neovim"
+  ansible.builtin.shell: "nvim --headless \"+Lazy! sync\" +qa"
+
+

@@ -13,12 +13,7 @@ alias servers="sshs --config ~/.ssh/config"
 ################################################################################
 #  COMMAND SHADOWS
 ################################################################################
-if type lsd > /dev/null 2>&1; then
-    alias ls='lsd'
-else
-    # ls padrão com cores automáticas
-    alias ls='ls -h --color=auto --group-directories-first'
-fi
+alias ls='lsd'
 
 # grep padrão com cores automáticas
 alias grep='grep --color=auto'
@@ -37,7 +32,7 @@ alias tx='tmux'
 
 alias cat='bat'
 alias cd='z'
-cx(){ cd "$@" && ls; }
+cx() { cd "$@" && ls; }
 
 # alias de navegação
 alias ..="cd .."
@@ -110,3 +105,4 @@ alias git_undo_commit="git reset --soft HEAD^"
 
 # got to git-root folder
 alias git_root="git rev-parse --show-toplevel"
+

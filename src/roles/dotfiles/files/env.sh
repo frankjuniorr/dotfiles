@@ -4,7 +4,7 @@
 ############################################################
 # export EDITOR=vim
 # export EDITOR=nvim
-export EDITOR=code
+export EDITOR=nvim
 
 # SSH
 ############################################################
@@ -31,7 +31,7 @@ export LESS_TERMCAP_us=${bold_red}
 ############################################################
 export FZF_BASE="/home/${USER}/bin"
 
-if [ -f "${FZF_BASE}/key-bindings.zsh" ];then
+if [ -f "${FZF_BASE}/key-bindings.zsh" ]; then
   source "${FZF_BASE}/key-bindings.zsh"
 fi
 export FZF_DEFAULT_COMMAND="fd --type f --color=never"
@@ -62,3 +62,4 @@ export FZF_ALT_C_COMMAND="fd --type d . --color=never"
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -n 50'"
 
 source ~/.config/dotfiles/private-env.sh
+
