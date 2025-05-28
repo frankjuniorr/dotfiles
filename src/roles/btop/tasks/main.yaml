@@ -10,6 +10,11 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
+- name: "BTOP | Refresh {{ ansible_user_dir }}/.config/btop folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/btop"
+    state: absent
+
 # Link the Config File
 - name: "BTOP | Ensure btop directory structure exists"
   ansible.builtin.file:
@@ -22,9 +27,7 @@
 
 - name: "BTOP | Copy btop config"
   ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item | basename }}"
-    dest: "{{ ansible_user_dir }}/.config/btop/{{ item | basename }}"
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_user_dir }}/.config/btop"
     state: link
     force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/*"

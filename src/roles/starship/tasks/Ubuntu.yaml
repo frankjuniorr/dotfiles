@@ -16,21 +16,3 @@
     path: "/tmp/starship-install.sh"
     state: absent
 
-# Link the Config File
-- name: "STARSHIP | Ensure starship directory structure exists"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/starship"
-
-- name: "STARSHIP | Copy config file"
-  ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item | basename }}"
-    dest: "{{ ansible_user_dir }}/.config/starship/{{ item | basename }}"
-    state: link
-    force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/*"

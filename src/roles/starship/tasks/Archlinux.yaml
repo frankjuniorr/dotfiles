@@ -1,5 +1,5 @@
 ---
-- name: "HYDE | Install some packages"
+- name: "STARSHIP | Install" 
   become: true
   community.general.pacman:
     name: starship

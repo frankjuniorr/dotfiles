@@ -27,6 +27,11 @@
     - "Reledia/glow"
     - "wylie102/duckdb"
 
+- name: "YAZI | Refresh {{ ansible_user_dir }}/.config/yazi folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/yazi"
+    state: absent
+
 - name: "YAZI | Ensure {{ ansible_user_dir }}/.config/yazi directory structure exists"
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.config/yazi"
@@ -35,10 +40,9 @@
 
 - name: "YAZI | Create config files symlinks"
   ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item | basename }}"
-    dest: "{{ ansible_user_dir }}/.config/yazi/{{ item | basename }}"
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_user_dir }}/.config/yazi"
     state: link
     mode: "0755"
     force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/*"
+

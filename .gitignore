@@ -1,4 +1,4 @@
-private-dotfiles
+src/roles/tmux/files/plugins
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,ansible
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,ansible

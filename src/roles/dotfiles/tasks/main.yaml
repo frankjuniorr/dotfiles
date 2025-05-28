@@ -41,13 +41,11 @@
 
 - name: "DOTFILES | Create symbolic links for commands"
   ansible.builtin.file:
-    src: "{{ role_path }}/files/commands/{{ item | basename }}"
-    dest: "{{ scripts_installation_path }}/{{ item | basename }}"
+    src: "{{ role_path }}/files/commands"
+    dest: "{{ scripts_installation_path }}"
     state: link
     mode: "0755"
     force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/commands/*"
 
 - name: "DOTFILES | generate GITHUB_TOKEN environment variables"
   ansible.builtin.shell: op read "op://Personal/GitHub Token/credential"

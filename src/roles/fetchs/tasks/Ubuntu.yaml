@@ -48,20 +48,3 @@
     path: /tmp/fastfetch.deb
     state: absent
 
-- name: "FASTFETCH | Ensure fastfetch directory structure exists"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/fastfetch"
-
-- name: "FASTFETCH | Create symbolic links for configuration files"
-  ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item | basename }}"
-    dest: "{{ ansible_user_dir }}/.config/fastfetch/{{ item | basename }}"
-    state: link
-    force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/*"
