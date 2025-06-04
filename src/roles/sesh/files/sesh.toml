@@ -6,16 +6,19 @@
 name = "Downloads folder"
 path = "~/Downloads"
 startup_command = "y"
+preview_command = "lsd --long ~/Downloads/"
 
 [[session]]
 name = "Dropbox folder"
 path = "~/Dropbox"
 startup_command = "y"
+preview_command = "lsd --tree --depth 2 ~/Dropbox"
 
 [[session]]
 name = "Code folder"
 path = "~/Dropbox/code folder"
 startup_command = "y"
+preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
 
 #############################################################
 #  Folder or files open by $EDITOR (neovim)
@@ -24,13 +27,22 @@ startup_command = "y"
 name = "tmuxinator config"
 path = "~/.config/tmuxinator"
 startup_command = "nvim ."
+windows = [ "git" ]
 
 [[session]]
 name = "neovim config"
 path = "~/.config/nvim"
 startup_command = "nvim ."
+preview_command = "lsd --tree --depth 3 ~/.config/nvim"
+windows = [ "git" ]
 
 [[session]]
 name = "sesh config"
 path = "~/.config/sesh"
 startup_command = "nvim ~/.config/sesh/sesh.toml"
+preview_command = "bat --color=always ~/.config/sesh/sesh.toml"
+windows = [ "git" ]
+
+[[window]]
+name = "git"
+startup_script = "lazygit"
