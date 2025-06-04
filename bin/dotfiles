@@ -8,10 +8,9 @@ DOTFILES_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 DOTFILES_VERSION="v1.1.1"
 
-
-function show_header(){
-clear
-cat << "HEADER"
+function show_header() {
+  clear
+  cat <<"HEADER"
     ____        __  _____ __
    / __ \____  / /_/ __(_) /__  _____
   / / / / __ \/ __/ /_/ / / _ \/ ___/
@@ -21,48 +20,48 @@ cat << "HEADER"
 HEADER
 }
 
-function print_message(){
-    local message="$1"
+function print_message() {
+  local message="$1"
 
-    gum style --bold --foreground="#FFFFFF" "$message"
+  gum style --bold --foreground="#FFFFFF" "$message"
 }
 
-function loading(){
-    local title="$1"
-    local command="$2"
+function loading() {
+  local title="$1"
+  local command="$2"
 
-    gum spin --title="$title" \
-      --spinner.foreground="$os_color" -- sh -c "$command"
+  gum spin --title="$title" \
+    --spinner.foreground="$os_color" -- sh -c "$command"
 }
 
-function print_stats(){
+function print_stats() {
   os_pretty_name=$(grep "^PRETTY_NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
   dotfiles_stats_file="/tmp/dotfiles-stats.csv"
 
-  echo "Dotfiles,$DOTFILES_VERSION" > "$dotfiles_stats_file"
-  echo "Distro Linux,$os_pretty_name" >> "$dotfiles_stats_file"
+  echo "Dotfiles,$DOTFILES_VERSION" >"$dotfiles_stats_file"
+  echo "Distro Linux,$os_pretty_name" >>"$dotfiles_stats_file"
 
   gum table --border rounded --print --file "$dotfiles_stats_file"
 }
 
-function check_dependencies(){
-    if ! type gum >/dev/null 2>&1; then
+function check_dependencies() {
+  if ! type gum >/dev/null 2>&1; then
 
-      case $os_name in
-        Ubuntu)
-          gum_version="0.14.4"
-          gum_filename="gum_${gum_version}_amd64.deb"
+    case $os_name in
+    Ubuntu)
+      gum_version="0.14.4"
+      gum_filename="gum_${gum_version}_amd64.deb"
 
-          echo "Installing dependencies: gum"
-          wget -q -P /tmp "https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_filename}"
-          sudo dpkg -i /tmp/${gum_filename} > /dev/null && rm -rf /tmp/${gum_filename}
-        ;;
-        "Arch Linux")
-          sudo pacman -S --noconfirm gum
-        ;;
-      esac
+      echo "Installing dependencies: gum"
+      wget -q -P /tmp "https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_filename}"
+      sudo dpkg -i /tmp/${gum_filename} >/dev/null && rm -rf /tmp/${gum_filename}
+      ;;
+    "Arch Linux")
+      sudo pacman -S --noconfirm gum
+      ;;
+    esac
 
-    fi
+  fi
 }
 
 function ubuntu_setup() {
@@ -132,7 +131,6 @@ update_ansible_galaxy() {
 # MAIN
 #########################################################
 
-
 tag_name="$1"
 test -z "$tag_name" && tag_name='all'
 
@@ -144,29 +142,33 @@ show_header
 print_stats
 
 case $os_name in
-  Ubuntu)
-    os_color="#E95420"
+Ubuntu)
+  os_color="#E95420"
+  if [ "$tag_name" = "all" ]; then
     ubuntu_setup
-    ;;
-  "Arch Linux")
-    os_color="#1793D1"
+  fi
+  ;;
+"Arch Linux")
+  os_color="#1793D1"
+  if [ "$tag_name" = "all" ]; then
     arch_setup
-    ;;
-  *)
-    print_message "Unsupported OS"
-    exit 1
-    ;;
+  fi
+  ;;
+*)
+  print_message "Unsupported OS"
+  exit 1
+  ;;
 esac
 
 # shellcheck disable=SC2069
-pushd "$DOTFILES_DIR" 2>&1 > /dev/null
+pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 update_ansible_galaxy
 
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" > /dev/null && ansible-playbook -i hosts.ini "main.yml" --tags "$tag_name"
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --ask-become-pass -i hosts.ini "main.yml" --tags "$tag_name"
 
 # shellcheck disable=SC2069
-popd 2>&1 > /dev/null
+popd 2>&1 >/dev/null
 
 if ! [[ -f "$IS_FIRST_RUN" ]]; then
   print_message "☯ First run complete. Please reboot your computer"
