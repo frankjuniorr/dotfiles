@@ -5,19 +5,19 @@
 [[session]]
 name = "Downloads folder"
 path = "~/Downloads"
-startup_command = "y"
+startup_command = "y ~/Downloads"
 preview_command = "lsd --long ~/Downloads/"
 
 [[session]]
 name = "Dropbox folder"
 path = "~/Dropbox"
-startup_command = "y"
+startup_command = "y ~/Dropbox"
 preview_command = "lsd --tree --depth 2 ~/Dropbox"
 
 [[session]]
 name = "Code folder"
 path = "~/Dropbox/code folder"
-startup_command = "y"
+startup_command = "y ~/Dropbox/code"
 preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
 
 #############################################################
