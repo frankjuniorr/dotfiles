@@ -16,10 +16,20 @@
     state: directory
     mode: '0755'
 
+
+- name: "ZSH | Ensure zsh directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config"
+    - "{{ ansible_user_dir }}/.config/zsh"
+
 # Linking Config file
 - name: "ZSH | Ensure clean .zshrc file"
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.zshrc"
+    path: "{{ ansible_user_dir }}/.config/zsh/.zshrc"
     state: absent
 
 - name: "ZSH | Create symbolic link for .zshrc"
@@ -29,7 +39,7 @@
     dest: "{{ item.dest }}"
     state: link
   loop:
-    - { src: "{{ role_path }}/files/.zshrc", dest: "{{ ansible_user_dir }}/.zshrc" }
+    - { src: "{{ role_path }}/files/.zshrc", dest: "{{ ansible_user_dir }}/.config/zsh/.zshrc" }
 
 - name: "ZSH | Change to zsh"
   become: yes
