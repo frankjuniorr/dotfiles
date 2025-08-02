@@ -30,6 +30,11 @@ startup_command = "nvim ."
 windows = [ "git" ]
 
 [[session]]
+name = "tmux config"
+path = "~/.config/tmux"
+startup_command = "nvim ."
+
+[[session]]
 name = "neovim config"
 path = "~/.config/nvim"
 startup_command = "nvim ."
