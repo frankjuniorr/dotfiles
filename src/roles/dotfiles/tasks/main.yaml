@@ -8,18 +8,15 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
 
-
 - name: "DOTFILES | Create symbolic link for .zshrc"
   # become: yes
   ansible.builtin.file:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.config/dotfiles/{{ item | basename }}"
     state: link
     force: yes
-  loop:
-    - { src: "{{ role_path }}/files/alias.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/alias.sh" }
-    - { src: "{{ role_path }}/files/functions.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/functions.sh" }
-    - { src: "{{ role_path }}/files/env.sh", dest: "{{ ansible_user_dir }}/.config/dotfiles/env.sh" }
+  with_fileglob:
+    - "{{ role_path }}/files/alias/*"
 
 - name: "DOTFILES | Refresh {{ scripts_installation_path }} folder"
   ansible.builtin.file:

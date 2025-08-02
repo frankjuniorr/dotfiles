@@ -75,34 +75,11 @@ alias path='echo $PATH | tr ":" "\n" | sort'
 # Mostra todas as interfaces de rede, highlighted, e de mais fácil visualização.
 alias ips='ip -c -br a'
 
-################################################################################
-#  GIT ALIAS
-################################################################################
-# olhe: http://opensource.apple.com/source/Git/Git-19/src/git-htmldocs/pretty-formats.txt
-
-alias gs="git status"
-
-# <hash> <date> <user name> <commit message>
-alias gl='git log -n 20 --oneline --date=short --pretty=format:"%Cgreen%h%Creset %Cred%ad%Creset %Cblue% %aN%Creset %s"'
-
-# <hash> <date> <user email> <commit message>
-alias gle='git log -n 20 --oneline --date=short --pretty=format:"%Cgreen%h%Creset %Cred%ad%Creset %Cblue% %ae%Creset %s"'
-
-# imprime apenas o ultimo commit
-alias git_last_commit="git log -1 --pretty=%s"
-
-# desfaz as alteração do stage
-alias git_unstage="git reset HEAD"
-
-# pega o nome do repositório do git
-alias git_repository_name="git config --get --local remote.origin.url"
-
-# Deleta todas as branches locais, deixando só a current branch
-alias git_clean_branches="git branch | grep -v \"\*\" | xargs -n 1 git branch -D && git fetch --prune"
-
-# undo commit, and files back to the 'stage area'
-alias git_undo_commit="git reset --soft HEAD^"
-
-# got to git-root folder
-alias git_root="git rev-parse --show-toplevel"
-
+# Função auxiliar, para todos os comandos
+__is_cmd_installed() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "$cmd is not installed. Please install it first."
+    return 1
+  fi
+}
