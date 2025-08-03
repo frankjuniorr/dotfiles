@@ -32,7 +32,9 @@ alias tx='tmux'
 
 alias cat='bat'
 alias cd='z'
-cx() { cd "$@" && ls; }
+cx() {
+  cd "$@" && ls
+}
 
 # alias de navegação
 alias ..="cd .."

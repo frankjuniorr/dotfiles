@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # yazi: recommended by docs: https://yazi-rs.github.io/docs/quick-start#shell-wrapper
-function y() {
+# ----------------------------------------------------------------------
+y() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
   yazi "$@" --cwd-file="$tmp"
   if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
@@ -10,6 +11,7 @@ function y() {
   rm -f -- "$tmp"
 }
 
+# ----------------------------------------------------------------------
 matrix() {
   if [ -n "$WAYLAND_DISPLAY" ] && command -v unimatrix >/dev/null 2>&1; then
     unimatrix -b -s 80
@@ -22,6 +24,7 @@ matrix() {
 }
 
 # Função para copiar pro clipboard
+# ----------------------------------------------------------------------
 copy() {
   if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
     wl-copy
@@ -34,6 +37,7 @@ copy() {
 }
 
 # Função para colar do clipboard
+# ----------------------------------------------------------------------
 paste() {
   if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-paste >/dev/null 2>&1; then
     wl-paste
@@ -46,7 +50,8 @@ paste() {
 }
 
 # funcção que imrpime o conteúdo de um alias ou função no terminal.
-show_my_alias() {
+# ----------------------------------------------------------------------
+alias-show() {
   my_alias=$(echo "$1" | sed 's/()//g' | sed 's/alias //g')
 
   # validação
@@ -68,47 +73,45 @@ show_my_alias() {
   fi
 }
 
-list_my_alias() {
-  local dotfiles_path="${HOME}/Dropbox/code/01.github/linux_ricing_project/dotfiles"
-  local public_dotfiles_path="${dotfiles_path}/public-dotfiles"
-  local private_dotfiles_path="${dotfiles_path}/private-dotfiles"
+# ----------------------------------------------------------------------
+alias-list() {
+  local dotfiles_path="${HOME}/.config/dotfiles"
 
   local search_query='^alias [a-zA-Z_][a-zA-Z0-9_]*='
 
-  grep -rE "$search_query" "${public_dotfiles_path}"/* "${private_dotfiles_path}"/* >/tmp/list_alias.tmp
+  grep -rE "$search_query" "${dotfiles_path}"/* >/tmp/list_alias.tmp
 
-  show_my_alias "$(grep --no-filename -E "$search_query" "${public_dotfiles_path}"/* "${private_dotfiles_path}"/* |
+  alias-show "$(grep -E "$search_query" "${dotfiles_path}"/* |
     cut -d "=" -f1 |
+    awk '{print $2}' |
     fzf --header-first --header="Alias" --layout reverse --preview '
-      file=$(grep {} /tmp/list_alias.tmp | cut -d ":" -f 1);
-      alias_line={}
+      grep {}= /tmp/list_alias.tmp | cut -d ":" -f2 | sed "s/alias //g" | grep ^{}= | cut -d "=" -f2
 
-      grep {} "$file" | cut -d "=" -f2
     ')"
 
   rm -rf /tmp/list_alias.tmp
 }
 
-list_my_functions() {
-  local dotfiles_path="${HOME}/Dropbox/code/01.github/linux_ricing_project/dotfiles"
-  local public_dotfiles_path="${dotfiles_path}/public-dotfiles"
-  local private_dotfiles_path="${dotfiles_path}/private-dotfiles"
+# ----------------------------------------------------------------------
+alias-functions() {
+  local dotfiles_path="${HOME}/.config/dotfiles"
 
-  local search_query='^(function )?[a-zA-Z_][a-zA-Z0-9_]*\(\)'
+  local search_query='^(function )?[a-zA-Z_]*\(\)'
 
-  grep -E "$search_query" "${public_dotfiles_path}"/* "${private_dotfiles_path}"/* >/tmp/list_functions.tmp
+  grep -E "$search_query" "${dotfiles_path}"/* | sed "s/ \?{//g" >/tmp/list_functions.tmp
 
-  show_my_alias "$(grep --no-filename -E "$search_query" "${public_dotfiles_path}"/* "${private_dotfiles_path}"/* |
-    sed "s/function //g" | sed "s/{//g" |
+  alias-show "$(grep --no-filename -E "$search_query" "${dotfiles_path}"/* |
+    sed "s/function //g" | sed "s/ {//g" |
     fzf --header-first --header="Functions" --layout reverse --preview '
-      file=$(grep {} /tmp/list_functions.tmp | cut -d ":" -f 1);
-      function_line={}
-      awk "/^${function_line}/,/^\}/ { if (/^\}/ && getline == 0) exit; print NR, \$0 }" "$file"
+      filename=$(grep :{} /tmp/list_functions.tmp | cut -d ":" -f 1);
+      function_name=$(grep :{} /tmp/list_functions.tmp | cut -d ":" -f 2);
+
+      awk "/^(function )?$function_name\\(\\)/,/^}/" "$filename"
 ')"
 
-  rm -rf /tmp/list_functions.tmp
 }
 
+# ----------------------------------------------------------------------
 trash_clean() {
   echo "Limpando lixeira...."
   if [ -d "${HOME}/.local/share/Trash" ]; then
@@ -120,6 +123,7 @@ trash_clean() {
 }
 
 # alias pra recarregar o shell
+# ----------------------------------------------------------------------
 refresh_shell() {
   local shell_file=""
 
@@ -135,20 +139,24 @@ refresh_shell() {
 #################################################################
 # Docker Functions
 #################################################################
+
 # função auxiliar que destrói todo o ambiente docker na máquina
+# ----------------------------------------------------------------------
 d-destroy() {
   yes | docker system prune -a
   yes | docker volume prune
 }
 
 # Docker PS formatted to print only my most used fields
+# ----------------------------------------------------------------------
 d-ps() {
   docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Size}}"
 }
 
 # Entra no shell de um container docker que esteja em execução, de maneira interativa com fzf
+# ----------------------------------------------------------------------
 d-shell() {
-  local container_name=$(docker ps --format "{{.Names}}" | fzf --prompt="Selecione o container: ")
+  local container_name=$(docker ps --format "{{.Names}}" | fzf --height=20% --prompt="Selecione o container: ")
 
   # Se nenhum container foi selecionado, sai
   if [ -z "$container_name" ]; then
@@ -160,9 +168,31 @@ d-shell() {
   docker exec -it "$container_name" bash
 }
 
+# ----------------------------------------------------------------------
+d-run-ephemeral() {
+  local docker_color="#0db7ed"
+  local images=(
+    "ubuntu:24.04"
+    "archlinux:latest"
+    "rockylinux:9.3"
+    "alpine:latest"
+  )
+
+  local image=$(printf '%s\n' "${images[@]}" | fzf --height=20% --prompt="Escolha a imagem: ")
+
+  if [ -z "$image" ]; then
+    gum style --foreground="$docker_color" "Any docker image was selected"
+    return 1
+  fi
+
+  gum style --foreground="$docker_color" "Iniciando container efêmero com imagem: $image"
+  docker run --rm -it "$image" bash || docker run --rm -it "$image" sh
+}
+
 # Exibe o log um container docker que esteja em execução, de maneira interativa com fzf
+# ----------------------------------------------------------------------
 d-logs() {
-  local container_name=$(docker ps --format "{{.Names}}" | fzf --prompt="Selecione o container: ")
+  local container_name=$(docker ps --format "{{.Names}}" | fzf --height=20% --prompt="Selecione o container: ")
 
   # Se nenhum container foi selecionado, sai
   if [ -z "$container_name" ]; then
@@ -196,6 +226,7 @@ apt_get_fix() {
 # Python Functions
 #################################################################
 
+# ----------------------------------------------------------------------
 # alias rápido que habilita um venv padrão no python
 python_enable_venv() {
   if ! dpkg -s python3-venv >/dev/null 2>&1; then
@@ -206,6 +237,7 @@ python_enable_venv() {
   source venv/bin/activate
 }
 
+# ----------------------------------------------------------------------
 # alias rápido que desabilita um venv no python
 python_disable_venv() {
   deactivate
@@ -215,14 +247,17 @@ python_disable_venv() {
 # Kubernetes Functions
 #################################################################
 
+# ----------------------------------------------------------------------
 k8s-reset-all-pods() {
   k delete pods --all --all-namespaces
 }
 
+# ----------------------------------------------------------------------
 k8s-list-all-resources() {
   k get all --all-namespaces
 }
 
+# ----------------------------------------------------------------------
 # Exploration functions
 k8s-get-deployment() {
   local deploy_name=$1
@@ -287,7 +322,7 @@ ssh_create_new_key() {
   echo "OK: chave $ssh_key_file criada em: $HOME/.ssh"
 }
 
-########################################################################
+# ----------------------------------------------------------------------
 ssh_new_host() {
   public_key_file="$1"
   host_user="$2"
@@ -336,12 +371,12 @@ Host <ALTERE_AQUI>
   echo "Arquivo $ssh_config_file atualizado com sucesso."
 }
 
-########################################################################
+# ----------------------------------------------------------------------
 ssh_list_hosts() {
   grep ^Host ~/.ssh/config | awk '{print $2}'
 }
 
-########################################################################
+# ----------------------------------------------------------------------
 ssh_shutdown_all_vms() {
   # all_hosts=$(grep 'HostName' ~/.ssh/config | awk '{print $2}')
   all_hosts=($(ssh_list_hosts))
@@ -351,3 +386,17 @@ ssh_shutdown_all_vms() {
   done
 }
 
+#################################################################
+# BLUETOOTH
+#################################################################
+
+# ----------------------------------------------------------------------
+b-restart() {
+  sudo systemctl restart bluetooth.service
+}
+
+# ----------------------------------------------------------------------
+b-connect-headphone() {
+  local headphone_mac_address="FC:E8:06:8A:2E:F9"
+  bluetoothctl connect "$headphone_mac_address"
+}
