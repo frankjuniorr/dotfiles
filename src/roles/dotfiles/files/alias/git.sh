@@ -40,8 +40,8 @@ alias g-repository-name="git config --get --local remote.origin.url"
 # abre o repositório no browser
 g-repository-web() {
   local repository_url=$(g-repository-name)
-  repository_url=$(echo "$repository_url" | sed 's/gitlab@//g' | sed 's/.git//g' | sed 's|:|/|g')
-  google-chrome "$repository_url"
+  repository_url=$(echo "$repository_url" | sed 's/gitlab@//g' | sed 's/git@//g' | sed 's/.git//g' | sed 's|:|/|g')
+  google-chrome-stable "$repository_url"
 }
 
 # -------------------------------------------------------------------------------
