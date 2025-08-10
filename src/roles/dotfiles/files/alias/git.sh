@@ -12,7 +12,7 @@ alias g-root="git rev-parse --show-toplevel"
 # Faz o `git fetch` com o spinner do `gum`
 g-fetch() {
   gum spin \
-    --spinner.foreground="$g1_color" \
+    --spinner.foreground= \
     --spinner dot \
     --title "Fetching repository..." \
     -- git fetch --prune
@@ -268,7 +268,7 @@ g-branch-new() {
     branch_src="$remote_branches"
   fi
 
-  branch_new=$(gum input --cursor.foreground="$g1_color" --no-show-help --placeholder="Type the new branch name")
+  branch_new=$(gum input --cursor.foreground=2 --no-show-help --placeholder="Type the new branch name")
 
   git checkout "$branch_src"
   git pull
@@ -278,8 +278,8 @@ g-branch-new() {
   # - ! git diff --quiet : Verifica se há modificações "not staged"
   # - ! git diff --cached --quiet : Verifica se há modificações "staged"
   if ! git diff --quiet || ! git diff --cached --quiet; then
-    commit_title=$(gum input --cursor.foreground="$g1_color" --no-show-help --placeholder="Type commit message")
-    commit_body=$(gum write --cursor.foreground="$g1_color" --no-show-help --placeholder="Type commit description")
+    commit_title=$(gum input --cursor.foreground=2 --no-show-help --placeholder="Type commit message")
+    commit_body=$(gum write --cursor.foreground=2 --no-show-help --placeholder="Type commit description")
 
     test -z "$commit_title" && echo "The commit cannot be empty" && return 1
 
