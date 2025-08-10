@@ -9,6 +9,15 @@
 # got to git-root folder
 alias g-root="git rev-parse --show-toplevel"
 
+# Faz o `git fetch` com o spinner do `gum`
+g-fetch() {
+  gum spin \
+    --spinner.foreground="$g1_color" \
+    --spinner dot \
+    --title "Fetching repository..." \
+    -- git fetch --prune
+}
+
 # Alias para quando eu quero dar um 'git pull', levando em conta
 # APENAS o que tem no repositório.
 # útil, pra quando eu faço um Amend em um commit, e quero dar um 'git pull' depois
@@ -85,7 +94,6 @@ alias g-commit-undo="git reset --soft HEAD^"
 # Adiciona as modificações correntes no 'git status' ao último commit (HEAD), e faz um force push
 alias g-commit-amend="git add . && git commit --amend --no-edit && git push --force-with-lease"
 
-# Faz um commit na branch corrente, de maneira interativa
 g-commit-new() {
 
   __is_cmd_installed gum
@@ -94,11 +102,11 @@ g-commit-new() {
   # - ! git diff --quiet : Verifica se há modificações "not staged"
   # - ! git diff --cached --quiet : Verifica se há modificações "staged"
   if ! git diff --quiet || ! git diff --cached --quiet; then
-    local commit_title=$(gum input --cursor.foreground=4 --no-show-help --placeholder="Digite a mensagem do commit")
-    local commit_body=$(gum write --cursor.foreground=4 --no-show-help --placeholder="Digite uma description pro commit")
-    local current_branch=$(git branch | grep "^*" | awk '{print $2}')
+    local commit_title=$(gum input --cursor.foreground=2 --no-show-help --placeholder="Type the commit message")
+    local commit_body=$(gum write --cursor.foreground=2 --no-show-help --placeholder="Type the commit description")
+    local current_branch=$(git branch --show-current)
 
-    test -z "$commit_title" && echo "o commit não pode ser vazio" && return 1
+    test -z "$commit_title" && echo "The commit title cannot be empty" && return 1
 
     if [ -z "$commit_body" ]; then
       git commit -a -m \""$commit_title"\"
@@ -107,7 +115,7 @@ g-commit-new() {
     fi
     git push -u origin "$current_branch"
   else
-    echo "Não há modificações a serem commitadas"
+    echo "Nothing to commit"
     return 0
   fi
 }
@@ -147,6 +155,44 @@ g-commit-squash-equals() {
 # comando padrão de listar as branchs locais
 alias gb="git branch"
 
+g-branch-switch() {
+
+  __is_cmd_installed fzf
+
+  # Atualiza a referências do repositório
+  g-fetch
+
+  # Get local branches and format with green color
+  local local_branches=$(git branch --format='%(refname:short) %(committerdate:relative)' | grep -v HEAD)
+  local formatted_local=$(echo "$local_branches" | sed -E "s/^([^ ]+)(.*)/${color_green}\1${color_reset}${color_blue}\2${color_reset}/")
+
+  # Get remote branches and format with red color for names and blue for dates
+  local remote_branches=$(git branch -r --format='%(refname:short) %(committerdate:relative)' | grep -v HEAD | grep "^origin/")
+  local formatted_remote=$(echo "$remote_branches" | sed -E "s/^([^ ]+)(.*)/${color_red}\1${color_reset}${color_blue}\2${color_reset}/")
+
+  # Combine the lists
+  all_branches=$(echo -e "${formatted_local}\n${formatted_remote}" | grep -v "^$")
+
+  # Select branch with FZF
+  branch=$(
+    echo "$all_branches" |
+      fzf --ansi --no-sort --height 40% --reverse --border rounded \
+        --preview 'branch_name=$(echo {} | sed -E "s/^[^a-zA-Z0-9_\/\-]*(([a-zA-Z0-9_\/\-]+)( .*)?)/\2/"); git log --oneline --date=short --color --pretty="format:%C(auto)%cd %h%d %s" $branch_name | head -n 20' \
+        --preview-window right:60% \
+        --prompt "Switch to branch: " |
+      sed -E 's/^[[:space:]]*([^ ]+).*/\1/' | # Extract just the branch name
+      sed -E 's/^origin\///'                  # Remove origin/ prefix if present
+  )
+
+  # Exit if no branch was selected
+  if [ -z "$branch" ]; then
+    echo "No branch selected. Exiting."
+    return 0
+  fi
+
+  git checkout "$branch"
+}
+
 # Deleta todas as branches locais, deixando só a current branch
 g-branches-clean() {
   local branches=$(git branch | grep -v '^\*' | awk '{print $1}')
@@ -158,6 +204,29 @@ g-branches-clean() {
 
   echo "🔄 Limpando referências remotas obsoletas..."
   git fetch --prune
+}
+
+# Usado para checkar se a minha branch corrente, existe no repositório ou não
+g-branch-check() {
+
+  __is_cmd_installed gum
+
+  local current_branch=$(git branch --show-current)
+
+  g-fetch
+
+  if git branch -r | grep -q "origin/${current_branch}"; then
+    echo "This branch $current_branch exists in the repository"
+  else
+    echo "This branch $current_branch doens't exists in the repository"
+    if gum confirm \
+      --prompt.foreground=2 \
+      --selected.background=2 \
+      --no-show-help \
+      "Clean up local branches?"; then
+      g-branch-default && g-branch-clean
+    fi
+  fi
 }
 
 # Volta para o default branch
@@ -173,8 +242,9 @@ g-branch-new() {
 
   __is_cmd_installed fzf
 
-  # atualiza o HEAD do repositório, e limpa as branchs locais, que não existem correspondente no remote
-  g-clean-branches
+  # faz o fetch pra atualizar as referências do repositório
+  g-fetch
+
   local branch_src
   local branch_new
   local commit_title
@@ -184,21 +254,21 @@ g-branch-new() {
   local default_branch=$(git rev-parse --abbrev-ref origin/HEAD | cut -d '/' -f2)
 
   # Menu: branch de origem
-  local options=("Default (${default_branch})" "outra")
+  local options=("Default (${default_branch})" "other")
   local branch_selected=$(printf "%s\n" "${options[@]}" | fzf \
-    --prompt="Selecione a branch de origem: " \
+    --prompt="Select a source branch: " \
     --height=20%)
 
-  if [ "$branch_selected" != "outra" ]; then
+  if [ "$branch_selected" != "other" ]; then
     branch_src="$default_branch"
   else
     remote_branches=$(git branch -r | grep -v "origin/HEAD" | sed "s/^ *//g" | sed "s|origin/||g" | fzf \
-      --prompt="Selecione a branch de origem: " \
+      --prompt="Select a source branch: " \
       --height=20%)
     branch_src="$remote_branches"
   fi
 
-  branch_new=$(gum input --cursor.foreground=4 --no-show-help --placeholder="Digite o nome da nova branch")
+  branch_new=$(gum input --cursor.foreground="$g1_color" --no-show-help --placeholder="Type the new branch name")
 
   git checkout "$branch_src"
   git pull
@@ -208,17 +278,16 @@ g-branch-new() {
   # - ! git diff --quiet : Verifica se há modificações "not staged"
   # - ! git diff --cached --quiet : Verifica se há modificações "staged"
   if ! git diff --quiet || ! git diff --cached --quiet; then
-    commit_title=$(gum input --cursor.foreground=4 --no-show-help --placeholder="Digite a mensagem do commit")
-    commit_body=$(gum write --cursor.foreground=4 --no-show-help --placeholder="Digite uma description pro commit")
+    commit_title=$(gum input --cursor.foreground="$g1_color" --no-show-help --placeholder="Type commit message")
+    commit_body=$(gum write --cursor.foreground="$g1_color" --no-show-help --placeholder="Type commit description")
 
-    test -z "$commit_title" && echo "o commit não pode ser vazio" && return 1
+    test -z "$commit_title" && echo "The commit cannot be empty" && return 1
 
     if [ -z "$commit_body" ]; then
       git commit -a -m \""$commit_title"\"
     else
       git commit -a -m \""$commit_title"\" -m \""$commit_body"\"
     fi
-    git push -u origin \""$branch_new"\"
 
     # TODO: usar o 'gum confirm' para perguntar, se quer abrir um MR ou não.
     # caso sim:
@@ -227,6 +296,8 @@ g-branch-new() {
     # caso não:
     # encerra o comando
   fi
+
+  git push origin -u "$branch_new"
 }
 
 # -------------------------------------------------------------------------------
