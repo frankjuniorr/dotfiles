@@ -54,7 +54,9 @@ d-ephemeral() {
   ubuntu:* | debian:*)
     init_cmd=(
       "apt-get update"
-      "apt-get install -y tzdata vim bash"
+      "apt-get install -y tzdata vim bash curl wget figlet"
+      "clear"
+      "figlet \"$image\""
       "exec bash"
     )
     env_vars=(
@@ -65,15 +67,20 @@ d-ephemeral() {
   archlinux:*)
     init_cmd=(
       "pacman -Syu --noconfirm"
-      "pacman -Sy --noconfirm vim bash"
+      "pacman -Sy --noconfirm vim bash curl wget figlet"
+      "clear"
+      "figlet \"$image\""
       "exec bash"
     )
     env_vars=()
     ;;
   rockylinux:* | centos:* | fedora:*)
     init_cmd=(
-      "dnf check-update || true"
-      "dnf install -y vim bash"
+      "dnf update -y"
+      "dnf install -y vim bash ncurses epel-release"
+      "dnf install -y figlet"
+      "clear"
+      "figlet \"$image\""
       "exec bash"
     )
     env_vars=()
@@ -81,7 +88,9 @@ d-ephemeral() {
   alpine:*)
     init_cmd=(
       "apk update"
-      "apk add vim bash"
+      "apk add vim bash curl wget figlet"
+      "clear"
+      "figlet \"$image\""
       "exec bash"
     )
     env_vars=()
