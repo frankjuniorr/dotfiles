@@ -136,6 +136,15 @@ refresh_shell() {
   source "$shell_file" >/dev/null && echo "shell refreshed"
 }
 
+# Função auxiliar, para todos os comandos
+__is_cmd_installed() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "$cmd is not installed. Please install it first."
+    return 1
+  fi
+}
+
 ################################################################################
 #  APT-GET ALIASES
 ################################################################################
