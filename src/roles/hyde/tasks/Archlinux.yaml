@@ -13,6 +13,7 @@
     - wtype
 
 - name: "HYDE | Install some AUR packages"
+  become: true
   ansible.builtin.shell: yay -S --needed --noconfirm {{ item }}
   loop:
     - visual-studio-code-bin
@@ -96,7 +97,7 @@
     - { src: "{{ role_path }}/files/windowrules.conf", dest: "{{ ansible_user_dir }}/.config/hypr/windowrules.conf" }
     - { src: "{{ role_path }}/files/hypridle.conf", dest: "{{ ansible_user_dir }}/.config/hypr/hypridle.conf" }
     - { src: "{{ role_path }}/files/kitty.conf", dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf" }
-    - { src: "{{ role_path }}/files/user.zshrc", dest: "{{ ansible_user_dir }}/.config/zsh/user.zshrc" }
+    - { src: "{{ role_path }}/files/user.zsh", dest: "{{ ansible_user_dir }}/.config/zsh/user.zsh" }
 
 # Change some environment variables
 - name: "HYDE | uncomment '$EDITOR' line"
