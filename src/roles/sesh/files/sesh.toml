@@ -6,7 +6,7 @@
 name = "Downloads folder"
 path = "~/Downloads"
 startup_command = "y ~/Downloads"
-preview_command = "lsd --long ~/Downloads/"
+preview_command = "lsd --tree --depth 2 ~/Downloads/"
 
 [[session]]
 name = "Dropbox folder"
