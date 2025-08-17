@@ -103,7 +103,7 @@ function arch_setup() {
   fi
 
   if ! pacman -Q python3 >/dev/null 2>&1; then
-    loading "Installing Python3" "sudo pacman -S --noconfirm python3"
+    loading "Installing Python3" "sudo pacman -S --noconfirm python3 python-virtualenv"
   fi
 
   if ! pacman -Q python-pip >/dev/null 2>&1; then

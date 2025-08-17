@@ -170,10 +170,28 @@ apt_get_fix() {
 # ----------------------------------------------------------------------
 # alias rápido que habilita um venv padrão no python
 python_enable_venv() {
-  if ! dpkg -s python3-venv >/dev/null 2>&1; then
-    echo "instale primeiro o pacote:"
-    echo "sudo apt install python3-venv"
-  fi
+
+  os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
+
+  case $os_name in
+  "Ubuntu")
+    if ! dpkg -s python3-venv >/dev/null 2>&1; then
+      echo "⚠️  Package 'python3-venv' is not installed."
+      echo "   Install it with:"
+      echo "   sudo apt install python3-venv"
+      return 1
+    fi
+    ;;
+  "Arch Linux")
+    if ! pacman -Qi python-virtualenv >/dev/null 2>&1; then
+      echo "⚠️  Package 'python-virtualenv' is not installed."
+      echo "   Install it with:"
+      echo "   sudo pacman -S python-virtualenv"
+      return 1
+    fi
+    ;;
+  esac
+
   python3 -m venv venv
   source venv/bin/activate
 }
