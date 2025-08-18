@@ -6,7 +6,7 @@
 # REPOSITORY
 # -------------------------------------------------------------------------------
 # Jump: got to git-root folder
-alias g-root="cd $(git rev-parse --show-toplevel)"
+alias g-root='cd "$(git rev-parse --show-toplevel)"'
 
 # My git repository commands
 alias g-repo="bash ~/.bin/git/git-repo.sh"
