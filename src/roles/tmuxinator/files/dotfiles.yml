@@ -9,3 +9,5 @@ windows:
       - clear && figlet -k -c -t "Dotfiles" 
   - git:
     - lazygit
+  - cmd:
+    - flow sync && flow browse --workspace dotfiles
