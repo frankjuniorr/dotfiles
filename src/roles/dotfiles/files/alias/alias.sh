@@ -39,3 +39,6 @@ alias path='echo $PATH | tr ":" "\n" | sort'
 
 # Mostra todas as interfaces de rede, highlighted, e de mais fácil visualização.
 alias ips='ip -c -br a'
+
+# Chama o binário do meu projeto Dotfiles de qualquer lugar do terminal, passando pelo flow
+alias dotfiles="flow run dotfiles/dotfiles "

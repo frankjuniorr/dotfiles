@@ -1,0 +1,15 @@
+
+visibility: public
+tags: [dotfiles]
+executables:
+
+  - verb: run
+    name: dotfiles
+    description: |
+      Execute my Dotfiles project binary
+    exec:
+      logMode: logfmt
+      params:
+        - prompt: What the Dotfiles role?
+          envKey: ROLE
+      file: bin/dotfiles

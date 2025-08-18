@@ -15,7 +15,7 @@ fi
 ############################################################
 path=(
     $path               # Keep existing PATH entries
-    $HOME/.bin/
+    # $HOME/.bin/
     $HOME/.local/bin
     $HOME/.krew/bin
     /usr/local/go/bin
