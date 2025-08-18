@@ -1,23 +1,25 @@
-#################################################################
-# Docker Functions
-#################################################################
+#!/bin/env bash
+
+set -e
+
+source ${HOME}/.bin/__utils.sh
 
 # função auxiliar que destrói todo o ambiente docker na máquina
 # ----------------------------------------------------------------------
-d-destroy() {
+destroy() {
   yes | docker system prune -a
   yes | docker volume prune
 }
 
 # Docker PS formatted to print only my most used fields
 # ----------------------------------------------------------------------
-d-ps() {
+ps() {
   docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Size}}"
 }
 
 # Entra no shell de um container docker que esteja em execução, de maneira interativa com fzf
 # ----------------------------------------------------------------------
-d-shell() {
+shell() {
   local container_name=$(docker ps --format "{{.Names}}" | fzf --height=20% --prompt="Selecione o container: ")
 
   # Se nenhum container foi selecionado, sai
@@ -31,7 +33,7 @@ d-shell() {
 }
 
 # ----------------------------------------------------------------------
-d-ephemeral() {
+ephemeral() {
   local docker_color="#0db7ed"
   local images=(
     "ubuntu:24.04"
@@ -117,7 +119,7 @@ d-ephemeral() {
 
 # Exibe o log um container docker que esteja em execução, de maneira interativa com fzf
 # ----------------------------------------------------------------------
-d-logs() {
+logs() {
   local container_name=$(docker ps --format "{{.Names}}" | fzf --height=20% --prompt="Selecione o container: ")
 
   # Se nenhum container foi selecionado, sai
@@ -129,3 +131,22 @@ d-logs() {
   # Executa o bash interativo no container selecionado
   docker logs "$container_name"
 }
+
+# --------------------------------------------------------------------------------------
+# MAIN
+# --------------------------------------------------------------------------------------
+
+# Menu
+options=("ps" "shell" "ephemeral" "logs" "destroy")
+result=$(printf "%s\n" "${options[@]}" | fzf \
+  --ansi \
+  --prompt="Git Commit: " \
+  --height=20%)
+
+case "$result" in
+"ps") ps ;;
+"shell") shell ;;
+"ephemeral") ephemeral ;;
+"logs") logs ;;
+"destroy") destroy ;;
+esac

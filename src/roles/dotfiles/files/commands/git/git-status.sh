@@ -31,10 +31,6 @@ result=$(printf "%s\n" "${options[@]}" | fzf \
   --height=20%)
 
 case "$result" in
-"Remove untracked")
-  remove_untracked
-  ;;
-"Clean")
-  status_clean
-  ;;
+"Remove untracked") remove_untracked ;;
+"Clean") status_clean ;;
 esac

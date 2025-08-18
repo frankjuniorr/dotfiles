@@ -8,8 +8,26 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
 
+
+- name: "DOTFILES | Refresh folders"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ scripts_installation_path }}"
+    - "{{ ansible_user_dir }}/.config/dotfiles/"
+
+
+- name: "DOTFILES | Ensure directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ scripts_installation_path }}"
+    - "{{ ansible_user_dir }}/.config/dotfiles/"
+
 - name: "DOTFILES | Create symbolic link for all alias"
-  # become: yes
   ansible.builtin.file:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.config/dotfiles/{{ item | basename }}"
@@ -18,16 +36,6 @@
   with_fileglob:
     - "{{ role_path }}/files/alias/*"
 
-- name: "DOTFILES | Refresh {{ scripts_installation_path }} folder"
-  ansible.builtin.file:
-    path: "{{ scripts_installation_path }}"
-    state: absent
-
-- name: "DOTFILES | Ensure {{ scripts_installation_path }} directory structure exists"
-  ansible.builtin.file:
-    path: "{{ scripts_installation_path }}"
-    mode: "0755"
-    state: directory
 
 - name: "DOTFILES | Ensure that all the commands have execution permission"
   ansible.builtin.file:

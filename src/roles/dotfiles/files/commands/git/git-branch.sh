@@ -161,19 +161,9 @@ result=$(printf "%s\n" "${options[@]}" | fzf \
   --height=20%)
 
 case "$result" in
-"Switch")
-  branch_switch
-  ;;
-"New")
-  branch_new
-  ;;
-"Check")
-  branch_check
-  ;;
-"Default")
-  branch_default
-  ;;
-"Clean")
-  branches_clean
-  ;;
+"Switch") branch_switch ;;
+"New") branch_new ;;
+"Check") branch_check ;;
+"Default") branch_default ;;
+"Clean") branches_clean ;;
 esac

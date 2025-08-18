@@ -62,22 +62,10 @@ result=$(printf "%s\n" "${options[@]}" | fzf \
   --height=20%)
 
 case "$result" in
-"Github Create")
-  bash ~/.bin/git/__gh-create.sh
-  ;;
-"Fetch")
-  fetch
-  ;;
-"Force pull")
-  force_pull
-  ;;
-"Clone")
-  clone
-  ;;
-"Repo name")
-  repository_name
-  ;;
-"Repo web")
-  repository_web
-  ;;
+"Github Create") bash ~/.bin/git/__gh-create.sh ;;
+"Fetch") fetch ;;
+"Force pull") force_pull ;;
+"Clone") clone ;;
+"Repo name") repository_name ;;
+"Repo web") repository_web ;;
 esac

@@ -42,3 +42,9 @@ alias ips='ip -c -br a'
 
 # Chama o binário do meu projeto Dotfiles de qualquer lugar do terminal, passando pelo flow
 alias dotfiles="flow run dotfiles/dotfiles "
+
+################################################################################
+# DOCKER ALIAS
+################################################################################
+# My cusom docker commands
+alias d-docker="bash ~/.bin/docker/docker.sh"

@@ -44,10 +44,6 @@ result=$(printf "%s\n" "${options[@]}" | fzf \
   --height=20%)
 
 case "$result" in
-"New branch from Tag")
-  new_branch_from_tag
-  ;;
-"Rename")
-  rename
-  ;;
+"New branch from Tag") new_branch_from_tag ;;
+"Rename") rename ;;
 esac

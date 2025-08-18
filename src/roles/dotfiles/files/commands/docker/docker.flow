@@ -1,0 +1,20 @@
+
+visibility: public
+namespace: docker
+tags: [docker]
+executables:
+
+  - verb: run
+    name: docker 
+    description: |
+      My Docker commands.
+      It shows docker custom commands.
+      commands avaliable:
+        - "ps" : show `docker ps` whith colunm order custom
+        - "shell" : Enter inside of some docker container
+        - "ephemeral" : start a ephemeral docker container
+        - "logs" : show logs for some docker container 
+        - "destroy" : destroy the docker environment 
+    exec:
+      logMode: text
+      file: docker.sh

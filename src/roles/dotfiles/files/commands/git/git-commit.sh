@@ -82,19 +82,9 @@ result=$(printf "%s\n" "${options[@]}" | fzf \
   --height=20%)
 
 case "$result" in
-"Undo")
-  undo
-  ;;
-"New")
-  new
-  ;;
-"Amend")
-  amend
-  ;;
-"Squash")
-  squash
-  ;;
-"Squash equals")
-  squash_equals
-  ;;
+"Undo") undo ;;
+"New") new ;;
+"Amend") amend ;;
+"Squash") squash ;;
+"Squash equals") squash_equals ;;
 esac
