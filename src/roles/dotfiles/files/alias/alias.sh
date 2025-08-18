@@ -43,6 +43,9 @@ alias ips='ip -c -br a'
 # Chama o binário do meu projeto Dotfiles de qualquer lugar do terminal, passando pelo flow
 alias dotfiles="flow run dotfiles/dotfiles "
 
+# Faz o upgrade completo do sistema
+alias upgrade="bash ~/.bin/upgrade"
+
 ################################################################################
 # DOCKER ALIAS
 ################################################################################
