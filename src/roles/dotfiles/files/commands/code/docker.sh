@@ -143,17 +143,25 @@ tui() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("ps" "shell" "ephemeral" "logs" "tui" "destroy")
+options=(
+  "📋 ps"
+  "🐳 shell"
+  "⚡ ephemeral"
+  "📜 logs"
+  "🎛️ tui"
+  "💥 destroy"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet Docker)" \
   --ansi \
-  --prompt="Docker: " \
+  --prompt="⚡ Docker: " \
   --height=20%)
 
 case "$result" in
-"ps") ps ;;
-"shell") shell ;;
-"ephemeral") ephemeral ;;
-"logs") logs ;;
-"tui") tui ;;
-"destroy") destroy ;;
+"📋 ps") ps ;;
+"🐳 shell") shell ;;
+"⚡ ephemeral") ephemeral ;;
+"📜 logs") logs ;;
+"🎛️ tui") tui ;;
+"💥 destroy") destroy ;;
 esac

@@ -24,13 +24,17 @@ remove_untracked() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("Remove untracked" "Clean")
+options=(
+  "🗑️ Remove untracked"
+  "🧹 Clean"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet Git Status)" \
   --ansi \
-  --prompt="Git Status: " \
+  --prompt="⚡ Git Status: " \
   --height=20%)
 
 case "$result" in
-"Remove untracked") remove_untracked ;;
-"Clean") status_clean ;;
+"🗑️ Remove untracked") remove_untracked ;;
+"🧹 Clean") status_clean ;;
 esac

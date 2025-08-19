@@ -26,14 +26,19 @@ list_devices() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("Restart" "List Devices" "Connect Headphone")
+options=(
+  "🔄 Restart"
+  "📋 List Devices"
+  "🎧 Connect Headphone"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet bluetooth)" \
   --ansi \
-  --prompt="Bluetooth: " \
+  --prompt="⚡ Bluetooth: " \
   --height=20%)
 
 case "$result" in
-"Restart") restart ;;
-"List Devices") list_devices ;;
-"Connect Headphone") connect_headphone ;;
+"🔄 Restart") restart ;;
+"📋 List Devices") list_devices ;;
+"🎧 Connect Headphone") connect_headphone ;;
 esac

@@ -45,27 +45,39 @@ repository_name() {
 
 # abre o repositório no browser
 repository_web() {
-  local repository_url=$(g-repository-name)
+  local repository_url=$(repository_name)
   repository_url=$(echo "$repository_url" | sed 's/gitlab@//g' | sed 's/git@//g' | sed 's/.git//g' | sed 's|:|/|g')
   google-chrome-stable "$repository_url"
 }
+
+#TODO: Criar uma função nova aqui que cria um repositório temporário private de laboratório no Github
+# O intuito aqui é fazer testes no git, e aí eu crio um repo para estudos.
+# Depois eu deleto. Se eu conseguir deletar por aqui, melhor ainda.
 
 # --------------------------------------------------------------------------------------
 # MAIN
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("Github Create" "Fetch" "Force pull" "Clone" "Repo name" "Repo web")
+options=(
+  "🚀 Github Create"
+  "⬇️ Fetch"
+  "⚡ Force pull"
+  "📥 Clone"
+  "📝 Repo name"
+  "🌐 Repo web"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet Git Repository)" \
   --ansi \
-  --prompt="Git Repository: " \
+  --prompt="⚡ Git Repository: " \
   --height=20%)
 
 case "$result" in
-"Github Create") bash ~/.bin/git/__gh-create.sh ;;
-"Fetch") fetch ;;
-"Force pull") force_pull ;;
-"Clone") clone ;;
-"Repo name") repository_name ;;
-"Repo web") repository_web ;;
+"🚀 Github Create") bash ~/.bin/git/__gh-create.sh ;;
+"⬇️ Fetch") fetch ;;
+"⚡ Force pull") force_pull ;;
+"📥 Clone") clone ;;
+"📝 Repo name") repository_name ;;
+"🌐 Repo web") repository_web ;;
 esac

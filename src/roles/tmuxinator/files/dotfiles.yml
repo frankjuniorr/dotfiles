@@ -10,4 +10,4 @@ windows:
   - git:
     - lazygit
   - cmd:
-    - flow sync && flow browse --workspace dotfiles
+    - flow browse --workspace dotfiles

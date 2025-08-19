@@ -75,16 +75,23 @@ squash_equals() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("Undo" "New" "Amend" "Squash" "Squash equals")
+options=(
+  "↩️ Undo"
+  "🆕 New"
+  "✏️ Amend"
+  "🗜️ Squash"
+  "⚖️ Squash equals"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet Git Commit)" \
   --ansi \
-  --prompt="Git Commit: " \
+  --prompt="⚡ Git Commit: " \
   --height=20%)
 
 case "$result" in
-"Undo") undo ;;
-"New") new ;;
-"Amend") amend ;;
-"Squash") squash ;;
-"Squash equals") squash_equals ;;
+"↩️ Undo") undo ;;
+"🆕 New") new ;;
+"✏️ Amend") amend ;;
+"🗜️ Squash") squash ;;
+"⚖️ Squash equals") squash_equals ;;
 esac

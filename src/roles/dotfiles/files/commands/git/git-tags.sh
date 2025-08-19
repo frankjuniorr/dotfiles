@@ -18,6 +18,8 @@ rename() {
   local old_tag="$1"
   local new_tag="$2"
 
+  #TODO: Remover essas validações, e adicionar um menu no 'fzf' para as tags existentes
+  # Depois, usa um 'gum input' para digitar o nome da tag nova
   test -z "$old_tag" && echo "digite a tag antiga no 1º parametro" && return 1
   test -z "$new_tag" && echo "digite a tag nova no 2º parametro" && return 1
 
@@ -37,13 +39,17 @@ rename() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("New branch from Tag" "Rename")
+options=(
+  "🌿 New branch from Tag"
+  "✏️ Rename"
+)
 result=$(printf "%s\n" "${options[@]}" | fzf \
+  --header="$(figlet Git Tag)" \
   --ansi \
-  --prompt="Git Tags: " \
+  --prompt="⚡ Git Tags: " \
   --height=20%)
 
 case "$result" in
-"New branch from Tag") new_branch_from_tag ;;
-"Rename") rename ;;
+"🌿 New branch from Tag") new_branch_from_tag ;;
+"✏️ Rename") rename ;;
 esac

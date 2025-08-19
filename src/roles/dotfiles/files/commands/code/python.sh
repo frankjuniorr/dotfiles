@@ -52,15 +52,23 @@ zen() {
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("Enable venv" "Disable venv" "Shell" "Zen")
-result=$(printf "%s\n" "${options[@]}" | fzf \
-  --ansi \
-  --prompt="Python: " \
-  --height=20%)
+options=(
+  "✅ Enable venv"
+  "❌ Disable venv"
+  "🐍 Shell"
+  "🧘 Zen"
+)
+result=$(
+  printf "%s\n" "${options[@]}" | fzf \
+    --header="$(figlet Python)" \
+    --ansi \
+    --prompt="⚡ Python: " \
+    --height=20%
+)
 
 case "$result" in
-"Enable venv") enable_venv ;;
-"Disable venv") disable_venv ;;
-"Shell") shell ;;
-"Zen") zen ;;
+"✅ Enable venv") enable_venv ;;
+"❌ Disable venv") disable_venv ;;
+"🐍 Shell") shell ;;
+"🧘 Zen") zen ;;
 esac
