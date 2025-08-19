@@ -1,6 +1,6 @@
-
 visibility: public
-tags: [dotfiles]
+namespace: dotfiles
+tags: ["dotfiles", "projects"]
 executables:
 
   - verb: run

@@ -140,7 +140,7 @@ logs() {
 options=("ps" "shell" "ephemeral" "logs" "destroy")
 result=$(printf "%s\n" "${options[@]}" | fzf \
   --ansi \
-  --prompt="Git Commit: " \
+  --prompt="Docker: " \
   --height=20%)
 
 case "$result" in

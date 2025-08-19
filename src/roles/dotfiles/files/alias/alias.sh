@@ -4,8 +4,6 @@
 # alias to get weather
 alias weather='curl pt.wttr.in'
 
-alias servers="sshs --config ~/.ssh/config"
-
 ################################################################################
 #  COMMAND SHADOWS
 ################################################################################
@@ -24,6 +22,7 @@ alias free="free -mth"
 
 # get and print folder size for all folders, recursively
 alias sizer='du -h -c'
+alias disk='ncdu'
 
 ################################################################################
 #  ALIAS AND FUNCTIONS ALIASES
@@ -50,4 +49,20 @@ alias upgrade="bash ~/.bin/upgrade"
 # DOCKER ALIAS
 ################################################################################
 # My cusom docker commands
-alias d-docker="bash ~/.bin/docker/docker.sh"
+alias docker-menu="bash ~/.bin/code/docker.sh"
+
+#################################################################
+# CODE
+#################################################################
+alias python-menu="bash ~/.bin/code/python.sh"
+
+#################################################################
+# SYSTEM
+#################################################################
+# My custom bluetooth commands
+alias bluetooth-menu="bash ~/.bin/system/bluetooth.sh"
+
+#################################################################
+# FLOW
+#################################################################
+alias flow-menu="bash ~/.bin/system/flow.sh"

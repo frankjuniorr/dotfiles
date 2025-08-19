@@ -136,15 +136,6 @@ refresh_shell() {
   source "$shell_file" >/dev/null && echo "shell refreshed"
 }
 
-# Função auxiliar, para todos os comandos
-__is_cmd_installed() {
-  local cmd="$1"
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "$cmd is not installed. Please install it first."
-    return 1
-  fi
-}
-
 ################################################################################
 #  APT-GET ALIASES
 ################################################################################
@@ -161,58 +152,4 @@ apt_get_fix() {
   sudo apt --fix-broken install
   sudo dpkg --configure -a
   echo "OK"
-}
-
-#################################################################
-# Python Functions
-#################################################################
-
-# ----------------------------------------------------------------------
-# alias rápido que habilita um venv padrão no python
-python_enable_venv() {
-
-  os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
-
-  case $os_name in
-  "Ubuntu")
-    if ! dpkg -s python3-venv >/dev/null 2>&1; then
-      echo "⚠️  Package 'python3-venv' is not installed."
-      echo "   Install it with:"
-      echo "   sudo apt install python3-venv"
-      return 1
-    fi
-    ;;
-  "Arch Linux")
-    if ! pacman -Qi python-virtualenv >/dev/null 2>&1; then
-      echo "⚠️  Package 'python-virtualenv' is not installed."
-      echo "   Install it with:"
-      echo "   sudo pacman -S python-virtualenv"
-      return 1
-    fi
-    ;;
-  esac
-
-  python3 -m venv venv
-  source venv/bin/activate
-}
-
-# ----------------------------------------------------------------------
-# alias rápido que desabilita um venv no python
-python_disable_venv() {
-  deactivate
-}
-
-#################################################################
-# BLUETOOTH
-#################################################################
-
-# ----------------------------------------------------------------------
-b-restart() {
-  sudo systemctl restart bluetooth.service
-}
-
-# ----------------------------------------------------------------------
-b-connect-headphone() {
-  local headphone_mac_address="FC:E8:06:8A:2E:F9"
-  bluetoothctl connect "$headphone_mac_address"
 }

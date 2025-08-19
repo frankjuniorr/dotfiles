@@ -1,6 +1,9 @@
 #################################################################
 # SSH Functions
 #################################################################
+
+alias servers="sshs --config ~/.ssh/config"
+
 ssh_create_new_key() {
   key_name=$1
   ssh_key_comment="$2"
