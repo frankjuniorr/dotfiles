@@ -16,7 +16,7 @@ alias g-repo="bash ~/.bin/git/git-repo.sh"
 # -------------------------------------------------------------------------------
 # olhe: http://opensource.apple.com/source/Git/Git-19/src/git-htmldocs/pretty-formats.txt
 # <hash> <date> <user name> <commit message>
-alias gl="bash ~/.bin/git/git-log.sh"
+alias g-logs="bash ~/.bin/git/git-log.sh"
 
 # -------------------------------------------------------------------------------
 # STATUS

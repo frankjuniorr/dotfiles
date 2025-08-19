@@ -110,8 +110,10 @@ ephemeral() {
 
   gum style --foreground="$docker_color" "$cmd_str"
 
+  local container_name=$(echo "$image" | cut -d ":" -f1)
   docker run --rm -it \
     -e TERM=xterm-256color \
+    --name "$container_name" \
     "${env_vars[@]}" \
     "$image" \
     sh -c "$cmd_str"
@@ -132,12 +134,16 @@ logs() {
   docker logs "$container_name"
 }
 
+tui() {
+  lazydocker
+}
+
 # --------------------------------------------------------------------------------------
 # MAIN
 # --------------------------------------------------------------------------------------
 
 # Menu
-options=("ps" "shell" "ephemeral" "logs" "destroy")
+options=("ps" "shell" "ephemeral" "logs" "tui" "destroy")
 result=$(printf "%s\n" "${options[@]}" | fzf \
   --ansi \
   --prompt="Docker: " \
@@ -148,5 +154,6 @@ case "$result" in
 "shell") shell ;;
 "ephemeral") ephemeral ;;
 "logs") logs ;;
+"tui") tui ;;
 "destroy") destroy ;;
 esac
