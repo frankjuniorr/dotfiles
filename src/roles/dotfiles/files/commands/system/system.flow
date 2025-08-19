@@ -1,0 +1,16 @@
+visibility: public
+namespace: system
+tags: [system]
+executables:
+
+  - verb: run
+    name: bluetooth-menu
+    description: |
+      My Bluettoth commands.
+      commands avaliable:
+        - "restart" : Restart the bluetooth daemon 
+        - "List Devices" : List all bluetooth devices connected 
+        - "Connected Headphone" : Connect my headphone on bluetooth by CLI 
+    exec:
+      logMode: text
+      file: bluetooth.sh
