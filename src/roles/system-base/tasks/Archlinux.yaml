@@ -22,6 +22,8 @@
     - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
     - gnome-calculator    # default Gnome Calculator
     - zip                 # for compact files
+    - unrar               # for compact files
+    - "duf"               # Better 'df' alternative
 
 # Because the tradicional package by `pacman` doesn't work on Wayland.
 - name: "{{ ansible_distribution }} | install AUR packages"
@@ -29,4 +31,3 @@
   loop:
     - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.
     - "ddcui"             # GUI to control brightness for external monitors
-    - "duf"               # Better 'df' alternative
