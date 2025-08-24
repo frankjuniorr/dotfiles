@@ -36,9 +36,6 @@ if [ -f "${FZF_BASE}/key-bindings.zsh" ]; then
 fi
 export FZF_DEFAULT_COMMAND="fd --type f --color=never"
 
-# Show fzf in fullscreen
-# export FZF_DEFAULT_OPTS="--height=100% --border=rounded --reverse"
-
 export FZF_DEFAULT_OPTS="
   --border rounded
   --border-label-pos center
@@ -47,9 +44,9 @@ export FZF_DEFAULT_OPTS="
   --prompt ' : '
   --pointer ''
   --marker '✓'
-  --preview-window 'right:65%'
+  --preview-window 'right:30%'
   --ansi
-  --tmux 90%"
+  --tmux 50%"
 
 # CTRL + T: call the fzf in current folder
 # with a preview by bat
@@ -62,4 +59,3 @@ export FZF_ALT_C_COMMAND="fd --type d . --color=never"
 export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -n 50'"
 
 source ~/.config/dotfiles/private-env.sh
-

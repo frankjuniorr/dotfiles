@@ -1,6 +1,7 @@
 ################################################################################
 #  GIT ALIAS
 ################################################################################
+alias jam-git="bash ${jam_bin} ${jam_project_folder}/menus/git/git.yaml"
 
 # -------------------------------------------------------------------------------
 # REPOSITORY
@@ -9,14 +10,14 @@
 alias g-root='cd "$(git rev-parse --show-toplevel)"'
 
 # My git repository commands
-alias g-repo="bash ~/.bin/git/git-repo.sh"
+alias jam-git-repo="bash ${jam_bin} ${jam_project_folder}/menus/git/git-repository/git-repository.yaml"
 
 # -------------------------------------------------------------------------------
 # LOGS
 # -------------------------------------------------------------------------------
 # olhe: http://opensource.apple.com/source/Git/Git-19/src/git-htmldocs/pretty-formats.txt
 # <hash> <date> <user name> <commit message>
-alias g-logs="bash ~/.bin/git/git-log.sh"
+alias jam-git-logs="bash ${jam_bin} ${jam_project_folder}/menus/git/git-logs/git-logs.yaml"
 
 # -------------------------------------------------------------------------------
 # STATUS
@@ -25,23 +26,23 @@ alias g-logs="bash ~/.bin/git/git-log.sh"
 alias gt='git status'
 
 # My git status commands
-alias g-status="bash ~/.bin/git/git-status.sh"
+alias jam-git-status="bash ${jam_bin} ${jam_project_folder}/menus/git/git-status/git-status.yaml"
 
 # -------------------------------------------------------------------------------
 # COMMIT
 # -------------------------------------------------------------------------------
 # My git commit commands
-alias g-commit="bash ~/.bin/git/git-commit.sh"
+alias jam-git-commit="bash ${jam_bin} ${jam_project_folder}/menus/git/git-commit/git-commit.yaml"
 
 # -------------------------------------------------------------------------------
 # BRANCHES
 # -------------------------------------------------------------------------------
 # comando padrão de listar as branchs locais
 alias gb="git branch"
-alias g-branch="bash ~/.bin/git/git-branch.sh"
+alias jam-git-branch="bash ${jam_bin} ${jam_project_folder}/menus/git/git-branch/git-branch.yaml"
 
 # -------------------------------------------------------------------------------
 # TAGS
 # -------------------------------------------------------------------------------
 # My git tags commands
-alias g-tag="bash ~/.bin/git/git-tags.sh"
+alias jam-git-tag="bash ${jam_bin} ${jam_project_folder}/menus/git/git-tag/git-tag.yaml"
