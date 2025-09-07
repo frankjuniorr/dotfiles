@@ -17,7 +17,7 @@ path=(
     $path               # Keep existing PATH entries
     $HOME/.local/bin
     $HOME/.krew/bin
-    /usr/local/go/bin
+    $HOME/go/bin
 )
 
 # Remove duplicate entries and non-existent directories

@@ -67,6 +67,7 @@ alias jam-python="bash ${jam_bin} ${jam_project_folder}/menus/code/python/python
 # My custom bluetooth commands
 alias jam-bluetooth="bash ${jam_bin} ${jam_project_folder}/menus/system/bluetooth/bluetooth.yaml"
 alias jam-system="bash ${jam_bin} ${jam_project_folder}/menus/system/system.yaml"
+alias jam-files="bash ${jam_bin} ${jam_project_folder}/menus/files/files.yaml"
 
 #################################################################
 # FLOW

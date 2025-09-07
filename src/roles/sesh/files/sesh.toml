@@ -3,19 +3,26 @@
 #############################################################
 
 [[session]]
-name = "Downloads folder"
+name = "Open Downloads folder"
 path = "~/Downloads"
 startup_command = "y ~/Downloads"
 preview_command = "lsd --tree --depth 2 ~/Downloads/"
 
+
 [[session]]
-name = "Dropbox folder"
+name = "Cockpit"
+path = "~"
+startup_command = "flow ls"
+preview_command = "bat --color always ~/.config/flow/config.yaml"
+
+[[session]]
+name = "Open Dropbox folder"
 path = "~/Dropbox"
 startup_command = "y ~/Dropbox"
 preview_command = "lsd --tree --depth 2 ~/Dropbox"
 
 [[session]]
-name = "Code folder"
+name = "Open Code folder"
 path = "~/Dropbox/code folder"
 startup_command = "y ~/Dropbox/code"
 preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
@@ -24,25 +31,37 @@ preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
 #  Folder or files open by $EDITOR (neovim)
 #############################################################
 [[session]]
-name = "tmuxinator config"
+name = "Open tmuxinator config"
 path = "~/.config/tmuxinator"
 startup_command = "nvim ."
 windows = [ "git" ]
 
+
 [[session]]
-name = "tmux config"
+name = "Open Alias config"
+path = "~/.config/dotfiles/"
+startup_command = "nvim ."
+
+
+[[session]]
+name = "Open HyDE"
+path = "~/HyDE/"
+startup_command = "nvim ."
+
+[[session]]
+name = "Open tmux config"
 path = "~/.config/tmux"
 startup_command = "nvim ."
 
 [[session]]
-name = "neovim config"
+name = "Open neovim config"
 path = "~/.config/nvim"
 startup_command = "nvim ."
 preview_command = "lsd --tree --depth 3 ~/.config/nvim"
 windows = [ "git" ]
 
 [[session]]
-name = "sesh config"
+name = "Open sesh config"
 path = "~/.config/sesh"
 startup_command = "nvim ~/.config/sesh/sesh.toml"
 preview_command = "bat --color=always ~/.config/sesh/sesh.toml"

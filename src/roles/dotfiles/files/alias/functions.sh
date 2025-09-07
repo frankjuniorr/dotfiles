@@ -38,7 +38,7 @@ copy() {
 
 # Função para colar do clipboard
 # ----------------------------------------------------------------------
-paste() {
+paste-cp() {
   if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-paste >/dev/null 2>&1; then
     wl-paste
   elif [ -n "$DISPLAY" ] && command -v xclip >/dev/null 2>&1; then
@@ -134,6 +134,26 @@ refresh_shell() {
   fi
 
   source "$shell_file" >/dev/null && echo "shell refreshed"
+}
+
+# alias para abrir uma folder interativamente com o `fzf`.
+# Ele procura por folders a partir do diretório corrente, exibe no menu interativo, e executa um 'cd' depois.
+# Justamente por causa do 'cd' que essa função não pode ficar no 'jam'
+# ----------------------------------------------------------------------
+open_folder() {
+  local fzf_options=()
+
+  local max_depth=10
+
+  local preview_cmd=("lsd --color always --tree --depth 2 {}")
+  fzf_options+=(--tmux "80%" --layout=reverse --cycle --preview-window right:60% --preview "${preview_cmd[@]}")
+  local selected_folder=$(fd --max-depth "$max_depth" --type directory | fzf "${fzf_options[@]}")
+
+  if [[ -n "$selected_folder" ]]; then
+    cd "$selected_folder"
+  else
+    echo "No file selected or search returned no results."
+  fi
 }
 
 ################################################################################
