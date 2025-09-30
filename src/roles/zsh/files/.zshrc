@@ -11,6 +11,8 @@ if which zoxide > /dev/null 2>&1 ;then
 fi
 
 
+
+
 # PATH
 ############################################################
 path=(
@@ -23,7 +25,6 @@ path=(
 # Remove duplicate entries and non-existent directories
 typeset -U path
 
-# TODO: Precisa mesmo dessa linha?
 export PATH
 
 
