@@ -44,7 +44,7 @@ default_roles:
 
   # Kubernetes tools
   - kubectl
-  - kind
+  - k3d
   - helm
   - kubecolor
   - k9s
@@ -66,10 +66,6 @@ go:
   packages:
     - package: github.com/spf13/cobra-cli@latest
       cmd: cobra-cli
-
-k8s:
-  kubectl_version: "v1.26"
-  kind_version: "v0.23.0"
 
 # fonts list used by me
 fonts_list:

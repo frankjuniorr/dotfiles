@@ -1,3 +1,0 @@
----
-- name: "KIND | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm kind"
