@@ -1,0 +1,6 @@
+---
+- name: "NAVI | Install"
+  become: true
+  community.general.pacman:
+    name: navi
+    state: present

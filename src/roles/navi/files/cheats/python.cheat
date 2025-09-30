@@ -1,0 +1,11 @@
+%  python
+
+# Enable venv
+python3 -m venv .venv
+source venv/bin/activate
+
+# Disable venv
+deactivate
+
+# 🧘‍♂️ Zen of Python
+python3 -c "import this"
