@@ -46,7 +46,7 @@ export FZF_DEFAULT_OPTS="
   --marker '✓'
   --preview-window 'right:30%'
   --ansi
-  --tmux 50%"
+  --tmux 90%"
 
 # CTRL + T: call the fzf in current folder
 # with a preview by bat
