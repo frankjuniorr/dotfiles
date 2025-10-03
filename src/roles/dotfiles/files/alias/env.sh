@@ -29,24 +29,10 @@ export LESS_TERMCAP_us=${bold_red}
 
 # FZF
 ############################################################
-export FZF_BASE="/home/${USER}/bin"
-
-if [ -f "${FZF_BASE}/key-bindings.zsh" ]; then
-  source "${FZF_BASE}/key-bindings.zsh"
+# Load FZF configs
+if [ -f ~/.config/dotfiles/__fzf_config.sh ]; then
+  source ~/.config/dotfiles/__fzf_config.sh
 fi
-export FZF_DEFAULT_COMMAND="fd --type f --color=never"
-
-export FZF_DEFAULT_OPTS="
-  --border rounded
-  --border-label-pos center
-  --layout reverse
-  --info right
-  --prompt ' : '
-  --pointer ''
-  --marker '✓'
-  --preview-window 'right:30%'
-  --ansi
-  --tmux 90%"
 
 # CTRL + T: call the fzf in current folder
 # with a preview by bat

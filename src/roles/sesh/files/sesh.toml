@@ -75,6 +75,14 @@ startup_command = "nvim ~/.config/navi/"
 preview_command = "lsd --tree --depth 2 ~/.config/navi"
 windows = [ "git" ]
 
+
+[[session]]
+name = "kitty config"
+path = "~/.config/kitty"
+startup_command = "nvim ~/.config/kitty/"
+preview_command = "bat --color=always ~/.config/kitty/kitty.conf"
+windows = [ "git" ]
+
 [[window]]
 name = "git"
 startup_script = "lazygit"
