@@ -33,6 +33,9 @@ docker network ls
 # List the running containers
 docker ps
 
+# List the running container, with specific format
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Size}}"
+
 # Delete all running and stopped containers
 docker rm -f $(docker ps -aq)
 

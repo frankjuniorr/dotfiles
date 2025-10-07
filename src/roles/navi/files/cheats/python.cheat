@@ -2,10 +2,13 @@
 
 # Enable venv
 python3 -m venv .venv
-source venv/bin/activate
+source .venv/bin/activate
 
 # Disable venv
 deactivate
+
+# Open Shell
+python3
 
 # 🧘‍♂️ Zen of Python
 python3 -c "import this"
