@@ -1,0 +1,17 @@
+%  bluetooth
+
+# Restart Bluetooth service
+sudo systemctl restart bluetooth.service
+
+# Connect Bluetooth Headphone
+bluetoothctl connect "<headphone_mac_address>"
+
+# List known devices
+bluetoothctl devices
+
+# Info about specific device
+device=$(bluetoothctl devices | gum filter --no-show-help --limit 1 --no-sort --fuzzy --placeholder 'choose a device'  --prompt='⚡ ') \
+device=$(echo "$device" | awk '{print $2}') \
+bluetoothctl info "$device"
+
+$ headphone_mac_address: echo "FC:E8:06:8A:2E:F9"

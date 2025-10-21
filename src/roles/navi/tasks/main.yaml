@@ -1,0 +1,36 @@
+---
+- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+  register: system_distribution_config
+  no_log: true
+
+- name: "System | Run Tasks: {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+  when: system_distribution_config.stat.exists
+  no_log: true
+
+
+- name: "NAVI | Refresh {{ ansible_user_dir }}/.config/navi folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/navi"
+    state: absent
+
+- name: "NAVI | Ensure navi directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config"
+    - "{{ ansible_user_dir }}/.config/navi"
+
+- name: "NAVI | Create symbolic links for configuration files"
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+    force: yes
+  loop:
+    - { src: "{{ role_path }}/files/config.yaml", dest: "{{ ansible_user_dir }}/.config/navi/config.yaml" }
+    - { src: "{{ role_path }}/files/cheats", dest: "{{ ansible_user_dir }}/.config/navi/cheats" }

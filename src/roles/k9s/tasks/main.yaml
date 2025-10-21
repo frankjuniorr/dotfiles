@@ -9,3 +9,25 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
+
+- name: "K9S | Refresh {{ ansible_user_dir }}/.config/k9s folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/k9s"
+    state: absent
+
+- name: "K9s | Ensure k9s directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_user_dir }}/.config"
+    - "{{ ansible_user_dir }}/.config/k9s"
+
+- name: "K9s | Copy k9s config files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_user_dir }}/.config/k9s"
+    state: link
+    force: yes
+

@@ -1,3 +1,6 @@
 ---
 - name: "DOCKER | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm docker"
+  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+  loop:
+    - "docker"
+    - "docker-compose"

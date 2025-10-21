@@ -1,6 +1,7 @@
 #!/bin/env bash
 
 cd ~/HyDE/Scripts || return
+git pull
 ./install.sh -r
 
 # remove some fastfetchs images
@@ -18,4 +19,4 @@ cd ~/HyDE/Scripts || return
 #     fi
 # done
 
-reboot
+# reboot

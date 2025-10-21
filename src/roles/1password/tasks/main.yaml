@@ -34,6 +34,6 @@
   # become: yes
   ansible.builtin.file:
     src: "{{ role_path }}/files/agent.toml"
-    dest: "{{ ansible_user_dir }}/.config/1password/ssh/agent.toml"
+    dest: "{{ ansible_user_dir }}/.config/1Password/ssh/agent.toml"
     state: link
     force: yes

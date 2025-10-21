@@ -17,15 +17,10 @@
       curl -fsSL https://install.duckdb.org | sh
     fi
 
-# ya pack -a Reledia/glow
-- name: "YAZI | install plugins if not already installed"
-  ansible.builtin.shell: |
-    if ! ya pack --list | grep -q "{{ item }}"; then
-      ya pack -a {{ item }}
-    fi
-  loop:
-    - "Reledia/glow"
-    - "wylie102/duckdb"
+- name: "YAZI | Refresh {{ ansible_user_dir }}/.config/yazi folder"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/yazi"
+    state: absent
 
 - name: "YAZI | Ensure {{ ansible_user_dir }}/.config/yazi directory structure exists"
   ansible.builtin.file:
@@ -35,10 +30,19 @@
 
 - name: "YAZI | Create config files symlinks"
   ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item | basename }}"
-    dest: "{{ ansible_user_dir }}/.config/yazi/{{ item | basename }}"
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_user_dir }}/.config/yazi"
     state: link
     mode: "0755"
     force: yes
-  with_fileglob:
-    - "{{ role_path }}/files/*"
+
+- name: "YAZI | install plugins if not already installed"
+  ansible.builtin.shell: |
+    if ! ya pack --list | grep -q "{{ item }}"; then
+      ya pack -a {{ item }}
+    fi
+  loop:
+    - "Reledia/glow"
+    - "wylie102/duckdb"
+
+

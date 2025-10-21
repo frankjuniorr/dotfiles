@@ -1,19 +1,88 @@
+#############################################################
+# Folders opened with by file manager (yazi)
+#############################################################
+
 [[session]]
-name = "Downloads"
+name = "Downloads folder"
 path = "~/Downloads"
-startup_command = "y"
+startup_command = "y ~/Downloads"
+preview_command = "lsd --tree --depth 2 ~/Downloads/"
+
 
 [[session]]
-name = "Dropbox"
+name = "Cockpit"
+path = "~"
+startup_command = "flow ls"
+preview_command = "bat --color always ~/.config/flow/config.yaml"
+
+[[session]]
+name = "Dropbox folder"
 path = "~/Dropbox"
-startup_command = "y"
+startup_command = "y ~/Dropbox"
+preview_command = "lsd --tree --depth 2 ~/Dropbox"
 
 [[session]]
-name = "Code"
-path = "~/Dropbox/code"
-startup_command = "y"
+name = "Code folder"
+path = "~/Dropbox/code folder"
+startup_command = "y ~/Dropbox/code"
+preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
 
+#############################################################
+#  Folder or files open by $EDITOR (neovim)
+#############################################################
 [[session]]
-name = "Tmuxinator"
+name = "tmuxinator config"
 path = "~/.config/tmuxinator"
-startup_command = "$EDITOR ."
+startup_command = "nvim ."
+windows = [ "git" ]
+
+
+[[session]]
+name = "Alias config"
+path = "~/.config/dotfiles/"
+startup_command = "nvim ."
+
+
+[[session]]
+name = "HyDE"
+path = "~/HyDE/"
+startup_command = "nvim ."
+
+[[session]]
+name = "tmux config"
+path = "~/.config/tmux"
+startup_command = "nvim ."
+
+[[session]]
+name = "neovim config"
+path = "~/.config/nvim"
+startup_command = "nvim ."
+preview_command = "lsd --tree --depth 3 ~/.config/nvim"
+windows = [ "git" ]
+
+[[session]]
+name = "sesh config"
+path = "~/.config/sesh"
+startup_command = "nvim ~/.config/sesh/sesh.toml"
+preview_command = "bat --color=always ~/.config/sesh/sesh.toml"
+windows = [ "git" ]
+
+
+[[session]]
+name = "navi config"
+path = "~/.config/navi"
+startup_command = "nvim ~/.config/navi/"
+preview_command = "lsd --tree --depth 2 ~/.config/navi"
+windows = [ "git" ]
+
+
+[[session]]
+name = "kitty config"
+path = "~/.config/kitty"
+startup_command = "nvim ~/.config/kitty/"
+preview_command = "bat --color=always ~/.config/kitty/kitty.conf"
+windows = [ "git" ]
+
+[[window]]
+name = "git"
+startup_script = "lazygit"

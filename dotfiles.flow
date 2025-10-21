@@ -1,0 +1,25 @@
+visibility: public
+namespace: dotfiles
+tags: ["dotfiles", "projects"]
+
+executables:
+
+  - verb: run
+    name: dotfiles
+    description: |
+      Execute my Dotfiles project binary
+    exec:
+      logMode: logfmt
+      params:
+        - prompt: What the Dotfiles role?
+          envKey: ROLE
+      file: bin/dotfiles
+
+
+  - verb: run
+    name: hyde-update
+    description: |
+      Update HyDE from my Dotfiles repo
+    exec:
+      logMode: logfmt
+      file: scripts/hyde-update.sh

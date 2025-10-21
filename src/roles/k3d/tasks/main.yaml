@@ -1,0 +1,15 @@
+---
+- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+  register: system_distribution_config
+  no_log: true
+
+- name: "System | Run Tasks: {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+  when: system_distribution_config.stat.exists
+  no_log: true
+
+
+- name: "K3D | Install"
+  ansible.builtin.shell: "wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash"

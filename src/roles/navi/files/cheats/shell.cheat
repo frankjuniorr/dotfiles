@@ -1,0 +1,22 @@
+%  search, fd
+
+# search file or directory insensitive-case
+fd <filename>
+
+# search a file on specific folder
+fd <filename> <specific_folder>
+
+# search on folders with specific name
+fd <search_folder> --type d
+
+# search on file with specific name
+fd <search_file> --type f
+
+# search for files with specific extension
+fd --extension <extension>
+
+# search to filename and execute a command of each one
+fd <filename> --exec <command>
+
+# search for all break symlinks in HOME
+find ~ -xtype l

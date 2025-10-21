@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function ubuntu_switch(){
+    local layout="$1"
+
+    case $layout in
+        "pt_br")
+            setxkbmap -model abnt2 -layout br -variant abnt2 -option "compose:ralt"
+            ;;
+        "us")
+            setxkbmap -model logitech_base -layout us -variant intl -option "compose:ralt"
+            ;;
+        *)
+            print_message "Unsupported Layout"
+            exit 1
+            ;;
+    esac
+}
+
+function arch_switch(){
+    local layout="$1"
+    local config_file="${HOME}/.config/hypr/userprefs.conf"
+    local original_file=$(readlink -f "$config_file")
+
+    case $layout in
+        "pt_br")
+            sed -i "s/keyboard-us/keyboard-${layout}/g" "$original_file"
+            ;;
+        "us")
+            sed -i "s/keyboard-pt_br/keyboard-${layout}/g" "$original_file"
+            ;;
+        *)
+            print_message "Unsupported Layout"
+            exit 1
+            ;;
+    esac
+}
+
+############################################################################
+# MAIN
+############################################################################
+os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
+
+layout=$(gum choose \
+        --header "Choose a layout?" \
+        --header.foreground=7 \
+		--cursor.foreground=1 \
+		--selected.foreground=1 \
+		--no-show-help \
+		"pt_br" "us")
+
+case $os_name in
+  "Ubuntu")
+    ubuntu_switch "$layout"
+    ;;
+  "Arch Linux")
+    arch_switch "$layout"
+    ;;
+  *)
+    print_message "Unsupported OS"
+    exit 1
+    ;;
+esac

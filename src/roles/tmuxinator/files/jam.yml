@@ -1,0 +1,14 @@
+name: jam
+root: /home/frank/Dropbox/code/01.github/projects/jam
+
+
+windows:
+  - code:
+      layout: 8799,171x68,0,0[171x53,0,0,31,171x14,0,54,33] 
+      panes:
+      - $EDITOR .
+      - clear && figlet -k -c -t "Jam" 
+  - git:
+    - lazygit
+  - cmd:
+    - flow browse --workspace jam

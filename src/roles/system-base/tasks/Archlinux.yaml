@@ -1,5 +1,5 @@
 ---
-- name: "{{ ansible_distribution }} | Install tools"
+- name: "{{ ansible_distribution }} | Install packages"
   become: true
   community.general.pacman:
     name: "{{ item }}"
@@ -22,13 +22,12 @@
     - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
     - gnome-calculator    # default Gnome Calculator
     - zip                 # for compact files
+    - unrar               # for compact files
+    - "duf"               # Better 'df' alternative
 
-# This installation takes a while because it compiles the source code.
-# But this package at least works.
 # Because the tradicional package by `pacman` doesn't work on Wayland.
-- name: "FLAMESHOT | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm flameshot-git"
-
-# GUI to control brightness for external monitors
-- name: "{{ ansible_distribution }} | Install tools"
-  ansible.builtin.shell: "yay -S --needed --noconfirm ddcui"
+- name: "{{ ansible_distribution }} | install AUR packages"
+  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+  loop:
+    - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.
+    - "ddcui"             # GUI to control brightness for external monitors

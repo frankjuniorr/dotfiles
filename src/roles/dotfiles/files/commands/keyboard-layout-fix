@@ -1,3 +1,0 @@
-#!/bin/bash
-
-setxkbmap -model logitech_base -layout us -variant intl -option "compose:ralt"
