@@ -146,7 +146,7 @@ open_folder() {
   local max_depth=10
 
   local preview_cmd=("lsd --color always --tree --depth 2 {}")
-  fzf_options+=(--tmux "80%" --layout=reverse --cycle --preview-window right:60% --preview "${preview_cmd[@]}")
+  local fzf_options+=(--tmux "80%" --layout=reverse --cycle --preview-window right:60% --preview "${preview_cmd[@]}")
   local selected_folder=$(fd --max-depth "$max_depth" --type directory | fzf "${fzf_options[@]}")
 
   if [[ -n "$selected_folder" ]]; then

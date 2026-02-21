@@ -10,7 +10,7 @@ alias jam="bash ${jam_bin}"
 
 # Ref: https://github.com/paulmillr/dotfiles/blob/master/home/.zshrc.sh
 # alias to get weather
-alias weather='curl pt.wttr.in'
+alias weather='curl pt.wttr.in/Caruaru'
 
 ################################################################################
 #  COMMAND SHADOWS
