@@ -156,6 +156,14 @@ open_folder() {
   fi
 }
 
+# Essa função é tão corrente que eu preferi criar um alias pra conectar o headphone.
+# Mas não tirei do Navi, existe lá também.
+connect-headphone() {
+  local headphone_mac_address="FC:E8:06:8A:2E:F9"
+
+  bluetoothctl connect "$headphone_mac_address"
+}
+
 ################################################################################
 #  APT-GET ALIASES
 ################################################################################
