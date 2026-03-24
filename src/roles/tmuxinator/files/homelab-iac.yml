@@ -9,3 +9,4 @@ windows:
       - clear && figlet -k -c -t "Homelab IaC" 
   - git: lazygit
   - servers: sshs --config ~/.ssh/config
+  - IA: gemini .
