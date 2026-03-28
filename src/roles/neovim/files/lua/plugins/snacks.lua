@@ -30,6 +30,7 @@ return {
 			sources = {
 				files = {
 					hidden = true, -- Ativa a visualização de arquivos ocultos
+					ignored = true, -- Ativa a visualização de arquivos ignorados pelo git
 				},
 			},
 		},
