@@ -1,11 +1,22 @@
 # "$schema" = 'https://starship.rs/config-schema.json'
+
+###########################################################
+# CONFIGURAÇÕES GERAIS
+###########################################################
+
+# Adiciona uma linha em branco entre os prompts
 add_newline = true 
+
+# Configuração do prompt principal (lado esquerdo)
 format = """\
-  󰣇 \
+  󰣇 ☯ \
   $directory\
   $git_branch$git_commit$git_state $git_status\
   $character\n
 """
+
+# Configuração do prompt à direita
+# Removi as duplicatas de $kotlin, $ocaml e $rlang
 right_format = """
 $singularity\
 $kubernetes\
@@ -63,48 +74,49 @@ $gcloud\
 $openstack\
 $azure\
 $cpp\
-$kotlin\
-$ocaml\
 $pixi\
-$rlang\
 $php\
 $crystal\
 $custom\
 $status\
 $os\
-$time"""
+$cmd_duration"""
 
+# Prompt que aparece quando você digita comandos multilinhas
 continuation_prompt = '▶▶ '
 
+###########################################################
+# CORE - MÓDULOS PRINCIPAIS
+###########################################################
 
-# style_choices:
-# bold
-# italic
-# underline
-# dimmed
-# inverted
-# blink
-# hidden
-# strikethrough
-# bg:<color>
-# fg:<color>
-# <color>
-# none
+# O símbolo do prompt (indica se o último comando falhou ou teve sucesso)
+[character]
+success_symbol = "[  ]($bold fg:#f8f8f2)"
+error_symbol = "[ ➤ ]($bold fg:#fb4934)"
+vicmd_symbol = "[❮](purple)"
 
-#NTOE: you can customize the symbol(s, e.g:
-# [character]
-# success_symbol = "[  ]($bold fg:#f8f8f2)"
-# error_symbol = "[ ➤ ]($bold fg:#fb4934)"
-
+# Configuração de exibição do diretório atual
 [directory]
+style = "blue"
+read_only = " "
 disabled = false
 format = "[$path](bold fg:#8be9fd)"
-truncate_to_repo = false
-# home_symbol = "" 
+truncate_to_repo = false # Não trunca o caminho ao entrar em um repositório git
+home_symbol = "" 
 
+# Substituições de nomes de pastas por ícones
+[directory.substitutions]
+'Documents' = '󰈙'
+'Downloads' = ' '
+'Music' = ' '
+'Pictures' = ' '
+"~/.config" = " "
+
+# Exibição da branch atual do Git
 [git_branch]
 format = " [  $branch](fg:#9198a1)"
 
+# Status do repositório Git (modificado, arquivos novos, etc)
 [git_status]
 ahead = '⇡${count}'
 behind = '⇣${count}'
@@ -112,11 +124,14 @@ diverged = '⇕⇡${ahead_count}⇣${behind_count}'
 format = '[[( $all_status$ahead_behind )](fg:#769ff0)]($style)'
 style = "bg:#394260"
 
+# Duração do último comando executado
+[cmd_duration]
+format = "[$duration]($style)"
+style = "yellow"
 
-[time]
-disabled = false
-format = '[[  $time ](fg:#a0a9cb )]($style)'
-time_format = "%R"                            # Hour:Minute Format
+###########################################################
+# LINGUAGENS E TECNOLOGIAS
+###########################################################
 
 [deno]
 format = " [deno](italic) [ ](green bold)"
@@ -157,12 +172,6 @@ format = " [sw](italic) [${symbol}]($style)"
 style = "bold bright-red"
 symbol = " "
 version_format = "${raw}"
-
-[aws]
-disabled = true
-format = " [aws](italic) [$symbol $profile $region]($style)"
-style = "bold blue"
-symbol = " "
 
 [buf]
 style = "bold bright-red"
@@ -224,7 +233,6 @@ style = "bold bright-cyan"
 format = " dart [$symbol]($style)"
 symbol = " "
 
-
 [elixir]
 style = "bold bright-yellow"
 format = " exs [$symbol OTP $otp_version ]($style)"
@@ -255,54 +263,24 @@ style = "bold bright-cyan"
 format = " jl [$symbol]($style)"
 symbol = "◎ "
 
-[memory_usage]
-style = "bold bright-cyan"
-format = " mem [${ram}( ${swap})]($style)"
-symbol = "▪▫▪ "
-
 [nim]
 style = "bold bright-yellow"
 format = " nim [$symbol]($style)"
 symbol = "▴▲▴ "
-
-[nix_shell]
-format = '[$symbol nix⎪$state⎪]($style) [$name](italic dimmed white)'
-impure_msg = '[⌽](bold dimmed red)'
-pure_msg = '[⌾](bold dimmed green)'
-style = 'bold italic dimmed blue'
-symbol = ' '
-unknown_msg = '[◌](bold dimmed ellow)'
 
 [spack]
 style = "bold bright-yellow"
 format = " spack [$symbol$environment]($style)"
 symbol = "◇ "
 
-
 [zig]
 style = "bold bright-yellow"
 format = " zig [$symbol]($style)"
 symbol = " "
 
-
 [scala]
 format = " scala [$symbol]($style)"
 symbol = " "
-
-[singularity]
-style = "bold bright-yellow"
-format = " [singularity](italic) [$symbol]($style)"
-symbol = "singularity "
-
-[kubernetes]
-style = "bold bright-cyan"
-format = " [kubernetes](italic) [$symbol]($style)"
-symbol = " "
-
-[vcsh]
-style = "bold bright-red"
-format = " [vcsh](italic) [$symbol]($style)"
-symbol = "vcsh "
 
 [cobol]
 style = "bold bright-yellow"
@@ -334,21 +312,6 @@ style = "bold bright-red"
 format = " [haxe](italic) [$symbol]($style)"
 symbol = " "
 
-[helm]
-style = "bold bright-yellow"
-format = " [helm](italic) [$symbol]($style)"
-symbol = "helm "
-
-[opa]
-style = "bold bright-cyan"
-format = " [opa](italic) [$symbol]($style)"
-symbol = "opa "
-
-[pulumi]
-format = " [pulumi](italic) [$symbol]($style)"
-style = "bold bright-red"
-symbol = "pulumi "
-
 [purescript]
 style = "bold bright-yellow"
 format = " [purescript](italic) [$symbol]($style)"
@@ -369,20 +332,24 @@ style = "bold bright-yellow"
 format = " [solidity](italic) [$symbol]($style)"
 symbol = " "
 
-[terraform]
-style = "bold bright-cyan"
-format = " [terraform](italic) [$symbol]($style)"
-symbol = "terraform "
-
 [vlang]
 format = " [vlang](italic) [$symbol]($style)"
 style = "bold bright-red"
 symbol = "vlang "
 
-[vagrant]
-format = " [vagrant](italic) [$symbol]($style)"
-style = "bold bright-yellow"
-symbol = "vagrant "
+[crystal]
+format = " [crystal](italic) [$symbol]($style)"
+style = "bold bright-cyan"
+symbol = " "
+
+###########################################################
+# CLOUD, CONTAINERS E INFRAESTRUTURA
+###########################################################
+
+[aws]
+format = " [aws](italic) [$symbol $profile $region]($style)"
+style = "bold blue"
+symbol = " "
 
 [gcloud]
 format = " [gcloud](italic) [$symbol]($style)"
@@ -399,7 +366,68 @@ format = " [azure](italic) [$symbol]($style)"
 style = "bold bright-yellow"
 symbol = " "
 
-[crystal]
-format = " [crystal](italic) [$symbol]($style)"
+[terraform]
 style = "bold bright-cyan"
-symbol = " "
+format = " [terraform](italic) [$symbol]($style)"
+symbol = "terraform "
+
+[kubernetes]
+disabled = true
+style = "bold bright-cyan"
+format = " [kubernetes](italic) [$symbol]($style)"
+symbol = " "
+
+[helm]
+style = "bold bright-yellow"
+format = " [helm](italic) [$symbol]($style)"
+symbol = "helm "
+
+[vagrant]
+format = " [vagrant](italic) [$symbol]($style)"
+style = "bold bright-yellow"
+symbol = "vagrant "
+
+[singularity]
+style = "bold bright-yellow"
+format = " [singularity](italic) [$symbol]($style)"
+symbol = "singularity "
+
+[opa]
+style = "bold bright-cyan"
+format = " [opa](italic) [$symbol]($style)"
+symbol = "opa "
+
+[pulumi]
+format = " [pulumi](italic) [$symbol]($style)"
+style = "bold bright-red"
+symbol = "pulumi "
+
+[vcsh]
+style = "bold bright-red"
+format = " [vcsh](italic) [$symbol]($style)"
+symbol = "vcsh "
+
+###########################################################
+# SISTEMA E MEMÓRIA
+###########################################################
+
+# Uso de memória RAM e Swap
+[memory_usage]
+style = "bold bright-cyan"
+format = " mem [${ram}( ${swap})]($style)"
+symbol = "▪▫▪ "
+
+# NOTA: O módulo [time] e [nix_shell] não estão no 'format' ou 'right_format'
+# Por isso, eles não aparecerão no terminal mesmo estando configurados aqui.
+[time]
+disabled = false
+format = '[[  $time ](fg:#a0a9cb )]($style)'
+time_format = "%R"
+
+[nix_shell]
+format = '[$symbol nix⎪$state⎪]($style) [$name](italic dimmed white)'
+impure_msg = '[⌽](bold dimmed red)'
+pure_msg = '[⌾](bold dimmed green)'
+style = 'bold italic dimmed blue'
+symbol = ' '
+unknown_msg = '[◌](bold dimmed ellow)'
