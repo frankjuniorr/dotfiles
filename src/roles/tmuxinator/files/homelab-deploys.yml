@@ -8,4 +8,4 @@ windows:
       - $EDITOR .
       - clear && figlet -k -c -t "Homelab Deploys" 
   - git: lazygit
-  - IA: gemini .
+  - IA: claude
