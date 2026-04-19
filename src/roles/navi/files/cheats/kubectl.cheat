@@ -1,0 +1,87 @@
+% ☸ kubectl
+
+# Get all pods (all namespaces)
+kubectl get pods -A
+
+# Get pods in namespace
+kubectl get pods -n <namespace>
+
+# Get pods with wide output
+kubectl get pods -n <namespace> -o wide
+
+# Describe a pod
+kubectl describe pod <pod_name> -n <namespace>
+
+# Get logs from pod
+kubectl logs <pod_name> -n <namespace>
+
+# Follow logs from pod
+kubectl logs -f <pod_name> -n <namespace>
+
+# Get logs from previous container instance
+kubectl logs <pod_name> -n <namespace> --previous
+
+# Exec into pod (bash)
+kubectl exec -it <pod_name> -n <namespace> -- bash
+
+# Exec into pod (sh)
+kubectl exec -it <pod_name> -n <namespace> -- sh
+
+# Get deployments
+kubectl get deployments -n <namespace>
+
+# Describe a deployment
+kubectl describe deployment <deployment_name> -n <namespace>
+
+# Scale a deployment
+kubectl scale deployment <deployment_name> -n <namespace> --replicas=<replicas>
+
+# Rollout restart deployment
+kubectl rollout restart deployment <deployment_name> -n <namespace>
+
+# Rollout status
+kubectl rollout status deployment <deployment_name> -n <namespace>
+
+# Get services
+kubectl get svc -n <namespace>
+
+# Get all resources in namespace
+kubectl get all -n <namespace>
+
+# Get nodes
+kubectl get nodes -o wide
+
+# Apply a manifest
+kubectl apply -f <manifest_file>
+
+# Delete from manifest
+kubectl delete -f <manifest_file>
+
+# Get events in namespace
+kubectl get events -n <namespace> --sort-by='.lastTimestamp'
+
+# Get resource usage (top pods)
+kubectl top pods -n <namespace>
+
+# Get resource usage (top nodes)
+kubectl top nodes
+
+# Port-forward to pod
+kubectl port-forward pod/<pod_name> <local_port>:<pod_port> -n <namespace>
+
+# Get configmaps
+kubectl get configmaps -n <namespace>
+
+# Get secrets
+kubectl get secrets -n <namespace>
+
+# Get persistent volume claims
+kubectl get pvc -n <namespace>
+
+$ namespace: kubectl get namespaces -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+$ pod_name: kubectl get pods -n <namespace> -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+$ deployment_name: kubectl get deployments -n <namespace> -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+$ replicas: echo -e "1\n2\n3\n5\n0"
+$ local_port: echo -e "8080\n3000\n5432\n6379\n9090"
+$ pod_port: echo -e "80\n8080\n3000\n5432\n6379"
+$ manifest_file: fd --extension yaml --extension yml .

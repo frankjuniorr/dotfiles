@@ -1,0 +1,36 @@
+% k3d
+
+# Create a cluster
+k3d cluster create <cluster_name>
+
+# Create a cluster with port mapping
+k3d cluster create <cluster_name> -p "<host_port>:<container_port>@loadbalancer"
+
+# Create a cluster with N agents
+k3d cluster create <cluster_name> --agents <agent_count>
+
+# List clusters
+k3d cluster list
+
+# Start a cluster
+k3d cluster start <cluster_name>
+
+# Stop a cluster
+k3d cluster stop <cluster_name>
+
+# Delete a cluster
+k3d cluster delete <cluster_name>
+
+# Get kubeconfig for cluster
+k3d kubeconfig get <cluster_name>
+
+# Merge kubeconfig into default
+k3d kubeconfig merge <cluster_name> --kubeconfig-merge-default
+
+# List nodes in cluster
+k3d node list
+
+$ cluster_name: k3d cluster list --no-headers -o json | jq -r '.[].name' 2>/dev/null || echo "mycluster"
+$ agent_count: echo -e "1\n2\n3"
+$ host_port: echo -e "8080\n80\n443"
+$ container_port: echo -e "80\n443\n8080"

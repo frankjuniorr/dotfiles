@@ -1,0 +1,48 @@
+% 🔎 ripgrep, rg
+
+# Search for pattern in current directory
+rg <pattern>
+
+# Search case-insensitive
+rg -i <pattern>
+
+# Search in specific directory
+rg <pattern> <directory>
+
+# Search only in specific file type
+rg <pattern> --type <filetype>
+
+# Search with context lines
+rg <pattern> -C <context_lines>
+
+# Search with lines before match
+rg <pattern> -B <before_lines>
+
+# Search with lines after match
+rg <pattern> -A <after_lines>
+
+# Search and show only filenames
+rg -l <pattern>
+
+# Count matches per file
+rg -c <pattern>
+
+# Search with word boundary
+rg -w <pattern>
+
+# Search and exclude directory
+rg <pattern> --glob '!<exclude_dir>/**'
+
+# Search for fixed string (no regex)
+rg -F <string>
+
+# Search hidden files too
+rg --hidden <pattern>
+
+# Search with multiline support
+rg -U <pattern>
+
+$ filetype: echo -e "py\njs\nts\ngo\nrs\nyaml\njson\nmd\nsh\ntf"
+$ context_lines: echo -e "2\n3\n5\n10"
+$ before_lines: echo -e "2\n3\n5"
+$ after_lines: echo -e "2\n3\n5"

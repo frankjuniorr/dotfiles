@@ -1,0 +1,44 @@
+% imagemagick
+
+# Trim transparent border and reset canvas offset
+magick <input> -trim +repage <output>
+
+# Rotate image by degrees
+magick <input> -rotate <degrees> <output>
+
+# Rotate image and fill background color
+magick <input> -background <background_color> -rotate <degrees> <output>
+
+# Auto-rotate based on EXIF orientation
+magick <input> -auto-orient <output>
+
+# Remove background color (replace with transparency)
+magick <input> -fuzz <fuzz_percent>% -transparent <color> <output>
+
+# Remove background using flood-fill (corner pixel as reference)
+magick <input> -fuzz <fuzz_percent>% -fill none -draw "color 0,0 floodfill" <output>
+
+# Resize image (maintain aspect ratio)
+magick <input> -resize <width>x<height> <output>
+
+# Resize image to exact dimensions (ignore aspect ratio)
+magick <input> -resize <width>x<height>! <output>
+
+# Convert format
+magick <input> <output>
+
+# Compress and optimize PNG
+magick <input> -strip -define png:compression-level=9 <output>
+
+# Convert to WebP
+magick <input> -quality <quality> <output>.webp
+
+$ input: fd --extension png --extension jpg --extension webp . --- --preview 'echo {}'
+$ output: echo "output.png"
+$ degrees: echo -e "90\n180\n270\n45\n-90\n-45"
+$ background_color: echo -e "white\nblack\nnone\n#ffffff\n#000000"
+$ color: echo -e "white\nblack\n#ffffff\n#000000"
+$ fuzz_percent: echo -e "10\n15\n20\n25\n5"
+$ quality: echo -e "80\n85\n90\n95\n75"
+$ width: echo -e "800\n1024\n1280\n1920\n512"
+$ height: echo -e "600\n768\n960\n1080\n512"

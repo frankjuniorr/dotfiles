@@ -1,0 +1,34 @@
+% 💾 disk, ncdu
+
+# Interactive disk usage in current directory
+ncdu
+
+# Interactive disk usage in specific directory
+ncdu <directory>
+
+# Interactive disk usage in home directory
+ncdu ~
+
+# Interactive disk usage excluding a directory
+ncdu <directory> --exclude <exclude_path>
+
+# Show disk usage of directory (human-readable)
+du -sh <directory>
+
+# Show disk usage of all subdirectories (sorted)
+du -sh <directory>/* | sort -h
+
+# Show top 10 largest directories
+du -ah <directory> | sort -rh | head -10
+
+# Show disk usage summary per top-level folder
+du -sh /*
+
+# Check free disk space
+df -h
+
+# Check disk space for specific filesystem
+df -h <directory>
+
+$ directory: echo -e ".\n~\n/\n/var\n/home\n/tmp"
+$ exclude_path: echo -e ".git\nnode_modules\n.cache"

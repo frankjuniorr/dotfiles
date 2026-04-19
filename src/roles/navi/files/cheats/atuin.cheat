@@ -1,0 +1,36 @@
+% 📜 atuin
+
+# Search shell history (interactive)
+atuin search
+
+# Search history with query
+atuin search <query>
+
+# Show history stats
+atuin stats
+
+# Show history stats for specific command
+atuin stats <command>
+
+# Sync history with remote
+atuin sync
+
+# Import history from shell
+atuin import auto
+
+# Import from zsh history
+atuin import zsh
+
+# Show last N entries
+atuin history list --limit <limit>
+
+# Show history for today
+atuin history list --after "today"
+
+# Login to atuin sync account
+atuin login
+
+# Logout from atuin sync account
+atuin logout
+
+$ limit: echo -e "10\n20\n50\n100"
