@@ -9,3 +9,4 @@ windows:
       - clear && figlet -k -c -t "Homelab Deploys" 
   - git: lazygit
   - IA: claude
+  - k9s: k9s
