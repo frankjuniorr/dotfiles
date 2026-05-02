@@ -37,6 +37,17 @@
     repo: https://github.com/tmux-plugins/tpm
     dest: "{{ ansible_user_dir }}/.config/tmux/plugins/tpm"
 
-- name: "Tmux | install plugins"
+- name: "Tmux | Install plugins via TPM"
   ansible.builtin.shell:
     cmd: "{{ ansible_user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
+
+- name: "Tmux | Install theme plugins"
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ ansible_user_dir }}/.config/tmux/plugins/{{ item.name }}"
+    update: yes
+  loop:
+    - { name: "tmux-everforest", repo: "https://github.com/TanglingTreats/tmux-everforest" }
+    - { name: "tmux",            repo: "https://github.com/catppuccin/tmux" }
+    - { name: "tmux-gruvbox",    repo: "https://github.com/egel/tmux-gruvbox" }
+    - { name: "nord-tmux",       repo: "https://github.com/arcticicestudio/nord-tmux" }
