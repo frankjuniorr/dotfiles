@@ -21,6 +21,7 @@ alias ld='lazydocker'
 
 alias mux='tmuxinator'
 alias tx='tmux'
+alias v='nvim'
 
 # alias pro 'free'
 # -m  - memória
@@ -31,6 +32,7 @@ alias free="free -mth"
 # get and print folder size for all folders, recursively
 alias sizer='du -h -c'
 alias disk='ncdu'
+alias http="xh"
 
 ################################################################################
 #  ALIAS AND FUNCTIONS ALIASES

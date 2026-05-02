@@ -101,6 +101,7 @@ else
   fd_cmd=(
     fd
     --type d
+    .
     "$base_dir"
     --max-depth "$max_depth"
     --exclude node_modules
