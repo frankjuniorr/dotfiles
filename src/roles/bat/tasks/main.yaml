@@ -9,3 +9,16 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
+
+- name: "BAT | Ensure ~/.config/bat exists"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/bat"
+    state: directory
+    mode: '0755'
+
+- name: "BAT | Symlink config"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config"
+    dest: "{{ ansible_user_dir }}/.config/bat/config"
+    state: link
+    force: true
