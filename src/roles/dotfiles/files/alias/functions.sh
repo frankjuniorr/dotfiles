@@ -154,6 +154,18 @@ ss() {
   source ~/.bin/ss.sh "$@"
 }
 
+# alias para ler um arquivo markdown, usando o `glow`
+mdview() {
+  local file="$1"
+
+  # Verifica se foi passado algo
+  if [[ -n "$file" && "$file" == *.md ]]; then
+    glow "$file"
+  else
+    glow
+  fi
+}
+
 # Essa função é tão corrente que eu preferi criar um alias pra conectar o headphone.
 # Mas não tirei do Navi, existe lá também.
 connect-headphone() {

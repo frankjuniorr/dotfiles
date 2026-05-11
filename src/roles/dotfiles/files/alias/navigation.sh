@@ -27,12 +27,26 @@ alias fgrep='fgrep --color=auto'
 # egrep padrão com cores automáticas
 alias egrep='egrep --color=auto'
 
-alias mkdir='mkdir -p'
-
 alias cat='bat'
 alias cd='z'
 cx() {
   cd "$@" && ls
+}
+
+mkx() {
+  local folder_name="$1"
+
+  if [ -z "$folder_name" ]; then
+    folder_name=$(gum input \
+      --cursor.foreground=2 \
+      --no-show-help \
+      --placeholder="Type the folder name")
+  fi
+
+  if [ ! -d "$folder_name" ]; then
+    mkdir "$folder_name"
+  fi
+  cx "$folder_name"
 }
 
 # FZF commands
