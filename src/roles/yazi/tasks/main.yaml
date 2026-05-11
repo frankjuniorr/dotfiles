@@ -38,8 +38,8 @@
 
 - name: "YAZI | install plugins if not already installed"
   ansible.builtin.shell: |
-    if ! ya pack --list | grep -q "{{ item }}"; then
-      ya pack -a {{ item }}
+    if ! ya pkg list 2>/dev/null | grep -q "{{ item }}"; then
+      ya pkg add {{ item }}
     fi
   loop:
     - "Reledia/glow"

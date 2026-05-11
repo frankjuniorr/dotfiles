@@ -17,4 +17,5 @@
     - glow        # Charm's utility to read Markdown (https://github.com/charmbracelet/glow)
     # - fzf
     # - zoxide
+    - ueberzugpp
     # - imagemagick

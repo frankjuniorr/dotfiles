@@ -1,8 +1,8 @@
-    -- DuckDB plugin configuration
+-- DuckDB plugin configuration
 require("duckdb"):setup({
-  mode = "standard",            -- Default: "summarized" (options: "standard"/"summarized")
-  cache_size = 1000,               -- Default: 500
-  row_id = false,                 -- Default: false (options: true/false/"dynamic")
-  minmax_column_width = 21,       -- Default: 21 (int)
-  column_fit_factor = 10.0       -- Default: 10.0 (float)
+  mode = "standard",
+  cache_size = 1000,
+  row_id = false,
+  minmax_column_width = 21,
+  column_fit_factor = 10.0
 })
