@@ -1,0 +1,21 @@
+---
+- name: "Tmuxinator | Refresh {{ ansible_facts.user_dir }}/.config/tmuxinator folder"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/tmuxinator"
+    state: absent
+
+- name: "Tmuxinator | Ensure tmuxinator directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/tmuxinator"
+
+- name: "Tmuxinator | Create symbolic links for configuration files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmuxinator"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmuxinator"
+    state: link
+    force: yes

@@ -1,0 +1,54 @@
+---
+- name: "Tmux | Stat ~/.config/tmux"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux"
+  register: tmux_config_stat
+
+- name: "Tmux | Remove symlink if ~/.config/tmux is a symlink"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux"
+    state: absent
+  when: tmux_config_stat.stat.islnk | default(false)
+
+- name: "Tmux | Ensure tmux config directory exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/tmux"
+    - "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
+
+- name: "Tmux | Create symbolic links for configuration files"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmux/{{ item }}"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/{{ item }}"
+    state: link
+    force: yes
+  loop:
+    - general.conf
+    - keybindings.conf
+    - plugins.conf
+    - themes.conf
+    - tmux.conf
+
+- name: "Tmux | Install TPM"
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm"
+
+- name: "Tmux | Install plugins via TPM"
+  ansible.builtin.shell:
+    cmd: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
+
+- name: "Tmux | Install theme plugins"
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/{{ item.name }}"
+    update: yes
+  loop:
+    - { name: "tmux-everforest", repo: "https://github.com/TanglingTreats/tmux-everforest" }
+    - { name: "tmux",            repo: "https://github.com/catppuccin/tmux" }
+    - { name: "tmux-gruvbox",    repo: "https://github.com/egel/tmux-gruvbox" }
+    - { name: "nord-tmux",       repo: "https://github.com/arcticicestudio/nord-tmux" }

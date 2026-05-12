@@ -1,3 +1,0 @@
----
-- name: "TMUXINATOR | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"

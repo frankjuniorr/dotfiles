@@ -1,6 +1,12 @@
 ---
-- name: "TMUX | Install"
+- name: "Tmux | Archlinux | Install tmux"
   become: true
   community.general.pacman:
     name: tmux
+    state: present
+
+- name: "Tmuxinator | Archlinux | Install tmuxinator"
+  community.general.pacman:
+    name: tmuxinator
+    executable: yay
     state: present
