@@ -10,6 +10,17 @@
     state: absent
   when: tmux_config_stat.stat.islnk | default(false)
 
+- name: "Tmux | Stat ~/.config/tmux/plugins"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
+  register: tmux_plugins_stat
+
+- name: "Tmux | Remove symlink if ~/.config/tmux/plugins is a symlink"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
+    state: absent
+  when: tmux_plugins_stat.stat.islnk | default(false)
+
 - name: "Tmux | Ensure tmux config directory exists"
   ansible.builtin.file:
     path: "{{ item }}"
