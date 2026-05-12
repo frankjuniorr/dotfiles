@@ -10,6 +10,11 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
+- name: "VIM | Link the config file"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/.vimrc"
+    dest: "{{ ansible_facts.user_dir }}/.vimrc"
+    state: link
 
 - name: "NEOVIM | Refresh {{ ansible_facts.user_dir }}/.config/nvim folder"
   ansible.builtin.file:

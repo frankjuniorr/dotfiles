@@ -1,3 +1,6 @@
 ---
-- name: "NEOVIM | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm neovim-git"
+- name: "NEOVIM | Install"
+  become: true
+  community.general.pacman:
+    name: neovim
+    state: present
