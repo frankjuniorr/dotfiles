@@ -4,7 +4,7 @@ set -e
 # Paths
 CONFIG_DIR="$HOME/.config/dotfiles"
 # This command return 'git-root' folder
-DOTFILES_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+DOTFILES_DIR=$(git -C "$(dirname "$(readlink -f "$0")")" rev-parse --show-toplevel)
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 DOTFILES_VERSION="v1.1.1"
 
@@ -12,7 +12,10 @@ DOTFILES_VERSION="v1.1.1"
 # If `$ROLE` doens't exists, get the `$1`
 TAG_NAME="${ROLE:-$1}"
 
-test -z "$TAG_NAME" && TAG_NAME='all'
+if [ -z "$TAG_NAME" ]; then
+  TAG_NAME=$(gum input --placeholder "all" --prompt "Role > ")
+  [ -z "$TAG_NAME" ] && TAG_NAME='all'
+fi
 
 function show_header() {
   clear
@@ -169,7 +172,7 @@ pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 update_ansible_galaxy
 
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --ask-become-pass -i hosts.ini "main.yml" --tags "$TAG_NAME"
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME"
 
 # shellcheck disable=SC2069
 popd 2>&1 >/dev/null
