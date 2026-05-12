@@ -69,19 +69,13 @@ import yaml
 from ansible import constants as C
 from ansible import context
 from ansible.executor.task_result import TaskResult
-from ansible.module_utils._text import to_text, to_bytes
-from ansible.module_utils.common._collections_compat import Mapping
-from ansible.parsing.utils.yaml import from_yaml
+from ansible.module_utils.common.text.converters import to_text, to_bytes
 from ansible.plugins.callback import CallbackBase
 from ansible.template import Templar
-from ansible.utils.color import colorize, hostcolor, stringc
+from ansible.utils.color import stringc
 from ansible.vars.clean import strip_internal_keys, module_response_deepcopy
-from ansible.vars.hostvars import HostVarsVars
 from collections import OrderedDict
-try:
-    from collections.abc import Sequence
-except:
-    from collections import Sequence
+from collections.abc import Mapping, Sequence
 from numbers import Number
 from os.path import basename, isdir
 from watchdog.observers import Observer
@@ -93,12 +87,13 @@ _symbol = {
     "failure": to_text("✘"),
     "dead": to_text("✝"),
     "yaml": to_text("🅨"),
-    "retry": to_text("️↻"),
+    "retry": to_text("↻"),
     "loop": to_text("∑"),
-    "arrow_right": to_text("➞"),
-    "skip": to_text("⤼"),
+    "arrow_right": to_text("→"),
+    "skip": to_text("○"),
     "flag": to_text("⚑"),
-}  # type: Dict[str,str]
+}
+  # type: Dict[str,str]
 """:obj:`dict` of :obj:`str` to :obj:`str`: A dictionary of symbols to be used
 when the Callback needs to display a symbol on the screen.
 """
@@ -562,8 +557,8 @@ class CallbackModule(CallbackBase, FileSystemEventHandler):
         """
         msg = "  ️%s Retrying... (%d of %d)" % (
             symbol("retry"),
-            result._result["attempts"],
-            result._result["retries"],
+            result._result.get("attempts", 0),
+            result._result.get("retries", 0),
         )
         if self._is_run_verbose(result, 2):
             # All result keys stating with _ansible_ are internal, so remove them from the result before we output anything.
@@ -596,6 +591,7 @@ class CallbackModule(CallbackBase, FileSystemEventHandler):
             class.
         """
         self._current_host = host
+        self.delegated_vars = None
 
     def v2_runner_on_ok(self, result):
         """Displays the result of a task run.
@@ -1046,8 +1042,9 @@ class CallbackModule(CallbackBase, FileSystemEventHandler):
         """
         task_host = to_text("{0}{1}").format(prefix, result._host.get_name())
         if self.delegated_vars:
+            delegated_host = self.delegated_vars.get("ansible_host", "unknown")
             task_host += to_text(" {0} {1}{2}").format(
-                symbol("arrow_right"), prefix, self.delegated_vars["ansible_host"]
+                symbol("arrow_right"), prefix, delegated_host
             )
         return task_host
 
@@ -1239,33 +1236,39 @@ class CallbackModule(CallbackBase, FileSystemEventHandler):
         score = 0.5
         var_manager = task.get_variable_manager()
         task_args = task.args
-        if task.when and var_manager:
-            all_hosts = CallbackModule.get_chainned_value(
-                var_manager.get_vars(), "hostvars"
-            )
-            play_task_vars = var_manager.get_vars(
-                play=self._current_play, host=self._current_host, task=task
-            )
-            templar = Templar(task._loader, variables=play_task_vars)
-            exception = False
-            for hostname in all_hosts.keys():
-                host_vars = CallbackModule.get_chainned_value(all_hosts, hostname)
-                host_vars.update(play_task_vars)
-                try:
-                    if not task.evaluate_conditional(templar, host_vars):
-                        score = 0.0
-                        break
-                except Exception as e:
-                    exception = True
-            else:
-                if not exception:
-                    score = 1.0
-        elif task.action == "debug" and task_args and "verbosity" in task_args:
-            score = (
-                1.0
-                if self._is_run_verbose(verbosity=int(task_args["verbosity"]))
-                else 0.0
-            )
+        try:
+            if task.when and var_manager:
+                all_hosts = CallbackModule.get_chainned_value(
+                    var_manager.get_vars(), "hostvars"
+                )
+                if all_hosts:
+                    play_task_vars = var_manager.get_vars(
+                        play=self._current_play, host=self._current_host, task=task
+                    )
+                    templar = Templar(task._loader, variables=play_task_vars)
+                    exception = False
+                    for hostname in all_hosts.keys():
+                        host_vars = CallbackModule.get_chainned_value(all_hosts, hostname)
+                        host_vars.update(play_task_vars)
+                        try:
+                            if not task.evaluate_conditional(templar, host_vars):
+                                score = 0.0
+                                break
+                        except Exception:
+                            exception = True
+                    else:
+                        if not exception:
+                            score = 1.0
+            elif task.action == "debug" and task_args and "verbosity" in task_args:
+                score = (
+                    1.0
+                    if self._is_run_verbose(verbosity=int(task_args["verbosity"]))
+                    else 0.0
+                )
+        except Exception:
+            # If anything fails during aesthetic evaluation, we fall back to 0.5 (unknown)
+            # to let Ansible handle it normally without crashing the plugin.
+            score = 0.5
         return score
 
     def _display_task_name(self, task, is_handler=False):
