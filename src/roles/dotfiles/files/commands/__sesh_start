@@ -13,10 +13,10 @@ fi
 # CTRL + f: find file
 # CTRL + d: delete tmux session
 sesh connect "$(
-  sesh list --icons --hide-duplicates | fzf --no-border \
+  sesh list --tmux --icons | fzf --no-border \
     --ansi \
     --list-border \
-    --no-sort --prompt '⚡  ' \
+    --no-sort --prompt '🪟  ' \
     --header '📌  ^A:All | ^T:Tmux | ^P:Tmuxinator | ^G:configs | ^X:zoxide' \
     --color 'list-border:6,input-border:3,preview-border:4,header-bg:-1,header-border:6' \
     --input-border \
