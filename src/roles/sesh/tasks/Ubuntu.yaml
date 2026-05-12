@@ -1,0 +1,59 @@
+---
+- name: "SESH | Get latest version"
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/joshmedeski/sesh/releases/latest
+    return_content: yes
+  register: sesh_release_info
+
+- name: "SESH | Extract version"
+  ansible.builtin.set_fact:
+    sesh_version: "{{ sesh_release_info.json.tag_name }}"
+
+- name: "SESH | Download binary"
+  ansible.builtin.get_url:
+    url: "https://github.com/joshmedeski/sesh/releases/download/{{ sesh_version }}/sesh_Linux_x86_64.tar.gz"
+    dest: /tmp/sesh.tar.gz
+    force: true
+
+- name: "SESH | Extract binary"
+  ansible.builtin.unarchive:
+    src: /tmp/sesh.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: "SESH | Install binary"
+  become: true
+  ansible.builtin.copy:
+    src: /tmp/sesh
+    dest: /usr/local/bin/sesh
+    mode: '0755'
+    force: true
+
+- name: "SESH | Cleanup"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/sesh.tar.gz
+    - /tmp/sesh
+
+- name: "SESH | Refresh ~/.config/sesh folder"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/sesh"
+    state: absent
+
+- name: "SESH | Ensure sesh directory structure exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/sesh"
+
+- name: "SESH | Symlink config"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files"
+    dest: "{{ ansible_facts.user_dir }}/.config/sesh"
+    state: link
+    force: yes

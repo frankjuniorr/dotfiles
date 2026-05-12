@@ -1,0 +1,67 @@
+---
+- name: "VIRT-MANAGER | Install packages"
+  become: yes
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - qemu-kvm
+    - qemu-utils
+    - libvirt-daemon-system
+    - libvirt-clients
+    - virt-manager
+    - virt-viewer
+    - ovmf
+    - dnsmasq
+    - swtpm
+    - libguestfs-tools
+    - libosinfo-bin
+    - bridge-utils
+
+- name: "VIRT-MANAGER | Ensure that images directory exists"
+  become: yes
+  ansible.builtin.file:
+    path: /var/lib/libvirt/images
+    state: directory
+    owner: "{{ host_user }}"
+    group: libvirt
+    mode: '0755'
+    recurse: yes
+
+- name: "VIRT-MANAGER | Ensure that service is up"
+  become: yes
+  ansible.builtin.service:
+    name: libvirtd.service
+    state: started
+    enabled: yes
+
+- name: "VIRT-MANAGER | Add user to libvirt and kvm groups"
+  become: yes
+  ansible.builtin.user:
+    name: "{{ host_user }}"
+    groups:
+      - libvirt
+      - kvm
+    append: yes
+
+- name: "VIRT-MANAGER | Check if default network already exists"
+  ansible.builtin.shell: "virsh net-list --all | grep -w 'default'"
+  register: default_net_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: "VIRT-MANAGER | Define default network"
+  ansible.builtin.shell: "virsh net-define {{ role_path }}/files/default-network.xml"
+  register: virsh_define
+  changed_when: virsh_define.rc == 0
+  when: default_net_check.rc != 0
+
+- name: "VIRT-MANAGER | Start and autostart default network"
+  ansible.builtin.command: "{{ item }}"
+  register: virsh_start
+  changed_when: virsh_start.rc == 0
+  when: default_net_check.rc != 0
+  loop:
+    - "virsh net-start default"
+    - "virsh net-autostart default"

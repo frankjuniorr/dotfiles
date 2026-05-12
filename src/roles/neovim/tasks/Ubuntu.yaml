@@ -1,6 +1,42 @@
 ---
-- name: "VIM | Install"
+- name: "NEOVIM | Install dependencies"
   become: true
   ansible.builtin.apt:
-    name: "vim"
+    name: "{{ item }}"
     state: present
+  loop:
+    - curl
+    - git
+    - xclip
+
+- name: "NEOVIM | Download tarball"
+  ansible.builtin.get_url:
+    url: "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+    dest: /tmp/nvim-linux-x86_64.tar.gz
+    force: true
+
+- name: "NEOVIM | Remove existing installation"
+  become: true
+  ansible.builtin.file:
+    path: /opt/nvim-linux-x86_64
+    state: absent
+
+- name: "NEOVIM | Extract tarball to /opt"
+  become: true
+  ansible.builtin.unarchive:
+    src: /tmp/nvim-linux-x86_64.tar.gz
+    dest: /opt/
+    remote_src: yes
+
+- name: "NEOVIM | Create symlink in /usr/local/bin"
+  become: true
+  ansible.builtin.file:
+    src: /opt/nvim-linux-x86_64/bin/nvim
+    dest: /usr/local/bin/nvim
+    state: link
+    force: true
+
+- name: "NEOVIM | Cleanup tarball"
+  ansible.builtin.file:
+    path: /tmp/nvim-linux-x86_64.tar.gz
+    state: absent

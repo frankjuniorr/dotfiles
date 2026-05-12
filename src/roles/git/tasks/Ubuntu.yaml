@@ -1,26 +1,26 @@
 ---
-- name: "Lazygit | et the latest LazyGit version"
+- name: "LAZYGIT | Get the latest version"
   ansible.builtin.uri:
     url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
     return_content: yes
   register: lazygit_release_info
 
-- name: "Lazygit | Extract LazyGit version from API response"
+- name: "LAZYGIT | Extract version from API response"
   ansible.builtin.set_fact:
     lazygit_version: "{{ lazygit_release_info.json.tag_name | regex_replace('^v', '') }}"
 
-- name: "Lazygit | Download LazyGit binary"
+- name: "LAZYGIT | Download binary"
   ansible.builtin.get_url:
     url: "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
     dest: /tmp/lazygit.tar.gz
 
-- name: "Lazygit | Extract LazyGit binary"
+- name: "LAZYGIT | Extract binary"
   ansible.builtin.unarchive:
     src: /tmp/lazygit.tar.gz
     dest: /tmp
     creates: /tmp/lazygit
 
-- name: "Lazygit | Install LazyGit binary"
+- name: "LAZYGIT | Install binary"
   become: true
   ansible.builtin.copy:
     src: /tmp/lazygit
@@ -30,11 +30,52 @@
     group: "{{ host_user }}"
     force: true
 
-- name: "Lazygit | Cleanup lazygit downloaded tar"
+- name: "LAZYGIT | Cleanup"
   become: true
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
-    - "/tmp/lazygit.tar.gz"
+    - /tmp/lazygit.tar.gz
     - /tmp/lazygit
+
+# --- git-delta ---
+- name: "GIT-DELTA | Install"
+  become: true
+  ansible.builtin.apt:
+    name: git-delta
+    state: present
+
+# --- meld ---
+- name: "MELD | Install"
+  become: true
+  ansible.builtin.apt:
+    name: meld
+    state: present
+
+# --- github-cli ---
+- name: "GH CLI | Add GPG key"
+  become: true
+  ansible.builtin.apt_key:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    keyring: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+    state: present
+
+- name: "GH CLI | Get system architecture"
+  ansible.builtin.command: dpkg --print-architecture
+  register: dpkg_architecture
+  changed_when: false
+
+- name: "GH CLI | Add repository"
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ dpkg_architecture.stdout }} signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    filename: github-cli
+    state: present
+
+- name: "GH CLI | Install"
+  become: true
+  ansible.builtin.apt:
+    name: gh
+    state: present
+    update_cache: yes
