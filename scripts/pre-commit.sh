@@ -35,6 +35,7 @@ ensure_scripts_executable() {
   chmod +x scripts/*.sh
   chmod +x bin/*
   chmod +x .git/hooks/pre-commit
+  chmod +x src/roles/dotfiles/files/commands/*
 }
 
 ensure_scripts_executable
