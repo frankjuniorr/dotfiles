@@ -1,0 +1,184 @@
+---
+# --- kubectl ---
+- name: "KUBECTL | Check if installed"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.env.HOME }}/.local/bin/kubectl"
+  register: kubectl_bin
+
+- name: "KUBECTL | Install"
+  when: not kubectl_bin.stat.exists
+  block:
+    - name: "KUBECTL | Get latest version"
+      ansible.builtin.uri:
+        url: https://dl.k8s.io/release/stable.txt
+        return_content: yes
+      register: kubectl_version
+
+    - name: "KUBECTL | Download to /tmp"
+      ansible.builtin.get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/amd64/kubectl"
+        dest: "/tmp/kubectl"
+        mode: '0755'
+
+    - name: "KUBECTL | Ensure ~/.local/bin exists"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.env.HOME }}/.local/bin"
+        state: directory
+        mode: '0755'
+
+    - name: "KUBECTL | Move to ~/.local/bin"
+      ansible.builtin.copy:
+        src: "/tmp/kubectl"
+        dest: "{{ ansible_facts.env.HOME }}/.local/bin/kubectl"
+        remote_src: yes
+        mode: '0755'
+
+# --- helm ---
+- name: "HELM | Check if installed"
+  ansible.builtin.stat:
+    path: "/usr/local/bin/helm"
+  register: helm_bin
+
+- name: "HELM | Install"
+  when: not helm_bin.stat.exists
+  block:
+    - name: "HELM | Get latest release"
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/helm/helm/releases/latest
+      register: helm_latest_version_json
+      changed_when: false
+
+    - name: "HELM | Set latest release fact"
+      ansible.builtin.set_fact:
+        helm_latest_release: "{{ helm_latest_version_json.json.tag_name }}"
+
+    - name: "HELM | Download tarball"
+      ansible.builtin.get_url:
+        url: "https://get.helm.sh/helm-{{ helm_latest_release }}-linux-amd64.tar.gz"
+        dest: /tmp/helm.tar.gz
+
+    - name: "HELM | Extract tarball"
+      ansible.builtin.unarchive:
+        src: /tmp/helm.tar.gz
+        dest: "/tmp"
+
+    - name: "HELM | Move to /usr/local/bin"
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/linux-amd64/helm"
+        dest: "/usr/local/bin"
+        mode: '0755'
+        remote_src: true
+
+    - name: "HELM | Cleanup"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/helm.tar.gz"
+        - "/tmp/linux-amd64"
+
+# --- k9s ---
+- name: "K9S | Get latest release"
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/derailed/k9s/releases/latest
+  register: k9s_latest_version_json
+  changed_when: false
+
+- name: "K9S | Set latest release fact"
+  ansible.builtin.set_fact:
+    k9s_latest_release: "{{ k9s_latest_version_json.json.tag_name }}"
+
+- name: "K9S | Get current installed version"
+  ansible.builtin.shell:
+    cmd: "/usr/local/bin/k9s version -s | grep -o 'v[0-9]*\\.[0-9]*\\.[0-9]*'"
+  register: current_k9s_version
+  changed_when: false
+  failed_when: false
+
+- name: "K9S | Install"
+  when: k9s_latest_release not in current_k9s_version.stdout|default('')
+  block:
+    - name: "K9S | Set archive filename"
+      ansible.builtin.set_fact:
+        k9s_file: "k9s_Linux_amd64"
+
+    - name: "K9S | Ensure clean download destination"
+      become: true
+      ansible.builtin.file:
+        path: "/tmp/{{ k9s_file }}.tar.gz"
+        state: absent
+
+    - name: "K9S | Download release"
+      ansible.builtin.get_url:
+        url: "https://github.com/derailed/k9s/releases/download/{{ k9s_latest_release }}/{{ k9s_file }}.tar.gz"
+        dest: /tmp/
+        mode: 0644
+        force: true
+      notify:
+        - Cleanup k9s downloaded tar
+
+    - name: "K9S | Ensure clean extraction destination"
+      become: true
+      ansible.builtin.file:
+        path: "/tmp/k9s"
+        state: absent
+
+    - name: "K9S | Extract tarball"
+      ansible.builtin.unarchive:
+        src: "/tmp/{{ k9s_file }}.tar.gz"
+        dest: /tmp
+
+    - name: "K9S | Remove current installation"
+      become: true
+      ansible.builtin.file:
+        path: /usr/local/bin/k9s
+        state: absent
+
+    - name: "K9S | Install binary"
+      become: true
+      ansible.builtin.copy:
+        remote_src: true
+        src: /tmp/k9s
+        dest: /usr/local/bin/
+        owner: "{{ host_user }}"
+        group: "{{ host_user }}"
+        force: true
+        mode: 0755
+      notify:
+        - Remove extracted k9s directory
+
+# --- kubecolor ---
+- name: "KUBECOLOR | Check if installed"
+  ansible.builtin.stat:
+    path: "/usr/local/bin/kubecolor"
+  register: kubecolor_bin
+
+- name: "KUBECOLOR | Install"
+  when: not kubecolor_bin.stat.exists
+  block:
+    - name: "KUBECOLOR | Get latest release"
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/kubecolor/kubecolor/releases/latest
+      register: kubecolor_latest_version_json
+      changed_when: false
+
+    - name: "KUBECOLOR | Set latest release fact"
+      ansible.builtin.set_fact:
+        kubecolor_latest_release: "{{ kubecolor_latest_version_json.json.tag_name | replace('v', '') }}"
+
+    - name: "KUBECOLOR | Download tarball"
+      ansible.builtin.get_url:
+        url: "https://github.com/kubecolor/kubecolor/releases/download/v{{ kubecolor_latest_release }}/kubecolor_{{ kubecolor_latest_release }}_linux_amd64.tar.gz"
+        dest: /tmp/kubecolor.tar.gz
+
+    - name: "KUBECOLOR | Extract to /usr/local/bin"
+      become: true
+      ansible.builtin.unarchive:
+        src: /tmp/kubecolor.tar.gz
+        dest: "/usr/local/bin"
+
+    - name: "KUBECOLOR | Cleanup"
+      ansible.builtin.file:
+        path: "/tmp/kubecolor.tar.gz"
+        state: absent

@@ -1,3 +1,0 @@
----
-- name: "KUBECOLOR | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm kubecolor"

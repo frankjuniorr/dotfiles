@@ -1,0 +1,43 @@
+---
+- name: "Kubernetes tools | Install kubectl, helm, k9s"
+  become: true
+  community.general.pacman:
+    name:
+      - kubectl
+      - helm
+      - k9s
+    state: present
+
+- name: "KUBECOLOR | Check if installed"
+  ansible.builtin.stat:
+    path: "/usr/local/bin/kubecolor"
+  register: kubecolor_bin
+
+- name: "KUBECOLOR | Install"
+  when: not kubecolor_bin.stat.exists
+  block:
+    - name: "KUBECOLOR | Get latest release"
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/kubecolor/kubecolor/releases/latest
+      register: kubecolor_latest_version_json
+      changed_when: false
+
+    - name: "KUBECOLOR | Set latest release fact"
+      ansible.builtin.set_fact:
+        kubecolor_latest_release: "{{ kubecolor_latest_version_json.json.tag_name | replace('v', '') }}"
+
+    - name: "KUBECOLOR | Download tarball"
+      ansible.builtin.get_url:
+        url: "https://github.com/kubecolor/kubecolor/releases/download/v{{ kubecolor_latest_release }}/kubecolor_{{ kubecolor_latest_release }}_linux_amd64.tar.gz"
+        dest: /tmp/kubecolor.tar.gz
+
+    - name: "KUBECOLOR | Extract to /usr/local/bin"
+      become: true
+      ansible.builtin.unarchive:
+        src: /tmp/kubecolor.tar.gz
+        dest: "/usr/local/bin"
+
+    - name: "KUBECOLOR | Cleanup"
+      ansible.builtin.file:
+        path: "/tmp/kubecolor.tar.gz"
+        state: absent
