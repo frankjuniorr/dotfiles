@@ -2,9 +2,9 @@
 - name: "SESH | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm sesh-bin"
 
-- name: "SESH | Refresh {{ ansible_user_dir }}/.config/sesh folder"
+- name: "SESH | Refresh {{ ansible_facts.user_dir }}/.config/sesh folder"
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/sesh"
+    path: "{{ ansible_facts.user_dir }}/.config/sesh"
     state: absent
 
 # Link the Config File
@@ -14,12 +14,12 @@
     mode: "0755"
     state: directory
   loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/sesh"
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/sesh"
 
 - name: "SESH | Copy sesh config"
   ansible.builtin.file:
     src: "{{ role_path }}/files"
-    dest: "{{ ansible_user_dir }}/.config/sesh"
+    dest: "{{ ansible_facts.user_dir }}/.config/sesh"
     state: link
     force: yes

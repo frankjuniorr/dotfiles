@@ -18,7 +18,7 @@
 - name: "1PASSWORD | Import 1Password GPG key"
   ansible.builtin.command: gpg --import /tmp/1password.asc
   args:
-    creates: "{{ ansible_env.HOME }}/.gnupg/pubring.kbx"
+    creates: "{{ ansible_facts.env.HOME }}/.gnupg/pubring.kbx"
 
 - name: "1PASSWORD | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"

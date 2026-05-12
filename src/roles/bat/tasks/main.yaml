@@ -1,24 +1,24 @@
 ---
-- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+- name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"
   ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+    path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
   register: system_distribution_config
   no_log: true
 
-- name: "System | Run Tasks: {{ ansible_distribution }}"
-  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+- name: "System | Run Tasks: {{ ansible_facts.distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
 
 - name: "BAT | Ensure ~/.config/bat exists"
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/bat"
+    path: "{{ ansible_facts.user_dir }}/.config/bat"
     state: directory
     mode: '0755'
 
 - name: "BAT | Symlink config"
   ansible.builtin.file:
     src: "{{ role_path }}/files/config"
-    dest: "{{ ansible_user_dir }}/.config/bat/config"
+    dest: "{{ ansible_facts.user_dir }}/.config/bat/config"
     state: link
     force: true

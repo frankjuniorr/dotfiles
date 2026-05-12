@@ -1,12 +1,12 @@
 ---
-- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+- name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"
   ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+    path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
   register: system_distribution_config
   no_log: true
 
-- name: "System | Run Tasks: {{ ansible_distribution }}"
-  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+- name: "System | Run Tasks: {{ ansible_facts.distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
 
@@ -28,13 +28,13 @@
     mode: "0755"
     state: directory
   loop:
-    - "{{ ansible_user_dir }}/.config/lazygit"
-    - "{{ ansible_user_dir }}/.config/git"
+    - "{{ ansible_facts.user_dir }}/.config/lazygit"
+    - "{{ ansible_facts.user_dir }}/.config/git"
 
 - name: "GIT | Copy the credential file"
   ansible.builtin.template:
     src: "git-credentials-personal.j2"
-    dest: "{{ ansible_user_dir }}/.config/git/.git-credentials-personal"
+    dest: "{{ ansible_facts.user_dir }}/.config/git/.git-credentials-personal"
   when: op_installed
 
 - name: "GIT | Create symbolic links"
@@ -44,6 +44,6 @@
     state: link
     force: yes
   loop:
-    - { src: "{{ role_path }}/files/config", dest: "{{ ansible_user_dir }}/.config/git/config" }
-    - { src: "{{ role_path }}/files/template", dest: "{{ ansible_user_dir }}/.config/git/template" }
-    - { src: "{{ role_path }}/files/config.yml", dest: "{{ ansible_user_dir }}/.config/lazygit/config.yml" }
+    - { src: "{{ role_path }}/files/config", dest: "{{ ansible_facts.user_dir }}/.config/git/config" }
+    - { src: "{{ role_path }}/files/template", dest: "{{ ansible_facts.user_dir }}/.config/git/template" }
+    - { src: "{{ role_path }}/files/config.yml", dest: "{{ ansible_facts.user_dir }}/.config/lazygit/config.yml" }

@@ -23,7 +23,7 @@
 #######################################################################################
 - name: "HYDE | Remove yay installation folder"
   ansible.builtin.file:
-   path: "{{ ansible_user_dir }}/Clone"
+   path: "{{ ansible_facts.user_dir }}/Clone"
    state: absent
 
 - name: "HYDE | Comment 'ILoveCandy' line if it exists"
@@ -53,13 +53,13 @@
     state: link
     force: true
   loop:
-    - { src: "{{ role_path }}/files/monitors_host.conf", dest: "{{ ansible_user_dir }}/.config/hypr/monitors_host.conf" }
-    - { src: "{{ role_path }}/files/monitors_vm.conf", dest: "{{ ansible_user_dir }}/.config/hypr/monitors_vm.conf" }
+    - { src: "{{ role_path }}/files/monitors_host.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors_host.conf" }
+    - { src: "{{ role_path }}/files/monitors_vm.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors_vm.conf" }
 
 - name: "HYDE | Copy the monitor file"
   ansible.builtin.template:
     src: "monitors.conf.j2"
-    dest: "{{ ansible_user_dir }}/.config/hypr/monitors.conf"
+    dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.conf"
     mode: "0644"
 
 # CONFIGURE KEYBOARDS
@@ -71,8 +71,8 @@
     state: link
     force: true
   loop:
-    - { src: "{{ role_path }}/files/keyboard-us.conf", dest: "{{ ansible_user_dir }}/.config/hypr/keyboard-us.conf" }
-    - { src: "{{ role_path }}/files/keyboard-pt_br.conf", dest: "{{ ansible_user_dir }}/.config/hypr/keyboard-pt_br.conf" }
+    - { src: "{{ role_path }}/files/keyboard-us.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/keyboard-us.conf" }
+    - { src: "{{ role_path }}/files/keyboard-pt_br.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/keyboard-pt_br.conf" }
 
 # CONFIGURE USER PREFERENCES
 #######################################################################################
@@ -83,8 +83,8 @@
     mode: "0755"
     state: directory
   loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/zsh"
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/zsh"
 
 - name: "HYDE | Create symbolic link for user preferences"
   ansible.builtin.file:
@@ -93,16 +93,16 @@
     state: link
     force: true
   loop:
-    - { src: "{{ role_path }}/files/userprefs.conf", dest: "{{ ansible_user_dir }}/.config/hypr/userprefs.conf" }
-    - { src: "{{ role_path }}/files/windowrules.conf", dest: "{{ ansible_user_dir }}/.config/hypr/windowrules.conf" }
-    - { src: "{{ role_path }}/files/hypridle.conf", dest: "{{ ansible_user_dir }}/.config/hypr/hypridle.conf" }
-    - { src: "{{ role_path }}/files/kitty.conf", dest: "{{ ansible_user_dir }}/.config/kitty/kitty.conf" }
-    - { src: "{{ role_path }}/files/user.zsh", dest: "{{ ansible_user_dir }}/.config/zsh/user.zsh" }
+    - { src: "{{ role_path }}/files/userprefs.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/userprefs.conf" }
+    - { src: "{{ role_path }}/files/windowrules.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/windowrules.conf" }
+    - { src: "{{ role_path }}/files/hypridle.conf", dest: "{{ ansible_facts.user_dir }}/.config/hypr/hypridle.conf" }
+    - { src: "{{ role_path }}/files/kitty.conf", dest: "{{ ansible_facts.user_dir }}/.config/kitty/kitty.conf" }
+    - { src: "{{ role_path }}/files/user.zsh", dest: "{{ ansible_facts.user_dir }}/.config/zsh/user.zsh" }
 
 # Change some environment variables
 - name: "HYDE | uncomment '$EDITOR' line"
   ansible.builtin.lineinfile:
-    path: "{{ ansible_user_dir }}/.config/hypr/hyde.conf"
+    path: "{{ ansible_facts.user_dir }}/.config/hypr/hyde.conf"
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
     backrefs: true
@@ -112,7 +112,7 @@
 
 - name: "HYDE | Remove some fastfecth logos"
   ansible.builtin.file:
-   path: "{{ ansible_user_dir }}/.config/fastfetch/logo/{{ item }}"
+   path: "{{ ansible_facts.user_dir }}/.config/fastfetch/logo/{{ item }}"
    state: absent
   loop:
     - "aisaka.icon"
@@ -124,7 +124,7 @@
   become_user: yes
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ ansible_user_dir }}/.config/fastfetch/logo/{{ item | basename }}"
+    dest: "{{ ansible_facts.user_dir }}/.config/fastfetch/logo/{{ item | basename }}"
     mode: '0644'
   with_fileglob:
     - "{{ role_path }}/files/fastfetch_icons/*"

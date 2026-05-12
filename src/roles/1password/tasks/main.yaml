@@ -1,25 +1,25 @@
 ---
-- name: "System | Checking for Distribution Config: {{ ansible_distribution }}"
+- name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"
   ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_distribution }}.yaml"
+    path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
   register: system_distribution_config
   no_log: true
 
-- name: "System | Run Tasks: {{ ansible_distribution }}"
-  ansible.builtin.include_tasks: "{{ ansible_distribution }}.yaml"
+- name: "System | Run Tasks: {{ ansible_facts.distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
 
 
-- name: "1PASSWORD | Ensure that {{ ansible_user_dir }}/.config/1password/ssh exists"
+- name: "1PASSWORD | Ensure that {{ ansible_facts.user_dir }}/.config/1password/ssh exists"
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: '0755'
   loop:
-    - "{{ ansible_user_dir }}/.config"
-    - "{{ ansible_user_dir }}/.config/1password"
-    - "{{ ansible_user_dir }}/.config/1password/ssh"
+    - "{{ ansible_facts.user_dir }}/.config"
+    - "{{ ansible_facts.user_dir }}/.config/1password"
+    - "{{ ansible_facts.user_dir }}/.config/1password/ssh"
 
 - name: "1PASSWORD | Update file /usr/share/applications/1password.desktop"
   become: true
@@ -34,6 +34,6 @@
   # become: yes
   ansible.builtin.file:
     src: "{{ role_path }}/files/agent.toml"
-    dest: "{{ ansible_user_dir }}/.config/1Password/ssh/agent.toml"
+    dest: "{{ ansible_facts.user_dir }}/.config/1Password/ssh/agent.toml"
     state: link
     force: yes

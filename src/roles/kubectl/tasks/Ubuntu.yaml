@@ -17,13 +17,13 @@
 
 - name: "KUBECTL | Ensure ~/.local/bin directory exists"
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.local/bin"
+    path: "{{ ansible_facts.env.HOME }}/.local/bin"
     state: directory
     mode: '0755'
 
 - name: "KUBECTL | Move kubectl to ~/.local/bin"
   ansible.builtin.copy:
     src: "/tmp/kubectl"
-    dest: "{{ ansible_env.HOME }}/.local/bin/kubectl"
+    dest: "{{ ansible_facts.env.HOME }}/.local/bin/kubectl"
     remote_src: yes
     mode: '0755'

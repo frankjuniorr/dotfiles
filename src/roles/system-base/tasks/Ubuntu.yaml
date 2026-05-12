@@ -1,5 +1,5 @@
 ---
-- name: "{{ ansible_distribution }} | Install extract packages"
+- name: "{{ ansible_facts.distribution }} | Install extract packages"
   become: true
   ansible.builtin.apt:
     name: "{{ item }}"
@@ -9,7 +9,7 @@
     - unzip
     - bzip2
 
-- name: "{{ ansible_distribution }} | Install important packages"
+- name: "{{ ansible_facts.distribution }} | Install important packages"
   become: true
   ansible.builtin.apt:
     name: "{{ item }}"
@@ -20,7 +20,7 @@
     - software-properties-common
     - build-essential
 
-- name: "{{ ansible_distribution }} | Install tools"
+- name: "{{ ansible_facts.distribution }} | Install tools"
   become: true
   ansible.builtin.apt:
     name: "{{ item }}"
@@ -42,16 +42,16 @@
 
 # This code block will throw an error inside the Docker container because the container doens't use systemd as the init system.
 # That's why the condition at the end is there. This code will only work inside the VM.
-- name: "{{ ansible_distribution }} | Keyboard config"
+- name: "{{ ansible_facts.distribution }} | Keyboard config"
   block:
-    - name: "{{ ansible_distribution }} | Check if Keyboard file exists"
+    - name: "{{ ansible_facts.distribution }} | Check if Keyboard file exists"
       become: true
       ansible.builtin.file:
         path: /etc/default/keyboard
         state: touch
       register: keyboard_file_status
 
-    - name: "{{ ansible_distribution }} | Check Keyboard config"
+    - name: "{{ ansible_facts.distribution }} | Check Keyboard config"
       become: true
       ansible.builtin.lineinfile:
         path: /etc/default/keyboard
@@ -65,19 +65,19 @@
         state: present
       register: keyboard_config_status
 
-    - name: "{{ ansible_distribution }} | Check if the system is using X11 or Wayland"
+    - name: "{{ ansible_facts.distribution }} | Check if the system is using X11 or Wayland"
       ansible.builtin.command: echo $XDG_SESSION_TYPE
       register: session_type
       changed_when: false
 
-    - name: "{{ ansible_distribution }} | Update keyboard configs for X11"
+    - name: "{{ ansible_facts.distribution }} | Update keyboard configs for X11"
       become: true
       ansible.builtin.shell: localectl set-x11-keymap us logitech_base intl "compose:ralt"
       when:
         - session_type.stdout == 'x11'
         - keyboard_file_status.changed or keyboard_config_status.changed
 
-    - name: "{{ ansible_distribution }} | Update keyboard configs for Wayland"
+    - name: "{{ ansible_facts.distribution }} | Update keyboard configs for Wayland"
       ansible.builtin.shell: |
         gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us+intl')]"
         gsettings set org.gnome.desktop.input-sources xkb-options "['compose:ralt']"
@@ -85,7 +85,7 @@
         - session_type.stdout == 'wayland'
         - keyboard_file_status.changed or keyboard_config_status.changed
 
-    - name: "{{ ansible_distribution }} | Restart keyboard service"
+    - name: "{{ ansible_facts.distribution }} | Restart keyboard service"
       become: true
       ansible.builtin.systemd:
         name: keyboard-setup.service
@@ -94,5 +94,5 @@
       when: keyboard_file_status.changed or keyboard_config_status.changed
   when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
 
-- name: "{{ ansible_distribution }} | Enable Dark Mode on Ubuntu"
+- name: "{{ ansible_facts.distribution }} | Enable Dark Mode on Ubuntu"
   ansible.builtin.shell: "gsettings set org.gnome.desktop.interface color-scheme prefer-dark"

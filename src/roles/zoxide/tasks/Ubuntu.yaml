@@ -1,5 +1,5 @@
 ---
-- name: "Zoxide | {{ ansible_distribution }} | Install zoxide"
+- name: "Zoxide | {{ ansible_facts.distribution }} | Install zoxide"
   ansible.builtin.apt:
     name: zoxide
     state: present

@@ -2,20 +2,20 @@
 - name: "TFENV | Clone repository to tfenv"
   ansible.builtin.git:
     repo: https://github.com/tfutils/tfenv.git
-    dest: "{{ ansible_env.HOME }}/.tfenv"
+    dest: "{{ ansible_facts.env.HOME }}/.tfenv"
     depth: 1
 
 - name: "TFENV | Create directory ~/.local/bin"
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.local/bin"
+    path: "{{ ansible_facts.env.HOME }}/.local/bin"
     state: directory
     mode: '0755'
 
 - name: "TFENV | Create symlinks to tfenv"
   ansible.builtin.file:
     src: "{{ item }}"
-    dest: "{{ ansible_env.HOME }}/.local/bin/{{ item | basename }}"
+    dest: "{{ ansible_facts.env.HOME }}/.local/bin/{{ item | basename }}"
     state: link
     force: yes
   with_fileglob:
-    - "{{ ansible_env.HOME }}/.tfenv/bin/*"
+    - "{{ ansible_facts.env.HOME }}/.tfenv/bin/*"

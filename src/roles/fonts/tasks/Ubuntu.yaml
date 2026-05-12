@@ -3,14 +3,14 @@
 ########################################################################################
 - name: "Fonts | Ensure font directory exists"
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.local/share/fonts"
+    path: "{{ ansible_facts.user_dir }}/.local/share/fonts"
     state: directory
     mode: '0755'
 
 - name: "Fonts | Download fonts if not already present"
   ansible.builtin.get_url:
     url: "{{ item }}"
-    dest: "{{ ansible_user_dir }}/.local/share/fonts/{{ item.split('/')[-1] }}"
+    dest: "{{ ansible_facts.user_dir }}/.local/share/fonts/{{ item.split('/')[-1] }}"
   loop: "{{ fonts_list }}"
 
 - name: "Fonts | Install dependencies"

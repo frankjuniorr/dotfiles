@@ -1,5 +1,5 @@
 ---
-- name: "{{ ansible_distribution }} | Install packages"
+- name: "{{ ansible_facts.distribution }} | Install packages"
   become: true
   community.general.pacman:
     name: "{{ item }}"
@@ -26,7 +26,7 @@
     - "duf"               # Better 'df' alternative
 
 # Because the tradicional package by `pacman` doesn't work on Wayland.
-- name: "{{ ansible_distribution }} | install AUR packages"
+- name: "{{ ansible_facts.distribution }} | install AUR packages"
   ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
   loop:
     - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.

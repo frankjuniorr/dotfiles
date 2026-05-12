@@ -1,13 +1,13 @@
 ---
 - name: "Solaar | Check if udev rules file exists"
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules"
+    path: "{{ ansible_facts.user_dir }}/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules"
   register: udev_rules_file
 
 - name: "Solaar | Copy udev rules"
   become_user: yes
   ansible.builtin.copy:
-    src: "{{ ansible_user_dir }}/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules"
+    src: "{{ ansible_facts.user_dir }}/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules"
     dest: /etc/udev/rules.d/42-logitech-unify-permissions.rules
     owner: root
     group: root
