@@ -1,4 +1,5 @@
 src/roles/tmux/files/plugins
+src/roles/tmux/files/tmux/plugins
 src/roles/yazi/files/plugins
 src/roles/yazi/files/package.toml
 

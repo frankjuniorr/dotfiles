@@ -1,8 +1,8 @@
 ---
 
 # Default local Installations paths
-primary_installation_path: "{{ ansible_user_dir }}/.local/bin"
-scripts_installation_path: "{{ ansible_user_dir }}/.bin"
+primary_installation_path: "{{ ansible_facts.user_dir }}/.local/bin"
+scripts_installation_path: "{{ ansible_facts.user_dir }}/.bin"
 
 default_roles:
   - system-base
@@ -31,7 +31,6 @@ default_roles:
   - terminal
   - zsh
   - tmux
-  - tmuxinator
 
   # utilities to connect Logitech devices
   - solaar
