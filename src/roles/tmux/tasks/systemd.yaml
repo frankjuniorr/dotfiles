@@ -1,0 +1,20 @@
+---
+- name: "Tmuxinator | Ensure systemd user directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/systemd/user"
+    mode: "0755"
+    state: directory
+
+- name: "Tmuxinator | Symlink tmuxinator-sessions service"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/systemd/tmuxinator-sessions.service"
+    dest: "{{ ansible_facts.user_dir }}/.config/systemd/user/tmuxinator-sessions.service"
+    state: link
+    force: yes
+
+- name: "Tmuxinator | Enable tmuxinator-sessions service"
+  ansible.builtin.systemd:
+    name: tmuxinator-sessions.service
+    enabled: yes
+    scope: user
+    daemon_reload: yes

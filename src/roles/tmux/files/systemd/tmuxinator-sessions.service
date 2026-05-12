@@ -1,0 +1,11 @@
+[Unit]
+Description=Start detached tmuxinator sessions on login
+After=default.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=%h/.bin/__tmuxinator_start
+
+[Install]
+WantedBy=default.target

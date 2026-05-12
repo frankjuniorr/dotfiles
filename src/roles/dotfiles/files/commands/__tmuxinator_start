@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+sessions=(
+  dotfiles
+  homelab-iac
+  homelab-deploys
+)
+
+for session in "${sessions[@]}"; do
+  if ! tmux has-session -t "$session" 2>/dev/null; then
+    tmuxinator start "$session" --no-attach
+  fi
+done

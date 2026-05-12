@@ -15,3 +15,6 @@
 
 - name: "Tmux | Run tmuxinator tasks"
   ansible.builtin.include_tasks: tmuxinator.yaml
+
+- name: "Tmux | Run systemd user service tasks"
+  ansible.builtin.include_tasks: systemd.yaml
