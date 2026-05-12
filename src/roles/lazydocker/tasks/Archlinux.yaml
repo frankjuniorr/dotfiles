@@ -1,3 +1,0 @@
----
-- name: "LAZYDOCKER | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm lazydocker"

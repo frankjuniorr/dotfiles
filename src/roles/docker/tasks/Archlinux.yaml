@@ -1,6 +1,11 @@
 ---
-- name: "DOCKER | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
-  loop:
-    - "docker"
-    - "docker-compose"
+- name: "DOCKER | Install docker, docker-compose"
+  become: true
+  community.general.pacman:
+    name:
+      - docker
+      - docker-compose
+    state: present
+
+- name: "LAZYDOCKER | Install"
+  ansible.builtin.shell: "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash"
