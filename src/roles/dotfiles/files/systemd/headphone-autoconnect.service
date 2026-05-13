@@ -1,0 +1,12 @@
+[Unit]
+Description=Auto-connect headphone on login
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=%h/.bin/__headphone_connect
+Restart=on-failure
+RestartSec=15
+
+[Install]
+WantedBy=default.target

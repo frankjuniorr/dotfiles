@@ -75,3 +75,23 @@
     src: "private-env.sh.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/dotfiles/private-env.sh"
   when: op_installed
+
+- name: "DOTFILES | Ensure systemd user directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/systemd/user"
+    mode: "0755"
+    state: directory
+
+- name: "DOTFILES | Symlink headphone-autoconnect service"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/systemd/headphone-autoconnect.service"
+    dest: "{{ ansible_facts.user_dir }}/.config/systemd/user/headphone-autoconnect.service"
+    state: link
+    force: yes
+
+- name: "DOTFILES | Enable headphone-autoconnect service"
+  ansible.builtin.systemd:
+    name: headphone-autoconnect.service
+    enabled: yes
+    scope: user
+    daemon_reload: yes

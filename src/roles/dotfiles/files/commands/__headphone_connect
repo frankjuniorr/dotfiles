@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+HEADPHONE_MAC="FC:E8:06:8A:2E:F9"
+RETRY_INTERVAL=8
+
+# wait for bluetooth daemon before attempting anything
+until systemctl is-active --quiet bluetooth 2>/dev/null; do
+    sleep 3
+done
+
+while true; do
+    if bluetoothctl info "$HEADPHONE_MAC" | grep -q "Connected: yes"; then
+        exit 0
+    fi
+
+    result=$(bluetoothctl connect "$HEADPHONE_MAC" 2>&1)
+    echo "$result" | grep -q "Connection successful" && exit 0
+
+    sleep "$RETRY_INTERVAL"
+done
