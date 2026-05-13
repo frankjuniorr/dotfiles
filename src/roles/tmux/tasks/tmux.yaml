@@ -44,6 +44,13 @@
     - themes.conf
     - tmux.conf
 
+- name: "Tmux | Create symbolic link for themes directory"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/themes"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/themes"
+    state: link
+    force: yes
+
 - name: "Tmux | Install TPM"
   ansible.builtin.git:
     repo: https://github.com/tmux-plugins/tpm
