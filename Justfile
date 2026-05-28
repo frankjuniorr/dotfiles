@@ -11,9 +11,6 @@ install-hooks:
 	@chmod +x .git/hooks/pre-commit
 	@echo "Hook installed successfully."
 
-iac-proxmox:
-	@cd iac && bash iac-proxmox.sh
-
 ############################################################################
 # SECRETS (Ansible-Vault)
 ############################################################################

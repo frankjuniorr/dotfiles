@@ -2,11 +2,7 @@ name: homelab-deploys
 root: ~/Dropbox/code/01.github/homelab/homelab-deploys/
 
 windows:
-  - code:
-      layout: af1d,133x52,0,0[133x38,0,0,47,133x13,0,39,50]
-      panes:
-      - $EDITOR .
-      - clear && figlet -k -c -t "Homelab Deploys" 
+  - code: $EDITOR .
   - git: lazygit
   - IA: claude
   - k9s: k9s

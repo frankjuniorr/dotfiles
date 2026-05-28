@@ -2,11 +2,7 @@ name: dotfiles
 root: /home/frank/Dropbox/code/01.github/projects/dotfiles
 
 windows:
-  - code:
-      - $EDITOR .
-  - git:
-    - lazygit
-  - cmd:
-    - flow browse --workspace dotfiles
-  - IA:
-    - claude
+  - code: $EDITOR .
+  - git: lazygit
+  - cmd: flow browse --workspace dotfiles
+  - IA: claude

@@ -53,6 +53,7 @@ promptToReturnFromSubprocess: false
 # editCommand: "$XDG_CONFIG_HOME/lazygit/edit-nvim"
 # editCommandTemplate: "{{editor}} {{filename}}"
 git:
+  autoFetch: false
   log:
     showGraph: always
     showWholeGraph: false
