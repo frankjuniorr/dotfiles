@@ -1,6 +1,9 @@
 # Git history — not needed in build context, reduces context size
 .git
 
+# CI/CD workflows — irrelevant to image content, prevents cache invalidation on workflow-only changes
+.github
+
 # Ansible vault — NEVER include secrets in the build context
 src/group_vars/all/vault.yml
 
