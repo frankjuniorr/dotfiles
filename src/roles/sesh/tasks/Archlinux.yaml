@@ -1,6 +1,10 @@
 ---
 - name: "SESH | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm sesh-bin"
+  register: sesh_install
+  retries: 3
+  delay: 10
+  until: sesh_install.rc == 0
 
 - name: "SESH | Refresh {{ ansible_facts.user_dir }}/.config/sesh folder"
   ansible.builtin.file:
