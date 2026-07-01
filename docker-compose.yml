@@ -1,0 +1,26 @@
+services:
+  frank-env:
+    image: ${FRANK_ENV_IMAGE:-ghcr.io/frankjuniorr/dotfiles-env:latest}
+    container_name: frank-env
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    group_add:
+      - "${DOCKER_GID}"
+    environment:
+      - SSH_AUTH_SOCK=/run/ssh-agent
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - TZ=America/Recife
+    volumes:
+      # SSH agent socket — 1Password sets $SSH_AUTH_SOCK automatically
+      - ${SSH_AUTH_SOCK:-/dev/null}:/run/ssh-agent:ro
+      # Kubeconfig (read-only)
+      - ${HOME}/.kube:/home/frank/.kube:ro
+      # Docker socket — DooD (Docker-out-of-Docker)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Current working directory mapped to /workspace
+      - ${PWD}:/workspace
+    working_dir: /workspace

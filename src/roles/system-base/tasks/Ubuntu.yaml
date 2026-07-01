@@ -29,15 +29,23 @@
     - stow
     - curl
     - wget
-    - meld
     - jq
     - yq
     - ffmpeg
     - imagemagick
-    - xclip
-    - flameshot
     - ncdu
     - figlet
+
+- name: "{{ ansible_facts.distribution }} | Install GUI tools"
+  become: true
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  when: not (is_docker_build | default(false))
+  loop:
+    - meld
+    - xclip
+    - flameshot
     - virt-viewer
 
 # This code block will throw an error inside the Docker container because the container doens't use systemd as the init system.
@@ -92,7 +100,7 @@
         state: restarted
         enabled: yes
       when: keyboard_file_status.changed or keyboard_config_status.changed
-  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  when: not (is_docker_build | default(false))
 
 - name: "{{ ansible_facts.distribution }} | Enable Dark Mode on Ubuntu"
   ansible.builtin.shell: "gsettings set org.gnome.desktop.interface color-scheme prefer-dark"

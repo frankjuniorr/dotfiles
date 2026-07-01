@@ -16,6 +16,7 @@
     enabled: true
     name: docker
     state: started
+  when: not (is_docker_build | default(false))
 
 - name: "Docker | Add to group"
   become: true

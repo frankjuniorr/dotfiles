@@ -6,7 +6,6 @@
     state: present
 
 - name: "Tmuxinator | Archlinux | Install tmuxinator"
-  community.general.pacman:
-    name: tmuxinator
-    executable: yay
-    state: present
+  ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"
+  args:
+    creates: /usr/bin/tmuxinator

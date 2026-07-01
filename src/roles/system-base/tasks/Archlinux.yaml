@@ -17,17 +17,26 @@
     - figlet              # write ASCII texts on terminal
     - bc                  # simple calculator CLI
     - sshs                # TUI for SSH (https://github.com/quantumsheep/sshs)
-    - emote               # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
-    - virt-viewer         # used by SPICE on Proxmox
     - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
-    - gnome-calculator    # default Gnome Calculator
     - zip                 # for compact files
     - unrar               # for compact files
     - "duf"               # Better 'df' alternative
 
+- name: "{{ ansible_facts.distribution }} | Install GUI packages"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  when: not (is_docker_build | default(false))
+  loop:
+    - emote               # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
+    - virt-viewer         # used by SPICE on Proxmox
+    - gnome-calculator    # default Gnome Calculator
+
 # Because the tradicional package by `pacman` doesn't work on Wayland.
-- name: "{{ ansible_facts.distribution }} | install AUR packages"
+- name: "{{ ansible_facts.distribution }} | install AUR GUI packages"
   ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+  when: not (is_docker_build | default(false))
   loop:
     - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.
     - "ddcui"             # GUI to control brightness for external monitors
