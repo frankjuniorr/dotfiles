@@ -20,6 +20,7 @@ WORKDIR /home/${USER}
 # All provisioning in one layer so cleanup actually reduces image size
 # --mount=type=secret exposes the vault password only during this RUN step;
 # it is never written to any image layer and does not appear in docker history.
+# hadolint ignore=DL3003,DL3004,SC2015
 RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass \
     set -eo pipefail && \
     # Install AUR helper — build from source (avoids yay-bin's GitHub binary download, which can 502)

@@ -20,10 +20,6 @@ jobs:
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          # DL3003: cd inside a single RUN layer is intentional (layer efficiency)
-          # DL3004: sudo is required — non-root user needs sudo for pacman/AUR builds
-          # SC2015: cmd || true is intentional for optional cleanup steps
-          ignore: DL3003 DL3004 SC2015
 
   build:
     name: Build & Smoke Test
