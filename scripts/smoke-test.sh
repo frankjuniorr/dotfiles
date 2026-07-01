@@ -18,8 +18,8 @@ if [ -f /.dockerenv ]; then
 else
     IMAGE="${1:?Usage: smoke-test.sh <image-name>  (or run inside the container without args)}"
     CONTEXT="docker image: ${IMAGE}"
-    # -i (interactive) so zsh sources .zshrc and ~/.local/bin is in PATH
-    run_cmd() { docker run --rm --entrypoint zsh "$IMAGE" -i -c "$1" > /dev/null 2>&1; }
+    # Source zshenv (sets ZDOTDIR) + .zshrc (sets PATH) without -i so it works without a TTY (CI)
+    run_cmd() { docker run --rm --entrypoint zsh "$IMAGE" -c ". /etc/zsh/zshenv 2>/dev/null; . \${ZDOTDIR:-\$HOME}/.zshrc 2>/dev/null; $1" > /dev/null 2>&1; }
 fi
 
 # ── Check helper ─────────────────────────────────────────────────────────────
