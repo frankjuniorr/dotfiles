@@ -20,8 +20,9 @@ WORKDIR /home/${USER}
 # All provisioning in one layer so cleanup actually reduces image size
 # --mount=type=secret exposes the vault password only during this RUN step;
 # it is never written to any image layer and does not appear in docker history.
+# vault_pass is optional: vault.yml is excluded via .dockerignore so CI builds work without it.
 # hadolint ignore=DL3003,DL3004,SC2015
-RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass \
+RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,required=false \
     set -eo pipefail && \
     # Install AUR helper — build from source (avoids yay-bin's GitHub binary download, which can 502)
     sudo pacman -Sy --noconfirm --needed git go && \
@@ -36,10 +37,12 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass \
     \
     # Run playbook — CLI roles only, no 1Password (vault.yml excluded via .dockerignore)
     cd ~/.dotfiles/src && \
+    VAULT_OPT="" && \
+    if [ -f /run/secrets/vault_pass ]; then VAULT_OPT="--vault-password-file /run/secrets/vault_pass"; fi && \
     ANSIBLE_STDOUT_CALLBACK=default \
     ansible-playbook -i hosts.ini main.yml \
         --tags "cli" \
-        --vault-password-file /run/secrets/vault_pass \
+        ${VAULT_OPT} \
         -e '{"op_installed": false, "is_docker_build": true}' && \
     \
     # Remove Ansible and its galaxy collections (build-time only)
