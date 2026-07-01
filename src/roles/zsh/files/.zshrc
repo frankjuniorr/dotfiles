@@ -70,10 +70,12 @@ fi
 #   done
 # fi
 
-# export STARSHIP_CONFIG=~/.config/starship/starship.toml
-# eval "$(starship init zsh)"
+if which starship > /dev/null 2>&1; then
+  export STARSHIP_CONFIG=~/.config/starship/starship.toml
+  eval "$(starship init zsh)"
+fi
 
-. "$HOME/.local/share/../bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 export NVM_DIR="$HOME/.config/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

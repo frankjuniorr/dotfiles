@@ -1,10 +1,11 @@
 ---
-- name: "DOCKER | Install docker, docker-compose"
+- name: "DOCKER | Install docker, docker-compose, docker-buildx"
   become: true
   community.general.pacman:
     name:
       - docker
       - docker-compose
+      - docker-buildx
     state: present
 
 - name: "LAZYDOCKER | Install"

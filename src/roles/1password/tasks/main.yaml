@@ -4,10 +4,13 @@
     path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
   register: system_distribution_config
   no_log: true
+  when: not (is_docker_build | default(false))
 
 - name: "System | Run Tasks: {{ ansible_facts.distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
-  when: system_distribution_config.stat.exists
+  when:
+    - not (is_docker_build | default(false))
+    - system_distribution_config.stat.exists
   no_log: true
 
 
@@ -20,6 +23,7 @@
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/1password"
     - "{{ ansible_facts.user_dir }}/.config/1password/ssh"
+  when: not (is_docker_build | default(false))
 
 - name: "1PASSWORD | Update file /usr/share/applications/1password.desktop"
   become: true
@@ -29,11 +33,12 @@
     mode: '0755'
     remote_src: true
     force: true
+  when: not (is_docker_build | default(false))
 
 - name: "1PASSWORD | Create symbolic link for 1password/ssh/agent.toml"
-  # become: yes
   ansible.builtin.file:
     src: "{{ role_path }}/files/agent.toml"
     dest: "{{ ansible_facts.user_dir }}/.config/1Password/ssh/agent.toml"
     state: link
     force: yes
+  when: not (is_docker_build | default(false))

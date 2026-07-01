@@ -95,3 +95,4 @@
     enabled: yes
     scope: user
     daemon_reload: yes
+  when: not (is_docker_build | default(false))

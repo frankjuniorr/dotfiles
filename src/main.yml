@@ -19,7 +19,16 @@
 
     - name: Set roles
       ansible.builtin.set_fact:
-        run_roles: "{{ ansible_run_tags != ['all'] and ansible_run_tags or default_roles }}"
+        run_roles: >-
+          {%- if 'cli' in ansible_run_tags -%}
+            {{ cli_roles }}
+          {%- elif 'gui' in ansible_run_tags -%}
+            {{ gui_roles }}
+          {%- elif ansible_run_tags != ['all'] -%}
+            {{ ansible_run_tags }}
+          {%- else -%}
+            {{ default_roles }}
+          {%- endif -%}
       tags:
         - always
 
@@ -28,6 +37,7 @@
         apply:
           tags:
             - "{{ roles_item }}"
+            - always
         name: "{{ roles_item }}"
       loop_control:
         loop_var: roles_item

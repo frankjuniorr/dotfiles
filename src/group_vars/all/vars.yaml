@@ -4,6 +4,46 @@
 primary_installation_path: "{{ ansible_facts.user_dir }}/.local/bin"
 scripts_installation_path: "{{ ansible_facts.user_dir }}/.bin"
 
+cli_roles:
+  - system-base
+  - 1password
+  - git
+  - fzf
+  - atuin
+  - bat
+  - zoxide
+  - lsd
+  - btop
+  - fetchs
+  - just
+  - fd
+  - yazi
+  - sesh
+  - navi
+  - neovim
+  - starship
+  - zsh
+  - tmux
+  - docker
+  - terraform
+  - go
+  - kubernetes
+  - dotfiles
+
+gui_roles:
+  - fonts
+  - terminal
+  - solaar
+  - funny-apps
+  - dropbox
+  - insync
+  - vscode
+  - google-chrome
+  - telegram
+  - spotify
+  - obsidian
+  - hyde
+
 default_roles:
   - system-base
   - 1password     # password manager first
