@@ -1,0 +1,7 @@
+ignore:
+  # sudo is required: non-root user (frank) must call sudo for pacman/system tasks;
+  # this is the standard pattern for AUR builds where makepkg cannot run as root.
+  - DL3004
+  # cmd 2>/dev/null || true is intentional — allows optional cleanup steps to fail
+  # gracefully without aborting the build (e.g. removing packages that may not exist).
+  - SC2015

@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.description="Personal CLI environment — Frank's
 
 # Initialize pacman keyring and create non-root user (required for AUR/makepkg)
 RUN pacman-key --init && pacman-key --populate && \
-    useradd -m -u ${UID} -G wheel -s /bin/zsh ${USER} && \
+    useradd -m -u ${UID} -G wheel -s /bin/zsh -l ${USER} && \
     echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Copy repo to the same path used by docker-compose volume mount
@@ -25,7 +25,7 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass \
     # Install AUR helper — build from source (avoids yay-bin's GitHub binary download, which can 502)
     sudo pacman -Sy --noconfirm --needed git go && \
     git clone https://aur.archlinux.org/yay.git /tmp/yay && \
-    cd /tmp/yay && makepkg -si --noconfirm && cd ~ && \
+    (cd /tmp/yay && makepkg -si --noconfirm) && \
     rm -rf /tmp/yay && \
     \
     # Install Ansible and Galaxy dependencies
