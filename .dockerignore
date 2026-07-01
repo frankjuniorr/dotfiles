@@ -1,0 +1,27 @@
+# Git history — not needed in build context, reduces context size
+.git
+
+# Ansible vault — NEVER include secrets in the build context
+src/group_vars/all/vault.yml
+
+# Vault password and other secret files
+.vault_pass
+*.env
+.env
+*.key
+*.pem
+*.p12
+
+# OS and editor artifacts
+.DS_Store
+**/.DS_Store
+*.swp
+*.swo
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+
+# Node (in case any tooling uses it)
+node_modules
