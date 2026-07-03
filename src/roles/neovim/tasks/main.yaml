@@ -16,26 +16,46 @@
     dest: "{{ ansible_facts.user_dir }}/.vimrc"
     state: link
 
-- name: "NEOVIM | Refresh {{ ansible_facts.user_dir }}/.config/nvim folder"
-  ansible.builtin.file:
-    path: "{{ ansible_facts.user_dir }}/.config/nvim"
-    state: absent
+- name: "NEOVIM | Full config (Docker/Ubuntu)"
+  when: not (omarchy_mode | default(false))
+  block:
+    - name: "NEOVIM | Refresh {{ ansible_facts.user_dir }}/.config/nvim folder"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.user_dir }}/.config/nvim"
+        state: absent
 
+    - name: "NEOVIM | Ensure the config folder already exists"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.user_dir }}/.config/nvim"
+        mode: "0755"
+        state: directory
 
-- name: "NEOVIM | Ensure the config fodler already exists"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{ ansible_facts.user_dir }}/.config/nvim"
+    - name: "NEOVIM | Create symlink to role files directory"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files"
+        dest: "{{ ansible_facts.user_dir }}/.config/nvim"
+        state: link
+        force: true
 
-- name: "NEOVIM | Create symlink to role files directory"
-  ansible.builtin.file:
-    src: "{{ role_path }}/files"
-    dest: "{{ ansible_facts.user_dir }}/.config/nvim"
-    state: link
-    force: true
+# Omarchy ships omarchy-nvim (LazyVim) already configured — patch it with personal
+# plugins instead of wiping ~/.config/nvim, so Omarchy's own base config survives.
+- name: "NEOVIM | Patch omarchy-nvim with personal plugins (Omarchy)"
+  when: omarchy_mode | default(false)
+  block:
+    - name: "NEOVIM | Ensure omarchy-nvim plugins folder exists"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.user_dir }}/.config/nvim/lua/plugins"
+        mode: "0755"
+        state: directory
+
+    - name: "NEOVIM | Symlink personal plugin files on top of omarchy-nvim"
+      ansible.builtin.file:
+        src: "{{ item }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/nvim/lua/plugins/{{ item | basename }}"
+        state: link
+        force: true
+      with_fileglob:
+        - "{{ role_path }}/files/lua/plugins/*.lua"
 
 - name: "NEOVIM | Sync and update neovim"
   ansible.builtin.shell: "nvim --headless \"+Lazy! sync\" +qa"
