@@ -7,5 +7,9 @@
 
 - name: "System | Run Tasks: {{ ansible_facts.distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
-  when: system_distribution_config.stat.exists
+  when:
+    - system_distribution_config.stat.exists
+    - not (omarchy_mode | default(false))
   no_log: true
+  # HyDE and Omarchy both manage Hyprland but with incompatible layouts —
+  # the `omarchy` role takes over Hyprland/desktop setup when omarchy_mode is true.
