@@ -1,0 +1,11 @@
+---
+# On Omarchy, use the CLI wrapper — it also configures theme + secrets integration.
+- name: "VSCode | Install via Omarchy CLI"
+  ansible.builtin.shell: "omarchy-install-vscode"
+  args:
+    creates: /usr/bin/code
+  when: omarchy_mode | default(false)
+
+- name: "VSCode | Install via AUR"
+  ansible.builtin.shell: "yay -S --needed --noconfirm visual-studio-code-bin"
+  when: not (omarchy_mode | default(false))

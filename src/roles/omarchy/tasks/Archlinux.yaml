@@ -1,0 +1,21 @@
+---
+# Replaces the `hyde` role on Omarchy hosts. Uses the Omarchy CLI wrappers instead of
+# raw pacman/yay so the integrations Omarchy manages itself (xdg-settings, .desktop
+# files, theming) stay intact. Only runs with `--mode omarchy` (omarchy_mode=true) —
+# on any other Arch host this role is a no-op.
+- name: "OMARCHY | Setup"
+  when: omarchy_mode | default(false)
+  block:
+    - name: "OMARCHY | Check if Chromium is installed"
+      ansible.builtin.stat:
+        path: /usr/bin/chromium
+      register: chromium_installed
+
+    - name: "OMARCHY | Remove Chromium"
+      ansible.builtin.shell: "omarchy-remove-browser chromium"
+      when: chromium_installed.stat.exists
+
+    - name: "OMARCHY | Install Google Chrome as default browser"
+      ansible.builtin.shell: "omarchy-install-browser chrome"
+      args:
+        creates: /usr/bin/google-chrome-stable

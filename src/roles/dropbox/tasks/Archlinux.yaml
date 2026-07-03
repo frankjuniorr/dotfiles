@@ -1,6 +1,15 @@
 ---
+# On Omarchy, use the CLI wrapper — it also installs dropbox-cli, libappindicator-gtk3,
+# python-gpgme and nautilus-dropbox, and wires up the systemd service.
+- name: "DROPBOX | Install via Omarchy CLI"
+  ansible.builtin.shell: "omarchy-install-dropbox"
+  args:
+    creates: /usr/bin/dropbox
+  when: omarchy_mode | default(false)
+
 - name: "DROPBOX | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm dropbox"
+  when: not (omarchy_mode | default(false))
 
 # - name: "DROPBOX | start service"
 #   become: true
