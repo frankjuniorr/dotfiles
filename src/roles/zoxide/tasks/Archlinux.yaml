@@ -4,3 +4,4 @@
   community.general.pacman:
     name: zoxide
     state: present
+  when: not (omarchy_mode | default(false))

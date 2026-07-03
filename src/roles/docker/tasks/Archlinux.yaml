@@ -7,6 +7,7 @@
       - docker-compose
       - docker-buildx
     state: present
+  when: not (omarchy_mode | default(false))
 
 - name: "LAZYDOCKER | Install"
   ansible.builtin.shell: "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash"

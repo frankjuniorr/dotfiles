@@ -4,3 +4,4 @@
   community.general.pacman:
     name: fzf
     state: present
+  when: not (omarchy_mode | default(false))

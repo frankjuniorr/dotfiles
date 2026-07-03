@@ -1,27 +1,31 @@
 ---
-- name: "1PASSWORD | Dependencies"
-  become: true
-  community.general.pacman:
-    name: xdg-desktop-portal-gtk
-    state: present
+# Omarchy ships 1Password (beta + CLI) in the base ISO — skip install, still configure below.
+- name: "1PASSWORD | Install on Arch Linux"
+  when: not (omarchy_mode | default(false))
+  block:
+    - name: "1PASSWORD | Dependencies"
+      become: true
+      community.general.pacman:
+        name: xdg-desktop-portal-gtk
+        state: present
 
-# this 2 tasks, is same thing to import the GPG key, with this command:
-# 'curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import'
-# This is necessary as a pre-requirements to 1password-cli works
-# see more: https://support.1password.com/install-linux/#arch-linux
-- name: "1PASSWORD | Download 1Password GPG key"
-  ansible.builtin.get_url:
-    url: https://downloads.1password.com/linux/keys/1password.asc
-    dest: /tmp/1password.asc
-    mode: '0644'
+    # this 2 tasks, is same thing to import the GPG key, with this command:
+    # 'curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import'
+    # This is necessary as a pre-requirements to 1password-cli works
+    # see more: https://support.1password.com/install-linux/#arch-linux
+    - name: "1PASSWORD | Download 1Password GPG key"
+      ansible.builtin.get_url:
+        url: https://downloads.1password.com/linux/keys/1password.asc
+        dest: /tmp/1password.asc
+        mode: '0644'
 
-- name: "1PASSWORD | Import 1Password GPG key"
-  ansible.builtin.command: gpg --import /tmp/1password.asc
-  args:
-    creates: "{{ ansible_facts.env.HOME }}/.gnupg/pubring.kbx"
+    - name: "1PASSWORD | Import 1Password GPG key"
+      ansible.builtin.command: gpg --import /tmp/1password.asc
+      args:
+        creates: "{{ ansible_facts.env.HOME }}/.gnupg/pubring.kbx"
 
-- name: "1PASSWORD | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
-  loop:
-    - "1password"
-    - "1password-cli"
+    - name: "1PASSWORD | install"
+      ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+      loop:
+        - "1password"
+        - "1password-cli"

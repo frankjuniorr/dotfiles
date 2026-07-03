@@ -1,3 +1,6 @@
 ---
+# On Omarchy, the `omarchy` role handles the Chromium -> Chrome swap via
+# omarchy-remove-browser/omarchy-install-browser, which also fixes xdg-settings and .desktop files.
 - name: "GOOGLE CHROME | install"
   ansible.builtin.shell: "yay -S --needed --noconfirm google-chrome"
+  when: not (omarchy_mode | default(false))

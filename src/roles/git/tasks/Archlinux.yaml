@@ -1,11 +1,20 @@
 ---
-- name: "GIT | Install packages"
+# Omarchy already ships lazygit and github-cli — skip those, install the rest anywhere.
+- name: "GIT | Install packages already in Omarchy"
   become: true
   community.general.pacman:
     name: "{{ item }}"
     state: present
   loop:
     - lazygit         # TUI for git (see more: https://github.com/jesseduffield/lazygit)
+    - github-cli      # Github CLI (see more: https://cli.github.com/manual/)
+  when: not (omarchy_mode | default(false))
+
+- name: "GIT | Install remaining packages"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  loop:
     - git-delta       # for diffs (see more: https://github.com/dandavison/delta)
     - meld            # for diffs in GUI
-    - github-cli      # Github CLI (see more: https://cli.github.com/manual/)

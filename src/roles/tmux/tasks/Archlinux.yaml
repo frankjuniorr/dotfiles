@@ -4,6 +4,7 @@
   community.general.pacman:
     name: tmux
     state: present
+  when: not (omarchy_mode | default(false))
 
 - name: "Tmuxinator | Archlinux | Install tmuxinator"
   ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"

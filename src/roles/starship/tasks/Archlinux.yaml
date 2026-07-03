@@ -4,3 +4,4 @@
   community.general.pacman:
     name: starship
     state: present
+  when: not (omarchy_mode | default(false))

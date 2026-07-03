@@ -1,12 +1,17 @@
 ---
-- name: "SPOTIFY | Install"
+# Omarchy already ships spotify — skip it, cava isn't included so install it anywhere.
+- name: "SPOTIFY | Install packages already in Omarchy"
   become: true
   community.general.pacman:
-    name: "{{ item }}"
+    name: spotify
     state: present
-  loop:
-    - spotify
-    - cava
+  when: not (omarchy_mode | default(false))
+
+- name: "SPOTIFY | Install remaining packages"
+  become: true
+  community.general.pacman:
+    name: cava
+    state: present
 
 - name: "SPOTIFY | Ensure config directory exists"
   ansible.builtin.file:
