@@ -12,7 +12,7 @@ cli_roles:
   - atuin
   - bat
   - zoxide
-  - lsd
+  - eza
   - btop
   - fetchs
   - just
@@ -54,7 +54,7 @@ default_roles:
   - atuin
   - bat
   - zoxide
-  - lsd
+  - eza
   - btop
   - fetchs
   - just

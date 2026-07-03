@@ -6,7 +6,7 @@
 name = "Downloads folder"
 path = "~/Downloads"
 startup_command = "y ~/Downloads"
-preview_command = "lsd --tree --depth 2 ~/Downloads/"
+preview_command = "eza --tree --level=2 --icons ~/Downloads/"
 
 
 [[session]]
@@ -19,13 +19,13 @@ preview_command = "bat --color always ~/.config/flow/config.yaml"
 name = "Dropbox folder"
 path = "~/Dropbox"
 startup_command = "y ~/Dropbox"
-preview_command = "lsd --tree --depth 2 ~/Dropbox"
+preview_command = "eza --tree --level=2 --icons ~/Dropbox"
 
 [[session]]
 name = "Code folder"
 path = "~/Dropbox/code folder"
 startup_command = "y ~/Dropbox/code"
-preview_command = "lsd --tree --depth 2 ~/Dropbox/code"
+preview_command = "eza --tree --level=2 --icons ~/Dropbox/code"
 
 #############################################################
 #  Folder or files open by $EDITOR (neovim)
@@ -57,7 +57,7 @@ startup_command = "nvim ."
 name = "neovim config"
 path = "~/.config/nvim"
 startup_command = "nvim ."
-preview_command = "lsd --tree --depth 3 ~/.config/nvim"
+preview_command = "eza --tree --level=3 --icons ~/.config/nvim"
 windows = [ "git" ]
 
 [[session]]
@@ -71,7 +71,7 @@ windows = [ "git" ]
 name = "navi config"
 path = "~/.config/navi"
 startup_command = "nvim ~/.config/navi/"
-preview_command = "lsd --tree --depth 2 ~/.config/navi"
+preview_command = "eza --tree --level=2 --icons ~/.config/navi"
 windows = [ "git" ]
 
 [[session]]
@@ -85,7 +85,7 @@ windows = [ "git" ]
 name = "claude config"
 path = "~/.claude"
 startup_command = "nvim ~/.claude/"
-preview_command = "lsd --tree --depth 3 ~/.claude"
+preview_command = "eza --tree --level=3 --icons ~/.claude"
 
 [[window]]
 name = "git"

@@ -1,0 +1,6 @@
+---
+- name: "EZA | Install"
+  become: yes
+  ansible.builtin.apt:
+    name: "eza"
+    state: present

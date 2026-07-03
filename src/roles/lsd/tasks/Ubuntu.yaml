@@ -1,6 +1,0 @@
----
-- name: "LSD | Install"
-  become: yes
-  ansible.builtin.apt:
-    name: "lsd"
-    state: present

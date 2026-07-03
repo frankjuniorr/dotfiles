@@ -1,0 +1,8 @@
+---
+- name: "EZA | Install"
+  become: true
+  community.general.pacman:
+    name: eza
+    state: present
+  when: not (omarchy_mode | default(false))
+  # Omarchy ships eza in the base ISO — skip on Omarchy, install everywhere else.

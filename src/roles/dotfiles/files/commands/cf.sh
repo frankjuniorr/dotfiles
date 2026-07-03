@@ -68,7 +68,7 @@ done
 # -----------------------------
 # FZF UI
 # -----------------------------
-local preview_cmd='lsd --color always --tree --depth 2 {} 2>/dev/null || tree -L 2 {}'
+local preview_cmd='eza --tree --level=2 --color=always --icons {} 2>/dev/null || tree -L 2 {}'
 
 local fzf_opts=(
   --height 80%

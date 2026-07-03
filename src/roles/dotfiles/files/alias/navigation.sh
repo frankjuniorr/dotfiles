@@ -18,7 +18,9 @@ alias .4="cd ../.."
 
 alias back="cd -"
 
-alias ls='lsd'
+alias ls='eza --icons'
+alias ll='eza -la --icons'
+alias lt='eza --tree --level=2 --icons'
 
 # grep padrão com cores automáticas
 alias grep='grep --color=auto'
