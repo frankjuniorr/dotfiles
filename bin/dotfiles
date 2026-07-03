@@ -8,6 +8,32 @@ DOTFILES_DIR=$(git -C "$(dirname "$(readlink -f "$0")")" rev-parse --show-toplev
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 DOTFILES_VERSION="v1.1.1"
 
+# Parse --mode omarchy|ubuntu, independent of the positional role/tag arg
+MODE="${MODE:-}"
+args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --mode)
+    MODE="$2"
+    shift 2
+    ;;
+  --mode=*)
+    MODE="${1#--mode=}"
+    shift
+    ;;
+  *)
+    args+=("$1")
+    shift
+    ;;
+  esac
+done
+set -- "${args[@]}"
+
+if [ -n "$MODE" ] && [ "$MODE" != "omarchy" ] && [ "$MODE" != "ubuntu" ]; then
+  echo "Unknown --mode '$MODE' (expected: omarchy, ubuntu)" >&2
+  exit 1
+fi
+
 # get the environment var `ROLE`.
 # If `$ROLE` doens't exists, get the `$1`
 TAG_NAME="${ROLE:-$1}"
@@ -49,6 +75,7 @@ function print_stats() {
 
   echo "Dotfiles,$DOTFILES_VERSION" >"$dotfiles_stats_file"
   echo "Distro Linux,$os_pretty_name" >>"$dotfiles_stats_file"
+  echo "Mode,${MODE:-auto}" >>"$dotfiles_stats_file"
   echo "Role,$TAG_NAME" >>"$dotfiles_stats_file"
 
   gum table --border rounded --print --file "$dotfiles_stats_file"
@@ -148,22 +175,40 @@ check_dependencies
 show_header
 print_stats
 
-case $os_name in
-Ubuntu)
-  os_color="#E95420"
-  if [ "$TAG_NAME" = "all" ]; then
-    ubuntu_setup
-  fi
-  ;;
-"Arch Linux")
+# --mode bypasses /etc/os-release detection: Omarchy is Arch-based but may not
+# report NAME="Arch Linux", so an explicit --mode omarchy always takes the Arch path.
+case "$MODE" in
+omarchy)
   os_color="#1793D1"
   if [ "$TAG_NAME" = "all" ]; then
     arch_setup
   fi
   ;;
+ubuntu)
+  os_color="#E95420"
+  if [ "$TAG_NAME" = "all" ]; then
+    ubuntu_setup
+  fi
+  ;;
 *)
-  print_message "Unsupported OS"
-  exit 1
+  case $os_name in
+  Ubuntu)
+    os_color="#E95420"
+    if [ "$TAG_NAME" = "all" ]; then
+      ubuntu_setup
+    fi
+    ;;
+  "Arch Linux")
+    os_color="#1793D1"
+    if [ "$TAG_NAME" = "all" ]; then
+      arch_setup
+    fi
+    ;;
+  *)
+    print_message "Unsupported OS"
+    exit 1
+    ;;
+  esac
   ;;
 esac
 
@@ -171,8 +216,13 @@ esac
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 update_ansible_galaxy
 
+EXTRA_VARS_ARGS=()
+if [ "$MODE" = "omarchy" ]; then
+  EXTRA_VARS_ARGS=(-e '{"omarchy_mode": true}')
+fi
+
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME"
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
 
 # shellcheck disable=SC2069
 popd 2>&1 >/dev/null
