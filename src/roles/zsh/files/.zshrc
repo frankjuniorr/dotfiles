@@ -10,7 +10,17 @@ if which zoxide > /dev/null 2>&1 ;then
   eval "$(zoxide init zsh)"
 fi
 
+# Omarchy compensations — chsh to zsh loses the omarchy-* PATH and mise init
+# that Omarchy's own bash rc provides. Guarded: this file also runs in the
+# busybox container and on Ubuntu, where Omarchy doesn't exist.
+if [ -d "$HOME/.local/share/omarchy/bin" ]; then
+  export OMARCHY_PATH="$HOME/.local/share/omarchy"
+  path=("$OMARCHY_PATH/bin" $path)
+fi
 
+if which mise > /dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 
 # PATH
