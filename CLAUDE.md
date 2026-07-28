@@ -81,6 +81,16 @@ Roles that need secrets (git credentials, GitHub token, SSH keys) use the `op` C
 ### Symlinks Pattern
 Roles symlink config files from `roles/<name>/files/` to the appropriate `~/.config/<tool>/` location. The neovim role removes and recreates the entire `~/.config/nvim/` directory on each run.
 
+### Omarchy Config Collision Policy
+Omarchy owns `~/.config` by copying (`cp -R`/`cp -f` via `omarchy-refresh-config`, `omarchy-reinstall-configs`, and update migrations), not by symlinking. A **directory** symlink at a path Omarchy also populates gets silently written through — Omarchy's copy lands inside this git repo. Rules, in priority order:
+
+1. **Never symlink a directory at a path Omarchy also populates** (check `~/omarchy/config/` in a local clone of the [Omarchy repo](https://github.com/basecamp/omarchy)). Symlink individual files instead — see the `btop` role for the pattern (Omarchy writes `~/.config/btop/themes/current.theme` next to our `btop.conf` symlink).
+2. **Prefer composing over overwriting** where the tool supports an include mechanism, so Omarchy's own file is left untouched: `git` (`config.personal` + `[include] path`), `starship` (`STARSHIP_CONFIG` env var instead of fighting `~/.config/starship.toml`).
+3. **Cede ownership** where Omarchy's default is fine and not worth maintaining a fork of (e.g. `lazygit` in omarchy_mode).
+4. Where overwriting is unavoidable, symlink at the file level and rely on the `configs` playbook tag (`bin/dotfiles --mode omarchy configs`) — installed as the `omarchy` role's `post-update` hook — to reapply the symlink after any `omarchy-update`/`omarchy-migrate` run.
+
+Full rationale and the file-by-file collision matrix live in the "Migração pro Omarchy" plan notes (not in this repo).
+
 ### Default Role Install Order
 System base → CLI tools → terminal/shell (zsh, tmux) → DevOps tools (docker, terraform, go) → Kubernetes stack (kubectl, k9s, helm) → GUI apps → config roles (dotfiles, hyde)
 
