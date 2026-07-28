@@ -15,9 +15,11 @@
     src: "{{ role_path }}/files/.vimrc"
     dest: "{{ ansible_facts.user_dir }}/.vimrc"
     state: link
+  tags: [configs]
 
 - name: "NEOVIM | Full config (Docker/Ubuntu)"
   when: not (omarchy_mode | default(false))
+  tags: [configs]
   block:
     - name: "NEOVIM | Refresh {{ ansible_facts.user_dir }}/.config/nvim folder"
       ansible.builtin.file:
@@ -41,6 +43,7 @@
 # plugins instead of wiping ~/.config/nvim, so Omarchy's own base config survives.
 - name: "NEOVIM | Patch omarchy-nvim with personal plugins (Omarchy)"
   when: omarchy_mode | default(false)
+  tags: [configs]
   block:
     - name: "NEOVIM | Ensure omarchy-nvim plugins folder exists"
       ansible.builtin.file:
