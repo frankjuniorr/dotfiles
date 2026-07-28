@@ -1,11 +1,16 @@
 ---
+# `configs` is intrinsically tagged on this dispatcher because the post-update
+# hook install (T7) lives inside Archlinux.yaml, mixed with the browser-swap
+# install steps — the include must stay reachable under --tags configs.
 - name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"
   ansible.builtin.stat:
     path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
   register: system_distribution_config
   no_log: true
+  tags: [configs]
 
 - name: "System | Run Tasks: {{ ansible_facts.distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
   when: system_distribution_config.stat.exists
   no_log: true
+  tags: [configs]

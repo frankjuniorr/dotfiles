@@ -19,3 +19,23 @@
       ansible.builtin.shell: "omarchy-install-browser chrome"
       args:
         creates: /usr/bin/google-chrome-stable
+
+    # omarchy-update calls `omarchy-hook post-update`, which runs everything in
+    # this directory (Omarchy itself ships a `.sample` file here — skipped by
+    # omarchy-hook, harmless to sit next to). Symlinked (not omarchy-hook-install's
+    # `cp`) so it stays live and self-updating on `git pull`, like every other
+    # config in this repo. Needs the `configs` tag (T6) to exist first.
+    - name: "OMARCHY | Ensure post-update hooks directory exists"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.user_dir }}/.config/omarchy/hooks/post-update.d"
+        state: directory
+        mode: "0755"
+      tags: [configs]
+
+    - name: "OMARCHY | Install post-update hook to reapply dotfiles symlinks"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hooks/10-dotfiles-reapply"
+        dest: "{{ ansible_facts.user_dir }}/.config/omarchy/hooks/post-update.d/10-dotfiles-reapply"
+        state: link
+        force: yes
+      tags: [configs]

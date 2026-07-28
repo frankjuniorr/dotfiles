@@ -1,0 +1,12 @@
+#!/bin/bash
+# Omarchy post-update hook — reapplies the dotfiles symlinks after
+# omarchy-update/omarchy-migrate, in case a config refresh/migration
+# clobbered one written through a symlink into the dotfiles repo.
+# See: Conflito de Configs no Omarchy / Tasks de Implementação (T7).
+set -e
+
+DOTFILES_DIR="$HOME/dotfiles"
+[ -d "$DOTFILES_DIR" ] || exit 0
+
+cd "$DOTFILES_DIR"
+bin/dotfiles --mode omarchy configs
