@@ -24,20 +24,26 @@
             {{ cli_roles }}
           {%- elif 'gui' in ansible_run_tags -%}
             {{ gui_roles }}
+          {%- elif 'configs' in ansible_run_tags -%}
+            {{ default_roles }}
           {%- elif ansible_run_tags != ['all'] -%}
             {{ ansible_run_tags }}
           {%- else -%}
             {{ default_roles }}
           {%- endif -%}
+        # `configs` must NOT get the blanket `always` apply-tag below: that tag makes
+        # every task in the role run regardless of --tags, which is exactly what cli/
+        # gui/all/single-role need (role selection happens via run_roles above, not via
+        # Ansible's own tag engine) but is exactly what `configs` must avoid — it only
+        # wants the tasks explicitly tagged `configs` (symlinks/templates, no installs).
+        configs_run: "{{ 'configs' in ansible_run_tags }}"
       tags:
         - always
 
     - name: Run roles
       ansible.builtin.include_role:
         apply:
-          tags:
-            - "{{ roles_item }}"
-            - always
+          tags: "{{ [roles_item] if configs_run else [roles_item, 'always'] }}"
         name: "{{ roles_item }}"
       loop_control:
         loop_var: roles_item

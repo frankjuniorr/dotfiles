@@ -4,6 +4,7 @@
     path: "{{ ansible_facts.user_dir }}/.config/systemd/user"
     mode: "0755"
     state: directory
+  tags: [configs]
 
 - name: "Tmuxinator | Symlink tmuxinator-sessions service"
   ansible.builtin.file:
@@ -11,6 +12,7 @@
     dest: "{{ ansible_facts.user_dir }}/.config/systemd/user/tmuxinator-sessions.service"
     state: link
     force: yes
+  tags: [configs]
 
 - name: "Tmuxinator | Enable tmuxinator-sessions service"
   ansible.builtin.systemd:
@@ -19,3 +21,4 @@
     scope: user
     daemon_reload: yes
   when: not (is_docker_build | default(false))
+  tags: [configs]

@@ -10,11 +10,17 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
+# Tagged `configs` directly on the include (not just inherited) so these stay
+# reachable under --tags configs — each file mixes install and symlink tasks,
+# and per-task tags inside decide what actually runs.
 - name: "Tmux | Run tmux tasks"
   ansible.builtin.include_tasks: tmux.yaml
+  tags: [configs]
 
 - name: "Tmux | Run tmuxinator tasks"
   ansible.builtin.include_tasks: tmuxinator.yaml
+  tags: [configs]
 
 - name: "Tmux | Run systemd user service tasks"
   ansible.builtin.include_tasks: systemd.yaml
+  tags: [configs]

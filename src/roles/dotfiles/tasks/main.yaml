@@ -16,6 +16,7 @@
   loop:
     - "{{ scripts_installation_path }}"
     - "{{ ansible_facts.user_dir }}/.config/dotfiles/"
+  tags: [configs]
 
 
 - name: "DOTFILES | Ensure directory structure exists"
@@ -26,6 +27,7 @@
   loop:
     - "{{ scripts_installation_path }}"
     - "{{ ansible_facts.user_dir }}/.config/dotfiles/"
+  tags: [configs]
 
 - name: "DOTFILES | Create symbolic link for all alias"
   ansible.builtin.file:
@@ -35,6 +37,7 @@
     force: yes
   with_fileglob:
     - "{{ role_path }}/files/alias/*"
+  tags: [configs]
 
 
 - name: "DOTFILES | Ensure that all the commands have execution permission"
@@ -43,6 +46,7 @@
     mode: '0755'
   with_fileglob:
     - "{{ role_path }}/files/commands/*"
+  tags: [configs]
 
 - name: "DOTFILES | Create symbolic links for commands"
   ansible.builtin.file:
@@ -51,11 +55,13 @@
     state: link
     mode: "0755"
     force: yes
+  tags: [configs]
 
 - name: "DOTFILES | Ensure dotfiles binary is executable"
   ansible.builtin.file:
     path: "{{ playbook_dir }}/../bin/dotfiles"
     mode: '0755'
+  tags: [configs]
 
 - name: "DOTFILES | Create symbolic link for dotfiles binary"
   ansible.builtin.file:
@@ -63,24 +69,28 @@
     dest: "{{ primary_installation_path }}/dotfiles"
     state: link
     force: yes
+  tags: [configs]
 
 - name: "DOTFILES | generate GITHUB_TOKEN environment variables"
   ansible.builtin.shell: op read "op://Personal/GitHub Token/credential"
   register: github_token
   changed_when: false
   when: op_installed
+  tags: [configs]
 
 - name: "DOTFILES | generate private environment variables"
   ansible.builtin.template:
     src: "private-env.sh.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/dotfiles/private-env.sh"
   when: op_installed
+  tags: [configs]
 
 - name: "DOTFILES | Ensure systemd user directory exists"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/systemd/user"
     mode: "0755"
     state: directory
+  tags: [configs]
 
 - name: "DOTFILES | Symlink headphone-autoconnect service"
   ansible.builtin.file:
@@ -88,6 +98,7 @@
     dest: "{{ ansible_facts.user_dir }}/.config/systemd/user/headphone-autoconnect.service"
     state: link
     force: yes
+  tags: [configs]
 
 - name: "DOTFILES | Enable headphone-autoconnect service"
   ansible.builtin.systemd:
@@ -96,3 +107,4 @@
     scope: user
     daemon_reload: yes
   when: not (is_docker_build | default(false))
+  tags: [configs]

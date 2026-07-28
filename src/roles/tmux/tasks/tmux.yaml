@@ -3,23 +3,27 @@
   ansible.builtin.stat:
     path: "{{ ansible_facts.user_dir }}/.config/tmux"
   register: tmux_config_stat
+  tags: [configs]
 
 - name: "Tmux | Remove symlink if ~/.config/tmux is a symlink"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/tmux"
     state: absent
   when: tmux_config_stat.stat.islnk | default(false)
+  tags: [configs]
 
 - name: "Tmux | Stat ~/.config/tmux/plugins"
   ansible.builtin.stat:
     path: "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
   register: tmux_plugins_stat
+  tags: [configs]
 
 - name: "Tmux | Remove symlink if ~/.config/tmux/plugins is a symlink"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
     state: absent
   when: tmux_plugins_stat.stat.islnk | default(false)
+  tags: [configs]
 
 - name: "Tmux | Ensure tmux config directory exists"
   ansible.builtin.file:
@@ -30,6 +34,7 @@
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/tmux"
     - "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
+  tags: [configs]
 
 - name: "Tmux | Create symbolic links for configuration files"
   ansible.builtin.file:
@@ -43,6 +48,7 @@
     - plugins.conf
     - themes.conf
     - tmux.conf
+  tags: [configs]
 
 - name: "Tmux | Create symbolic link for themes directory"
   ansible.builtin.file:
@@ -50,6 +56,7 @@
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/themes"
     state: link
     force: yes
+  tags: [configs]
 
 - name: "Tmux | Install TPM"
   ansible.builtin.git:

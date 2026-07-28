@@ -23,6 +23,7 @@
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/k9s"
     state: absent
+  tags: [configs]
 
 - name: "K9s | Ensure k9s directory structure exists"
   ansible.builtin.file:
@@ -32,6 +33,7 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/k9s"
+  tags: [configs]
 
 - name: "K9s | Link k9s config files"
   ansible.builtin.file:
@@ -39,3 +41,4 @@
     dest: "{{ ansible_facts.user_dir }}/.config/k9s"
     state: link
     force: yes
+  tags: [configs]

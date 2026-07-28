@@ -24,6 +24,7 @@
     - "{{ ansible_facts.user_dir }}/.config/1password"
     - "{{ ansible_facts.user_dir }}/.config/1password/ssh"
   when: not (is_docker_build | default(false))
+  tags: [configs]
 
 - name: "1PASSWORD | Update file /usr/share/applications/1password.desktop"
   become: true
@@ -42,3 +43,4 @@
     state: link
     force: yes
   when: not (is_docker_build | default(false))
+  tags: [configs]

@@ -41,6 +41,7 @@
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/sesh"
     state: absent
+  tags: [configs]
 
 - name: "SESH | Ensure sesh directory structure exists"
   ansible.builtin.file:
@@ -50,6 +51,7 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/sesh"
+  tags: [configs]
 
 - name: "SESH | Symlink config"
   ansible.builtin.file:
@@ -57,3 +59,4 @@
     dest: "{{ ansible_facts.user_dir }}/.config/sesh"
     state: link
     force: yes
+  tags: [configs]
