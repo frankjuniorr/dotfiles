@@ -3,8 +3,10 @@ set -e
 
 # Paths
 CONFIG_DIR="$HOME/.config/dotfiles"
-# This command return 'git-root' folder
-DOTFILES_DIR=$(git -C "$(dirname "$(readlink -f "$0")")" rev-parse --show-toplevel)
+# bin/dotfiles always lives exactly one level below the repo root, so resolve
+# it structurally instead of via `git rev-parse` — this script must also work
+# when there's no .git around (zip download, or an rsync loop that excludes it).
+DOTFILES_DIR=$(dirname "$(dirname "$(readlink -f "$0")")")
 IS_FIRST_RUN="$HOME/.dotfiles_first_run"
 DOTFILES_VERSION="v1.1.1"
 
