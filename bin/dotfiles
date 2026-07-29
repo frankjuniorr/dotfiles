@@ -237,7 +237,13 @@ if [ "$MODE" = "omarchy" ]; then
 fi
 
 print_message "Running playbook"
-cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
+# --ask-become-pass: without NOPASSWD sudo, every `become: true` task (there are
+# many — package installs across almost every role) needs a sudo password. Without
+# this flag Ansible assumes either NOPASSWD or `ansible_become_password` is set,
+# neither of which is true here, so become tasks just hang forever waiting on a
+# prompt nothing will ever answer. This asks once, upfront, and reuses it for the
+# whole run.
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --ask-become-pass --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
 
 # shellcheck disable=SC2069
 popd 2>&1 >/dev/null
