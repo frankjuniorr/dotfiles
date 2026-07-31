@@ -6,19 +6,30 @@
 - name: "OMARCHY | Setup"
   when: omarchy_mode | default(false)
   block:
-    - name: "OMARCHY | Check if Chromium is installed"
-      ansible.builtin.stat:
-        path: /usr/bin/chromium
-      register: chromium_installed
-
-    - name: "OMARCHY | Remove Chromium"
-      ansible.builtin.shell: "omarchy-remove-browser chromium"
-      when: chromium_installed.stat.exists
-
-    - name: "OMARCHY | Install Google Chrome as default browser"
-      ansible.builtin.shell: "omarchy-install-browser chrome"
+    # `omarchy-remove-browser` no longer accepts "chromium" as a target (rolling
+    # release drift since the migration was first audited against 4.0.0.alpha —
+    # chromium is now an internal fallback, not something you remove). The
+    # current flow is install + set-default instead, via omarchy-default-browser.
+    #
+    # yay's own internal `sudo pacman -U` needs a real tty to prompt for a
+    # password — Ansible detaches shell/command tasks from any controlling tty,
+    # so a bare `sudo` call inside a wrapped command always fails with "a
+    # password is required", no matter how recently sudo -v was run beforehand
+    # (that ticket lives on a different tty and isn't visible here). `script`
+    # allocates a pty for the whole wrapped command so the prime (piped in via
+    # stdin) and the later privileged use share the same tty — same technique
+    # Omarchy's own omarchy-update script uses.
+    - name: "OMARCHY | Install Google Chrome"
+      ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-browser chrome' /dev/null"
       args:
         creates: /usr/bin/google-chrome-stable
+      no_log: true
+
+    # omarchy-default-browser is unprivileged (xdg-settings/xdg-mime only) —
+    # doesn't need the script/sudo wrapping above.
+    - name: "OMARCHY | Set Google Chrome as default browser"
+      ansible.builtin.shell: "omarchy-default-browser chrome"
+      changed_when: true
 
     # omarchy-update calls `omarchy-hook post-update`, which runs everything in
     # this directory (Omarchy itself ships a `.sample` file here — skipped by
@@ -36,6 +47,40 @@
       ansible.builtin.file:
         src: "{{ role_path }}/files/hooks/10-dotfiles-reapply"
         dest: "{{ ansible_facts.user_dir }}/.config/omarchy/hooks/post-update.d/10-dotfiles-reapply"
+        state: link
+        force: yes
+      tags: [configs]
+
+    # ~/.config/hypr is populated by Omarchy at install time, but its automated
+    # update pipeline (omarchy-update -> omarchy-migrate) never touches these
+    # specific files — only the manual, confirmation-gated "reset Hyprland to
+    # defaults" action (omarchy-refresh-hyprland, exposed in omarchy-menu) does.
+    # Symlinking them here is safe: no silent clobber risk like fastfetch/git/btop.
+    - name: "OMARCHY | Symlink looknfeel.lua and hypridle.conf"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/{{ item }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/{{ item }}"
+        state: link
+        force: yes
+      loop:
+        - looknfeel.lua
+        - hypridle.conf
+      tags: [configs]
+
+    # monitors.lua is host-specific (resolution/position differ per machine), so
+    # pick the right source the same way the old `hyde` role did for its
+    # monitors_host.conf/monitors_vm.conf pair.
+    - name: "OMARCHY | Detect system: VM or Host"
+      ansible.builtin.shell: systemd-detect-virt
+      register: omarchy_virt_type
+      changed_when: false
+      ignore_errors: yes
+      tags: [configs]
+
+    - name: "OMARCHY | Symlink monitors.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.lua' if omarchy_virt_type.stdout != 'none' else 'monitors_host.lua' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.lua"
         state: link
         force: yes
       tags: [configs]
