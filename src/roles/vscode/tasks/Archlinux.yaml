@@ -1,11 +1,15 @@
 ---
 # On Omarchy, use the CLI wrapper — it also configures theme + secrets integration.
+# script -qec gives the wrapper's internal sudo call a tty to read the primed
+# ticket from — see the google-chrome role for the full explanation.
 - name: "VSCode | Install via Omarchy CLI"
-  ansible.builtin.shell: "omarchy-install-vscode"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-vscode' /dev/null"
   args:
     creates: /usr/bin/code
   when: omarchy_mode | default(false)
+  no_log: true
 
 - name: "VSCode | Install via AUR"
-  ansible.builtin.shell: "yay -S --needed --noconfirm visual-studio-code-bin"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm visual-studio-code-bin' /dev/null"
   when: not (omarchy_mode | default(false))
+  no_log: true

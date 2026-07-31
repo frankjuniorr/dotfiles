@@ -24,8 +24,11 @@
       args:
         creates: "{{ ansible_facts.env.HOME }}/.gnupg/pubring.kbx"
 
+    # script -qec gives yay's internal sudo call a tty to read the primed ticket
+    # from — see the google-chrome role for the full explanation.
     - name: "1PASSWORD | install"
-      ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+      ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm {{ item }}' /dev/null"
       loop:
         - "1password"
         - "1password-cli"
+      no_log: true

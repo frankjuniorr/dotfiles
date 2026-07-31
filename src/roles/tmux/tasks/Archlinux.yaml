@@ -6,7 +6,11 @@
     state: present
   when: not (omarchy_mode | default(false))
 
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation of why this is
+# needed at all.
 - name: "Tmuxinator | Archlinux | Install tmuxinator"
-  ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm tmuxinator' /dev/null"
   args:
     creates: /usr/bin/tmuxinator
+  no_log: true

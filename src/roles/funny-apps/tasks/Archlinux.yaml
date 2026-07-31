@@ -1,3 +1,7 @@
 ---
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation of why this is
+# needed at all.
 - name: "UNIMATRIX | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm unimatrix-git"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm unimatrix-git' /dev/null"
+  no_log: true
