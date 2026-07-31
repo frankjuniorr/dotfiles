@@ -11,3 +11,4 @@
 
 - name: "LAZYDOCKER | Install"
   ansible.builtin.shell: "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash"
+  when: not (omarchy_mode | default(false))

@@ -13,9 +13,15 @@
     # - jq
     - poppler
     # - fd
-    - ripgrep
     - glow        # Charm's utility to read Markdown (https://github.com/charmbracelet/glow)
     # - fzf
     # - zoxide
     - ueberzugpp
     # - imagemagick
+
+- name: "YAZI | install ripgrep (already in Omarchy)"
+  become: true
+  community.general.pacman:
+    name: ripgrep
+    state: present
+  when: not (omarchy_mode | default(false))

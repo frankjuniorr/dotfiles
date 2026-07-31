@@ -8,19 +8,38 @@
     - stow                # symlink manager
     - curl                # request and donwload CLI (like "wget")
     - wget                # request and donwload CLI (like "curl")
-    - less                # pager on CLI (like "more")
-    - jq                  # JSON processor (https://github.com/jqlang/jq)
     - yq                  # "JSON, XML, CSV, TOML and properties processor" (https://github.com/mikefarah/yq)
     - ffmpeg              # media manipulation on CLI
-    - imagemagick         # image manipulation on CLI
     - ncdu                # Disk Usage on CLI
     - figlet              # write ASCII texts on terminal
     - bc                  # simple calculator CLI
     - sshs                # TUI for SSH (https://github.com/quantumsheep/sshs)
-    - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
     - zip                 # for compact files
     - unrar               # for compact files
     - "duf"               # Better 'df' alternative
+
+- name: "{{ ansible_facts.distribution }} | Install packages already in Omarchy"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  when: not (omarchy_mode | default(false))
+  loop:
+    - less                # pager on CLI (like "more")
+    - jq                  # JSON processor (https://github.com/jqlang/jq)
+    - imagemagick         # image manipulation on CLI
+    - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
+
+# emote is AUR-only (not in the official repos pacman can see) and, on Omarchy,
+# redundant — Omarchy ships its own emoji picker (Super+Ctrl+E, via walker/elephant).
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation.
+- name: "{{ ansible_facts.distribution }} | Install emoji picker (emote)"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm emote' /dev/null"
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+  no_log: true
 
 - name: "{{ ansible_facts.distribution }} | Install GUI packages"
   become: true
@@ -29,14 +48,32 @@
     state: present
   when: not (is_docker_build | default(false))
   loop:
-    - emote               # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
     - virt-viewer         # used by SPICE on Proxmox
-    - gnome-calculator    # default Gnome Calculator
 
-# Because the tradicional package by `pacman` doesn't work on Wayland.
+- name: "{{ ansible_facts.distribution }} | Install GUI packages already in Omarchy"
+  become: true
+  community.general.pacman:
+    name: gnome-calculator
+    state: present
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+
+# flameshot doesn't work well on Wayland and, on Omarchy, is redundant — Omarchy
+# ships its own screenshot tool with built-in OCR (grim+slurp+satty+tesseract,
+# see omarchy-capture-screenshot / omarchy-capture-text-extraction).
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation.
+- name: "{{ ansible_facts.distribution }} | install flameshot (AUR)"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm flameshot-git' /dev/null"
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+  no_log: true
+
 - name: "{{ ansible_facts.distribution }} | install AUR GUI packages"
-  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm {{ item }}' /dev/null"
   when: not (is_docker_build | default(false))
   loop:
-    - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.
     - "ddcui"             # GUI to control brightness for external monitors
+  no_log: true
