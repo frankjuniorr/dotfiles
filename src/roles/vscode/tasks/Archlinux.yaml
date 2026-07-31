@@ -10,6 +10,6 @@
   no_log: true
 
 - name: "VSCode | Install via AUR"
-  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm visual-studio-code-bin' /dev/null"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None visual-studio-code-bin' /dev/null"
   when: not (omarchy_mode | default(false))
   no_log: true

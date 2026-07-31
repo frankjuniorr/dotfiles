@@ -14,7 +14,7 @@
 
 - name: "HYDE | Install some AUR packages"
   become: true
-  ansible.builtin.shell: yay -S --needed --noconfirm {{ item }}
+  ansible.builtin.shell: yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None {{ item }}
   loop:
     - visual-studio-code-bin
 
@@ -26,13 +26,8 @@
    path: "{{ ansible_facts.user_dir }}/Clone"
    state: absent
 
-- name: "HYDE | Comment 'ILoveCandy' line if it exists"
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/pacman.conf
-    regexp: '^ILoveCandy'
-    line: '# ILoveCandy'
-    backrefs: true
+# ILoveCandy is now disabled by the system-base role (runs on every Arch mode,
+# not just hyde) — no need to duplicate it here.
 
 # CONFIGURE MONITORS
 #######################################################################################

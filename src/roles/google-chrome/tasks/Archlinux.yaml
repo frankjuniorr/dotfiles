@@ -9,6 +9,6 @@
 # wrapped command so the prime (piped in via stdin) and the later privileged use
 # share the same tty — same technique Omarchy's own omarchy-update script uses.
 - name: "GOOGLE CHROME | install"
-  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm google-chrome' /dev/null"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None google-chrome' /dev/null"
   when: not (omarchy_mode | default(false))
   no_log: true

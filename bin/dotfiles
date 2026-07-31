@@ -179,7 +179,7 @@ function arch_setup() {
   if ! type yay >/dev/null 2>&1; then
     loading "Update System" "sudo pacman -Sy --noconfirm"
   else
-    loading "Update System" "yay -Syu --noconfirm"
+    loading "Update System" "yay -Syu --noconfirm --answerclean None --answerdiff None --answeredit None"
   fi
 
   if ! pacman -Q python3 >/dev/null 2>&1; then
