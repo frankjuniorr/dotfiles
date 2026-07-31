@@ -14,15 +14,18 @@
   no_log: true
 
 
-- name: "1PASSWORD | Ensure that {{ ansible_facts.user_dir }}/.config/1password/ssh exists"
+# Capital "1Password" here to match the SSH agent socket path 1Password's own
+# Linux docs specify (~/.config/1Password/ssh/agent.sock) — must be consistent
+# with the symlink dest below, since paths are case-sensitive.
+- name: "1PASSWORD | Ensure that {{ ansible_facts.user_dir }}/.config/1Password/ssh exists"
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: '0755'
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
-    - "{{ ansible_facts.user_dir }}/.config/1password"
-    - "{{ ansible_facts.user_dir }}/.config/1password/ssh"
+    - "{{ ansible_facts.user_dir }}/.config/1Password"
+    - "{{ ansible_facts.user_dir }}/.config/1Password/ssh"
   when: not (is_docker_build | default(false))
   tags: [configs]
 
