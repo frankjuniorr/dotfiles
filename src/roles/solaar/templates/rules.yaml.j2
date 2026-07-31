@@ -2,7 +2,11 @@
 ---
 - Rule:
   - Key: [Screen Capture/Print Screen, pressed]
+{% if omarchy_mode | default(false) %}
+  - Execute: [omarchy-capture-screenshot]
+{% else %}
   - Execute: [flameshot, gui]
+{% endif %}
 - Rule:
   - Key: [Calculator, pressed]
   - Execute: gnome-calculator

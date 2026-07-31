@@ -71,6 +71,32 @@ function loading() {
     --spinner.foreground="$os_color" -- sh -c "$command"
 }
 
+SUDO_KEEPALIVE_PID=""
+BECOME_PASS_FILE=""
+
+function cleanup() {
+  [ -n "$SUDO_KEEPALIVE_PID" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null
+  [ -n "$BECOME_PASS_FILE" ] && rm -f "$BECOME_PASS_FILE"
+}
+trap cleanup EXIT
+
+function start_sudo_keepalive() {
+  # sudo's cached ticket expires after ~15min by default. A full `all` run can
+  # easily run longer than that (several AUR packages compile from source —
+  # ddcui alone takes a few minutes), so anything relying on the ticket still
+  # being warm later in the run (e.g. `yay -S` tasks, which never run as root
+  # themselves and instead shell out to sudo internally) can start failing
+  # partway through with "sudo: a password is required" once it lapses.
+  # Refresh it in the background for the life of the script so it never does.
+  (
+    while kill -0 "$$" 2>/dev/null; do
+      sudo -n -v
+      sleep 60
+    done
+  ) &
+  SUDO_KEEPALIVE_PID=$!
+}
+
 function print_stats() {
   os_pretty_name=$(grep "^PRETTY_NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
   dotfiles_stats_file="/tmp/dotfiles-stats.csv"
@@ -112,6 +138,7 @@ function ubuntu_setup() {
   # hangs forever with no visible output. A cached ticket means none of the
   # sudo calls below ever need to prompt while wrapped.
   sudo -v
+  start_sudo_keepalive
 
   test -f /var/lib/apt/lists/lock && sudo rm -rf /var/lib/apt/lists/lock
   test -f /var/cache/apt/archives/lock && sudo rm -rf /var/cache/apt/archives/lock
@@ -147,6 +174,7 @@ function arch_setup() {
   # so the wrapped sudo calls below reuse the cached ticket instead of
   # risking a swallowed password prompt.
   sudo -v
+  start_sudo_keepalive
 
   if ! type yay >/dev/null 2>&1; then
     loading "Update System" "sudo pacman -Sy --noconfirm"
@@ -237,13 +265,24 @@ if [ "$MODE" = "omarchy" ]; then
 fi
 
 print_message "Running playbook"
-# --ask-become-pass: without NOPASSWD sudo, every `become: true` task (there are
-# many — package installs across almost every role) needs a sudo password. Without
-# this flag Ansible assumes either NOPASSWD or `ansible_become_password` is set,
-# neither of which is true here, so become tasks just hang forever waiting on a
-# prompt nothing will ever answer. This asks once, upfront, and reuses it for the
-# whole run.
-cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook --ask-become-pass --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
+# Without NOPASSWD sudo, every `become: true` task (there are many — package
+# installs across almost every role) needs a sudo password. Ansible's own
+# `--ask-become-pass` interactive prompt hits a real ansible-core 2.21.x bug
+# ("Duplicate become password prompt encountered") whenever the become task
+# comes from a dynamically included role (include_role) — which is every task
+# in this playbook, since role selection in main.yml goes through include_role.
+# Prompting for the password ourselves and feeding it in as a var sidesteps
+# Ansible's interactive prompt code path entirely, so the bug never triggers.
+# Passed via a temp vars file (not `-e ansible_become_pass=...` on argv) so it
+# never shows up in `ps aux`.
+read -rs -p "BECOME password: " BECOME_PASS
+echo
+BECOME_PASS_FILE=$(mktemp)
+chmod 600 "$BECOME_PASS_FILE"
+printf 'ansible_become_pass: %s\n' "$BECOME_PASS" >"$BECOME_PASS_FILE"
+unset BECOME_PASS
+
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook -e "@${BECOME_PASS_FILE}" --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
 
 # shellcheck disable=SC2069
 popd 2>&1 >/dev/null
