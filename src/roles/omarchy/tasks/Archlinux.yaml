@@ -51,25 +51,41 @@
         force: yes
       tags: [configs]
 
+    # Omarchy is mid-migration from classic hyprlang `.conf` to Lua config
+    # (`.lua`) for Hyprland — that switch is a specific migration
+    # (1778321093, "Migrate Hyprland user config from Omarchy hyprlang files
+    # to Lua files"), and as of this writing it only exists on Omarchy's `dev`
+    # channel, not yet on `master`/stable (confirmed against upstream directly:
+    # not present in origin/master as of 2026-07-29). Real installs — ISO
+    # downloads, `omarchy-update` on the stable channel — are still on `.conf`
+    # today, so that's what we target. `.lua` files with the same content live
+    # alongside for whenever stable does catch up (harmless while unused;
+    # revisit and switch once Hyprland here actually reads them — verify with
+    # `hyprctl reload` and a visible change, like the VM testing found no
+    # effect from the .lua symlinks even though they were in place).
+    #
     # ~/.config/hypr is populated by Omarchy at install time, but its automated
     # update pipeline (omarchy-update -> omarchy-migrate) never touches these
-    # specific files — only the manual, confirmation-gated "reset Hyprland to
-    # defaults" action (omarchy-refresh-hyprland, exposed in omarchy-menu) does.
-    # Symlinking them here is safe: no silent clobber risk like fastfetch/git/btop.
-    - name: "OMARCHY | Symlink looknfeel.lua and hypridle.conf"
+    # specific files today — only the manual, confirmation-gated "reset
+    # Hyprland to defaults" action (omarchy-refresh-hyprland, exposed in
+    # omarchy-menu) does. Symlinking them here is safe: no silent clobber risk
+    # like fastfetch/git/btop. Re-check this once the Lua migration lands on
+    # stable — it may rewrite these files as part of the .conf -> .lua
+    # conversion, which would need re-verifying against the collision policy.
+    - name: "OMARCHY | Symlink looknfeel.conf and hypridle.conf"
       ansible.builtin.file:
         src: "{{ role_path }}/files/hypr/{{ item }}"
         dest: "{{ ansible_facts.user_dir }}/.config/hypr/{{ item }}"
         state: link
         force: yes
       loop:
-        - looknfeel.lua
+        - looknfeel.conf
         - hypridle.conf
       tags: [configs]
 
-    # monitors.lua is host-specific (resolution/position differ per machine), so
-    # pick the right source the same way the old `hyde` role did for its
-    # monitors_host.conf/monitors_vm.conf pair.
+    # monitors.conf is host-specific (resolution/position differ per machine),
+    # so pick the right source the same way the old `hyde` role did for its
+    # monitors_host.conf/monitors_vm.conf pair (values carried over unchanged).
     - name: "OMARCHY | Detect system: VM or Host"
       ansible.builtin.shell: systemd-detect-virt
       register: omarchy_virt_type
@@ -77,10 +93,10 @@
       ignore_errors: yes
       tags: [configs]
 
-    - name: "OMARCHY | Symlink monitors.lua"
+    - name: "OMARCHY | Symlink monitors.conf"
       ansible.builtin.file:
-        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.lua' if omarchy_virt_type.stdout != 'none' else 'monitors_host.lua' }}"
-        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.lua"
+        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.conf' if omarchy_virt_type.stdout != 'none' else 'monitors_host.conf' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.conf"
         state: link
         force: yes
       tags: [configs]
