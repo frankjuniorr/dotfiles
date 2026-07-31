@@ -26,10 +26,19 @@
     - "{{ ansible_facts.user_dir }}/.config/solaar"
   tags: [configs]
 
-- name: "Solaar | Create symbolic links for configuration files"
+- name: "Solaar | Symlink config.yaml"
   ansible.builtin.file:
-    src: "{{ role_path }}/files"
-    dest: "{{ ansible_facts.user_dir }}/.config/solaar"
+    src: "{{ role_path }}/files/config.yaml"
+    dest: "{{ ansible_facts.user_dir }}/.config/solaar/config.yaml"
     state: link
     force: yes
+  tags: [configs]
+
+# Templated (not symlinked) so the Screen Capture key binding can switch between
+# flameshot and Omarchy's own capture tool depending on omarchy_mode.
+- name: "Solaar | Render rules.yaml"
+  ansible.builtin.template:
+    src: "rules.yaml.j2"
+    dest: "{{ ansible_facts.user_dir }}/.config/solaar/rules.yaml"
+    mode: "0644"
   tags: [configs]
