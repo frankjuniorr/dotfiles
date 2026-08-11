@@ -1,0 +1,21 @@
+---
+# Omarchy provisions dev-language runtimes via mise, not pacman — confirmed
+# `omarchy-install-dev-env go` is just a thin wrapper around
+# `mise use --global go@latest` (checked the script directly on a test VM).
+# Calling mise directly here skips the wrapper's case-statement indirection
+# and works identically. omarchy_mode only: a bare Arch/HyDE host has no
+# guarantee mise is installed (Omarchy ships it out of the box, vanilla Arch
+# doesn't), so HyDE keeps installing go the traditional way via pacman.
+- name: "GO | Archlinux | Install go via mise (omarchy_mode)"
+  ansible.builtin.command:
+    cmd: mise use --global go@latest
+  register: go_mise_install
+  changed_when: "'already installed' not in go_mise_install.stdout"
+  when: omarchy_mode | default(false)
+
+- name: "GO | Archlinux | Install go via pacman (non-omarchy)"
+  become: true
+  community.general.pacman:
+    name: go
+    state: present
+  when: not (omarchy_mode | default(false))
