@@ -36,7 +36,90 @@
     - "{{ ansible_facts.user_dir }}/.config/tmux/plugins"
   tags: [configs]
 
-- name: "Tmux | Create symbolic links for configuration files"
+# Same cleanup, for the other two symlinks an older version of this role used
+# to create (own hex-palette theme, never sourced by anything once
+# omarchy_mode composes on top of Omarchy's own tmux.conf instead).
+- name: "Tmux | Remove leftover themes.conf/themes symlinks (omarchy_mode)"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/{{ item }}"
+    state: absent
+  loop:
+    - themes.conf
+    - themes
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+# Safety net for machines that already ran an older version of this role,
+# which used to symlink tmux.conf straight into the repo (clobbering Omarchy's
+# real file). blockinfile below would otherwise follow that symlink and write
+# our block into the *repo's* tmux.conf instead of a real config. If tmux.conf
+# is currently a symlink, drop it and restore Omarchy's native file from its
+# source of truth (the same file omarchy-refresh-tmux copies from) before
+# composing.
+- name: "Tmux | Stat tmux.conf (omarchy_mode)"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/tmux.conf"
+  register: tmux_conf_stat
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "Tmux | Remove tmux.conf if it's a symlink, to restore the native file (omarchy_mode)"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/tmux.conf"
+    state: absent
+  when:
+    - omarchy_mode | default(false)
+    - tmux_conf_stat.stat.islnk | default(false)
+  tags: [configs]
+
+- name: "Tmux | Restore Omarchy's native tmux.conf if missing (omarchy_mode)"
+  ansible.builtin.copy:
+    src: "{{ ansible_facts.user_dir }}/.local/share/omarchy/config/tmux/tmux.conf"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/tmux.conf"
+    remote_src: yes
+    force: no
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+# Omarchy owns ~/.config/tmux/tmux.conf as a real file (copied from
+# ~/.local/share/omarchy/config/tmux/tmux.conf by omarchy-refresh-tmux and
+# reapplied on updates) and it "follows the theme" by inheriting the
+# terminal's ANSI palette (fg=blue, bg=default, etc — no fixed hex), not by
+# being rewritten by Omarchy's theme engine (confirmed the 18 `default/themed/*.tpl`
+# templates don't include tmux at all). general.conf/keybindings.conf are pure
+# logic/keybinds with no color references, so they compose safely on top:
+# symlinked as always, then appended into the native tmux.conf via blockinfile
+# so keys we redefine (e.g. prefix) win by load order while Omarchy's status-line
+# colors are left untouched. themes.conf/themes/ (our own 4-palette hex themes)
+# are skipped entirely here — they'd fight the point of following the OS theme.
+- name: "Tmux | Create symbolic links for configuration files (omarchy_mode)"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmux/{{ item }}"
+    dest: "{{ ansible_facts.user_dir }}/.config/tmux/{{ item }}"
+    state: link
+    force: yes
+  loop:
+    - general.conf
+    - keybindings.conf
+    - plugins.conf
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "Tmux | Compose with Omarchy's native tmux.conf (omarchy_mode)"
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_facts.user_dir }}/.config/tmux/tmux.conf"
+    marker: "# {mark} dotfiles — personal config/keybinds"
+    block: |
+      source-file {{ ansible_facts.user_dir }}/.config/tmux/keybindings.conf
+      source-file {{ ansible_facts.user_dir }}/.config/tmux/general.conf
+      source-file {{ ansible_facts.user_dir }}/.config/tmux/plugins.conf
+
+      run "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/tpm"
+    create: yes
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "Tmux | Create symbolic links for configuration files (non-omarchy)"
   ansible.builtin.file:
     src: "{{ role_path }}/files/tmux/{{ item }}"
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/{{ item }}"
@@ -48,14 +131,16 @@
     - plugins.conf
     - themes.conf
     - tmux.conf
+  when: not (omarchy_mode | default(false))
   tags: [configs]
 
-- name: "Tmux | Create symbolic link for themes directory"
+- name: "Tmux | Create symbolic link for themes directory (non-omarchy)"
   ansible.builtin.file:
     src: "{{ role_path }}/files/themes"
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/themes"
     state: link
     force: yes
+  when: not (omarchy_mode | default(false))
   tags: [configs]
 
 - name: "Tmux | Install TPM"
@@ -67,7 +152,10 @@
   ansible.builtin.shell:
     cmd: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
 
-- name: "Tmux | Install theme plugins"
+# Our 4 theme-repo clones (everforest/catppuccin/gruvbox/nord) back the hex
+# palettes in themes.conf/themes/, which only get sourced outside omarchy_mode
+# (see above) — skip cloning them on Omarchy, nothing sources them there.
+- name: "Tmux | Install theme plugins (non-omarchy)"
   ansible.builtin.git:
     repo: "{{ item.repo }}"
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/{{ item.name }}"
@@ -77,3 +165,4 @@
     - { name: "tmux",            repo: "https://github.com/catppuccin/tmux" }
     - { name: "tmux-gruvbox",    repo: "https://github.com/egel/tmux-gruvbox" }
     - { name: "nord-tmux",       repo: "https://github.com/arcticicestudio/nord-tmux" }
+  when: not (omarchy_mode | default(false))
