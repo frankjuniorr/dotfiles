@@ -100,3 +100,22 @@
         state: link
         force: yes
       tags: [configs]
+
+    # bindings.conf is a real file Omarchy owns and expects to be edited in
+    # place (its own migrations sed lines into it directly, e.g. 1771847961.sh
+    # adding a Tmux bind) — so compose via blockinfile instead of symlinking
+    # the whole file, same reasoning as the git role's config.personal include.
+    # Opens the sesh picker (~/.bin/__sesh_start, symlinked by the dotfiles
+    # role) from anywhere, not just from an already-open shell — complements
+    # the zsh zle widget in the dotfiles role's sesh.sh, which only fires once
+    # a zsh prompt already exists. xdg-terminal-exec resolves whichever
+    # terminal is actually configured, same mechanism Omarchy's own Tmux bind
+    # (SUPER ALT, RETURN) uses.
+    - name: "OMARCHY | Compose sesh keybind into native bindings.conf"
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/hypr/bindings.conf"
+        marker: "# {mark} dotfiles — personal bindings"
+        block: |
+          bindd = SUPER ALT, S, Sesh, exec, uwsm-app -- xdg-terminal-exec --dir="$(omarchy-cmd-terminal-cwd)" {{ ansible_facts.user_dir }}/.bin/__sesh_start
+        create: yes
+      tags: [configs]
