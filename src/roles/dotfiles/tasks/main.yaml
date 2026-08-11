@@ -71,18 +71,11 @@
     force: yes
   tags: [configs]
 
-- name: "DOTFILES | generate GITHUB_TOKEN environment variables"
-  ansible.builtin.shell: op read "op://Personal/GitHub Token/credential"
-  register: github_token
-  changed_when: false
-  when: op_installed
-  tags: [configs]
-
 - name: "DOTFILES | generate private environment variables"
   ansible.builtin.template:
     src: "private-env.sh.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/dotfiles/private-env.sh"
-  when: op_installed
+  when: vault_github_token is defined
   tags: [configs]
 
 - name: "DOTFILES | Ensure systemd user directory exists"

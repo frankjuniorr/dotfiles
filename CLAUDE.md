@@ -59,7 +59,7 @@ src/roles/<name>/
 │   ├── Archlinux.yaml     # Tasks for Arch Linux
 │   └── Ubuntu.yaml        # Tasks for Ubuntu
 ├── files/                 # Static config files to symlink
-├── templates/             # Jinja2 templates (used for secrets via 1Password)
+├── templates/             # Jinja2 templates (used for vault-sourced secrets)
 └── handlers/              # Service reload handlers
 ```
 
@@ -67,16 +67,15 @@ src/roles/<name>/
 
 ### Key Variables (`src/group_vars/all/`)
 `all.yaml` was split into two files — do not recreate `all.yaml`:
-- `vars.yaml` — plain vars: `primary_installation_path`, `scripts_installation_path`, `default_roles`, `fonts_list`, `go.packages`
-- `vault.yml` — Ansible-Vault encrypted secrets (always encrypted in git; managed via `just secrets-*`)
+- `vars.yaml` — plain vars: `primary_installation_path`, `scripts_installation_path`, `default_roles`, `fonts_list`, `go.packages`, `github_email` (not secret — already public in every commit)
+- `vault.yml` — Ansible-Vault encrypted secrets (always encrypted in git; managed via `just secrets-*`): `vault_github_token`, `vault_github_ssh_public_key`
 
 ### Pre-tasks (`src/pre_tasks/`)
-Two pre-tasks always run before roles:
+One pre-task always runs before roles:
 1. `whoami.yaml` — captures current user into `host_user` fact
-2. `detect_1password.yaml` — sets `op_installed` fact (controls whether 1Password-dependent tasks run)
 
-### 1Password Integration
-Roles that need secrets (git credentials, GitHub token, SSH keys) use the `op` CLI. They conditionally skip if `op_installed` is false. Templates like `private-env.sh.j2` and `git-credentials-personal.j2` read secrets at provision time.
+### Secrets in Templates
+`git` and `dotfiles` roles render templates (`git-credentials-personal.j2`, `private-env.sh.j2`) directly from vault vars (`vault_github_ssh_public_key`, `vault_github_token`) plus the plain `github_email`. These template tasks are gated with `when: <vault_var> is defined` rather than a hardcoded flag — they no-op cleanly when `vault.yml` isn't present (e.g. the Docker CLI-only image, which excludes `vault.yml` via `.dockerignore`). No secrets are fetched live via the `op` CLI at provision time anymore (that pattern, and the `op_installed` fact/`detect_1password.yaml` pre-task that gated it, was retired). 1Password itself is still used at the OS level (SSH agent, commit signing via `op-ssh-sign`) — just not as an Ansible-time secret source anymore.
 
 ### Symlinks Pattern
 Roles symlink config files from `roles/<name>/files/` to the appropriate `~/.config/<tool>/` location. The neovim role removes and recreates the entire `~/.config/nvim/` directory on each run.

@@ -35,7 +35,9 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,re
     ansible-galaxy collection install community.general && \
     ansible-galaxy install -r ~/.dotfiles/src/requirements/common.yml && \
     \
-    # Run playbook — CLI roles only, no 1Password (vault.yml excluded via .dockerignore)
+    # Run playbook — CLI roles only. vault.yml is excluded via .dockerignore, so
+    # vault-sourced vars (vault_github_token, vault_github_ssh_public_key) stay
+    # undefined here and the tasks that need them skip themselves accordingly.
     cd ~/.dotfiles/src && \
     VAULT_OPT="" && \
     if [ -f /run/secrets/vault_pass ]; then VAULT_OPT="--vault-password-file /run/secrets/vault_pass"; fi && \
@@ -43,7 +45,7 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,re
     ansible-playbook -i hosts.ini main.yml \
         --tags "cli" \
         ${VAULT_OPT} \
-        -e '{"op_installed": false, "is_docker_build": true}' && \
+        -e '{"is_docker_build": true}' && \
     \
     # Remove Ansible and its galaxy collections (build-time only)
     sudo pacman -Rns --noconfirm ansible ansible-core python-resolvelib 2>/dev/null || true && \

@@ -10,20 +10,6 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "GIT | Read email from vault"
-  ansible.builtin.shell: op read "op://Personal/GitHub/email"
-  register: github_email
-  changed_when: false
-  when: op_installed
-  tags: [configs]
-
-- name: "GIT | Read ssh key from vault"
-  ansible.builtin.shell: op read "op://Personal/GitHub SSH/public key"
-  register: github_ssh_public_key
-  changed_when: false
-  when: op_installed
-  tags: [configs]
-
 - name: "GIT | Ensure directories structure exists"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -38,7 +24,7 @@
   ansible.builtin.template:
     src: "git-credentials-personal.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/git/.git-credentials-personal"
-  when: op_installed
+  when: vault_github_ssh_public_key is defined
   tags: [configs]
 
 - name: "GIT | Create symbolic links"

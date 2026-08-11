@@ -4,6 +4,10 @@
 primary_installation_path: "{{ ansible_facts.user_dir }}/.local/bin"
 scripts_installation_path: "{{ ansible_facts.user_dir }}/.bin"
 
+# Git identity — not sensitive (already public in every commit), so it lives
+# here rather than in vault.yml or being fetched from 1Password at runtime.
+github_email: "frankcbjunior@gmail.com"
+
 cli_roles:
   - system-base
   - 1password
