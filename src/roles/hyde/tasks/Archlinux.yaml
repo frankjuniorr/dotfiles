@@ -73,17 +73,26 @@
 
 # Change some environment variables
 # HyDE moved these out of ~/.config/hypr/hyde.conf (also retired by the Lua
-# migration) into the [app] table of ~/.config/hyde/config.toml.
+# migration) into the [desktop.app] table of ~/.config/hyde/config.toml
+# (see ~/HyDE/Configs/.local/share/hyde/schema/config.toml). Not [app] —
+# that was this role's own earlier guess and HyDE never reads it.
 - name: "HYDE | Ensure hyde config directory exists"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/hyde"
     mode: "0755"
     state: directory
 
-- name: "HYDE | Set default editor/browser in hyde config.toml"
+- name: "HYDE | Remove obsolete [app] section from hyde config.toml"
   community.general.ini_file:
     path: "{{ ansible_facts.user_dir }}/.config/hyde/config.toml"
     section: app
+    state: absent
+    mode: "0644"
+
+- name: "HYDE | Set default editor/browser in hyde config.toml"
+  community.general.ini_file:
+    path: "{{ ansible_facts.user_dir }}/.config/hyde/config.toml"
+    section: desktop.app
     option: "{{ item.option }}"
     value: '"{{ item.value }}"'
     mode: "0644"
