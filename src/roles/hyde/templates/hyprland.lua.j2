@@ -1,0 +1,165 @@
+-- Managed by the `hyde` Ansible role (src/roles/hyde). Do not edit by hand —
+-- edit templates/hyprland.lua.j2 and re-run `bin/dotfiles hyde` instead.
+--
+-- Hyprland loads this file when it is started without a config, and it prefers
+-- it over hyprland.conf. HyDE loads it too, last, as the override layer below.
+-- The block keeps the two apart: hyde.lua sets `hyde` on its first line, so it
+-- runs only when this file is the entry point and HyDE has not been loaded.
+-- Removing it leaves a session with a cursor and nothing else.
+if not hyde then
+	local share = os.getenv("XDG_DATA_HOME") or (os.getenv("HOME") .. "/.local/share")
+	local entry = share .. "/hypr/hyde.lua"
+	local handle = io.open(entry, "r")
+	if not handle then
+		error("HyDE is not installed at " .. entry .. ". Run install.sh -r, or point Hyprland at your own config.")
+	end
+	handle:close()
+	dofile(entry)
+end
+
+-- Monitors
+{% if virt_type.stdout != 'none' %}
+hl.monitor({ output = "Virtual-1", mode = "1280x800", position = "auto", scale = "auto" })
+{% else %}
+hl.monitor({ output = "DP-1", mode = "2560x1080@60", position = "0x0", scale = 1 })
+hl.monitor({ output = "eDP-1", mode = "1366x768@60", position = "2560x0", scale = 1 })
+{% endif %}
+
+-- Keyboard + mouse focus behavior
+hl.config({
+	input = {
+		kb_layout = "us",
+		kb_variant = "intl",
+		kb_model = "logitech_base",
+		kb_options = "compose:ralt",
+		follow_mouse = 1,
+		mouse_refocus = false,
+	},
+})
+
+-- Custom keybinds
+-- Opens the sesh session picker (~/.bin/__sesh_start, symlinked by the
+-- dotfiles role) in a new kitty window, from anywhere — not just from an
+-- already-open kitty. This replaces HyDE's own SUPER + SHIFT + S default
+-- ("move focused window to scratchpad", see ~/.local/share/hypr/lua/key_binds.lua) —
+-- rebinding the same combo with matching (empty) flags takes it over, per
+-- MIGRATION-LUA.md's rule on replacing a default bind.
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("kitty --title sesh -e " .. os.getenv("HOME") .. "/.bin/__sesh_start"), {
+	description = "[Utilities] sesh session picker",
+})
+
+-- Startup apps (delayed to let the session settle first)
+hl.on("hyprland.start", function()
+	hl.exec_cmd("sleep 10 && dropbox start -i")
+	hl.exec_cmd("sleep 12 && insync start")
+	hl.exec_cmd("sleep 14 && env XDG_SESSION_TYPE=x11 1password --silent")
+end)
+
+-- Per-app window opacity
+-- Fixes disappearing drop-down menus, e.g. on Zoom:
+-- https://forum.endeavouros.com/t/hyprland-how-i-fixed-disappearing-drop-down-menus/49095
+local opacity_rules = {
+	{ class = "^(firefox)$", opacity = "0.90 0.90 1" },
+	{ class = "^(brave-browser)$", opacity = "0.90 0.90 1" },
+	{ class = "^(code-oss)$", opacity = "0.80 0.80 1" },
+	{ class = "^([Cc]ode)$", opacity = "0.80 0.80 1" },
+	{ class = "^(code-url-handler)$", opacity = "0.80 0.80 1" },
+	{ class = "^(code-insiders-url-handler)$", opacity = "0.80 0.80 1" },
+	{ class = "^(kitty)$", opacity = "0.80 0.80 1" },
+	{ class = "^(org.kde.dolphin)$", opacity = "0.80 0.80 1" },
+	{ class = "^(org.kde.ark)$", opacity = "0.80 0.80 1" },
+	{ class = "^(nwg-look)$", opacity = "0.80 0.80 1" },
+	{ class = "^(qt5ct)$", opacity = "0.80 0.80 1" },
+	{ class = "^(qt6ct)$", opacity = "0.80 0.80 1" },
+	{ class = "^(kvantummanager)$", opacity = "0.80 0.80 1" },
+	{ class = "^(org.pulseaudio.pavucontrol)$", opacity = "0.80 0.70 1" },
+	{ class = "^(blueman-manager)$", opacity = "0.80 0.70 1" },
+	{ class = "^(nm-applet)$", opacity = "0.80 0.70 1" },
+	{ class = "^(nm-connection-editor)$", opacity = "0.80 0.70 1" },
+	{ class = "^(org.kde.polkit-kde-authentication-agent-1)$", opacity = "0.80 0.70 1" },
+	{ class = "^(polkit-gnome-authentication-agent-1)$", opacity = "0.80 0.70 1" },
+	{ class = "^(org.freedesktop.impl.portal.desktop.gtk)$", opacity = "0.80 0.70 1" },
+	{ class = "^(org.freedesktop.impl.portal.desktop.hyprland)$", opacity = "0.80 0.70 1" },
+	{ class = "^([Ss]team)$", opacity = "0.70 0.70 1" },
+	{ class = "^(steamwebhelper)$", opacity = "0.70 0.70 1" },
+	{ class = "^([Ss]potify)$", opacity = "0.70 0.70 1" },
+	{ class = "^(com.github.rafostar.Clapper)$", opacity = "0.90 0.90" },
+	{ class = "^(com.github.tchx84.Flatseal)$", opacity = "0.80 0.80" },
+	{ class = "^(hu.kramo.Cartridges)$", opacity = "0.80 0.80" },
+	{ class = "^(com.obsproject.Studio)$", opacity = "0.80 0.80" },
+	{ class = "^(gnome-boxes)$", opacity = "0.80 0.80" },
+	{ class = "^(vesktop)$", opacity = "0.80 0.80" },
+	{ class = "^(discord)$", opacity = "0.80 0.80" },
+	{ class = "^(WebCord)$", opacity = "0.80 0.80" },
+	{ class = "^(ArmCord)$", opacity = "0.80 0.80" },
+	{ class = "^(app.drey.Warp)$", opacity = "0.80 0.80" },
+	{ class = "^(net.davidotek.pupgui2)$", opacity = "0.80 0.80" },
+	{ class = "^(yad)$", opacity = "0.80 0.80" },
+	{ class = "^(Signal)$", opacity = "0.80 0.80" },
+	{ class = "^(io.github.alainm23.planify)$", opacity = "0.80 0.80" },
+	{ class = "^(io.gitlab.theevilskeleton.Upscaler)$", opacity = "0.80 0.80" },
+	{ class = "^(com.github.unrud.VideoDownloader)$", opacity = "0.80 0.80" },
+	{ class = "^(io.gitlab.adhami3310.Impression)$", opacity = "0.80 0.80" },
+	{ class = "^(io.missioncenter.MissionCenter)$", opacity = "0.80 0.80" },
+	{ class = "^(io.github.flattool.Warehouse)$", opacity = "0.80 0.80" },
+}
+for i, rule in ipairs(opacity_rules) do
+	hl.window_rule({
+		name = "hyde_opacity_" .. i,
+		match = { class = rule.class },
+		opacity = rule.opacity,
+	})
+end
+
+-- Floating windows not already covered by HyDE's own float defaults
+-- (see ~/.local/share/hypr/lua/window_rules.lua for what's already handled —
+-- Bitwarden, KeePassXC, pavucontrol, dolphin dialogs, etc. are default HyDE rules)
+local float_classes = {
+	"^(Signal)$",
+	"^(com.github.rafostar.Clapper)$",
+	"^(app.drey.Warp)$",
+	"^(net.davidotek.pupgui2)$",
+	"^(yad)$",
+	"^(eog)$",
+	"^(io.github.alainm23.planify)$",
+	"^(io.gitlab.theevilskeleton.Upscaler)$",
+	"^(com.github.unrud.VideoDownloader)$",
+	"^(io.gitlab.adhami3310.Impression)$",
+	"^(io.missioncenter.MissionCenter)$",
+}
+for i, class in ipairs(float_classes) do
+	hl.window_rule({
+		name = "hyde_float_" .. i,
+		match = { class = class },
+		float = true,
+	})
+end
+
+-- Keep fullscreen video/media from triggering the idle lock
+local idle_inhibit_classes = {
+	"^(.*celluloid.*)$",
+	"^(.*mpv.*)$",
+	"^(.*vlc.*)$",
+	"^(.*[Ss]potify.*)$",
+	"^(.*LibreWolf.*)$",
+	"^(.*floorp.*)$",
+	"^(.*brave-browser.*)$",
+	"^(.*firefox.*)$",
+	"^(.*chromium.*)$",
+	"^(.*zen.*)$",
+	"^(.*vivaldi.*)$",
+}
+for i, class in ipairs(idle_inhibit_classes) do
+	hl.window_rule({
+		name = "hyde_idle_inhibit_" .. i,
+		match = { class = class },
+		idle_inhibit = "fullscreen",
+	})
+end
+
+-- Workaround for JetBrains IDE dropdown/popup flicker
+hl.window_rule({
+	name = "hyde_jetbrains_no_initial_focus",
+	match = { class = "^(.*jetbrains.*)$", title = "^(win[0-9]+)$" },
+	no_initial_focus = true,
+})

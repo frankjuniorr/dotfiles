@@ -19,7 +19,7 @@ bin/dotfiles "neovim"
 ROLE=tmux bin/dotfiles
 ```
 
-The `bin/dotfiles` script auto-installs dependencies (`gum`, Ansible), detects the OS, and runs the Ansible playbook in `src/`. It uses `--vault-password-file ~/.config/homelab-iac/.vault_pass` — no `become` password prompt.
+The `bin/dotfiles` script auto-installs dependencies (`gum`, Ansible), detects the OS, and runs the Ansible playbook in `src/` using `--vault-password-file ~/.config/homelab-iac/.vault_pass`. It always prompts for a "BECOME password" up front (own `read -rs`, not Ansible's `--ask-become-pass`) and feeds it to `ansible-playbook` via a temp vars file — a deliberate workaround for a real ansible-core 2.21.x bug ("Duplicate become password prompt encountered") that `--ask-become-pass` hits whenever the `become` task comes from a dynamically included role, which is every task here since `main.yml` selects roles via `include_role`. See `bin/dotfiles` around the `BECOME password` prompt for details.
 
 ## Ansible Playbook Commands
 
