@@ -51,39 +51,40 @@
         force: yes
       tags: [configs]
 
-    # Omarchy is mid-migration from classic hyprlang `.conf` to Lua config
-    # (`.lua`) for Hyprland — that switch is a specific migration
-    # (1778321093, "Migrate Hyprland user config from Omarchy hyprlang files
-    # to Lua files"), and as of this writing it only exists on Omarchy's `dev`
-    # channel, not yet on `master`/stable (confirmed against upstream directly:
-    # not present in origin/master as of 2026-07-29). Real installs — ISO
-    # downloads, `omarchy-update` on the stable channel — are still on `.conf`
-    # today, so that's what we target. `.lua` files with the same content live
-    # alongside for whenever stable does catch up (harmless while unused;
-    # revisit and switch once Hyprland here actually reads them — verify with
-    # `hyprctl reload` and a visible change, like the VM testing found no
-    # effect from the .lua symlinks even though they were in place).
+    # Omarchy "Quattro" (v4.0, confirmed against the real v4.0.0 tag) made the
+    # Lua Hyprland config (`hyprland.lua` entry point requiring hypr.monitors/
+    # input/bindings/looknfeel/autostart) the stable default — the old
+    # hyprlang `.conf` era (see git history around commit 7fed51b for why this
+    # role briefly reverted to `.conf` while `dev` was ahead of `stable`) is
+    # over on any current install. looknfeel.lua/monitors_*.lua content below
+    # is recovered from that pre-revert commit (7fed51b^) rather than
+    # rewritten from scratch, since it was already real Omarchy `dev`-branch
+    # syntax that `stable` has now caught up to — values (rounding=8, the same
+    # host/VM monitor layouts) were diffed against the `.conf` files being
+    # replaced here and confirmed unchanged.
     #
-    # ~/.config/hypr is populated by Omarchy at install time, but its automated
-    # update pipeline (omarchy-update -> omarchy-migrate) never touches these
-    # specific files today — only the manual, confirmation-gated "reset
-    # Hyprland to defaults" action (omarchy-refresh-hyprland, exposed in
+    # hypridle.conf has no `.lua` equivalent to symlink: Omarchy Quattro
+    # deleted the file outright (hyprlock/hypridle/waybar/mako/swayosd/swaybg/
+    # polkit-gnome all absorbed into a single Quickshell process). Idle/lock
+    # timeouts now live in `~/.config/omarchy/shell.json`'s `idle` key
+    # (`{"screensaver": 150, "lock": 300}`) — no role manages that file today;
+    # add one if/when idle timeout customization is actually needed.
+    #
+    # ~/.config/hypr is populated by Omarchy at install time, but its
+    # automated update pipeline (omarchy-update -> omarchy-migrate) never
+    # touches these specific files today — only the manual, confirmation-gated
+    # "reset Hyprland to defaults" action (omarchy-refresh-hyprland, exposed in
     # omarchy-menu) does. Symlinking them here is safe: no silent clobber risk
-    # like fastfetch/git/btop. Re-check this once the Lua migration lands on
-    # stable — it may rewrite these files as part of the .conf -> .lua
-    # conversion, which would need re-verifying against the collision policy.
-    - name: "OMARCHY | Symlink looknfeel.conf and hypridle.conf"
+    # like fastfetch/git/btop.
+    - name: "OMARCHY | Symlink looknfeel.lua"
       ansible.builtin.file:
-        src: "{{ role_path }}/files/hypr/{{ item }}"
-        dest: "{{ ansible_facts.user_dir }}/.config/hypr/{{ item }}"
+        src: "{{ role_path }}/files/hypr/looknfeel.lua"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/looknfeel.lua"
         state: link
         force: yes
-      loop:
-        - looknfeel.conf
-        - hypridle.conf
       tags: [configs]
 
-    # monitors.conf is host-specific (resolution/position differ per machine),
+    # monitors.lua is host-specific (resolution/position differ per machine),
     # so pick the right source the same way the old `hyde` role did for its
     # monitors_host.conf/monitors_vm.conf pair (values carried over unchanged).
     - name: "OMARCHY | Detect system: VM or Host"
@@ -93,29 +94,34 @@
       ignore_errors: yes
       tags: [configs]
 
-    - name: "OMARCHY | Symlink monitors.conf"
+    - name: "OMARCHY | Symlink monitors.lua"
       ansible.builtin.file:
-        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.conf' if omarchy_virt_type.stdout != 'none' else 'monitors_host.conf' }}"
-        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.conf"
+        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.lua' if omarchy_virt_type.stdout != 'none' else 'monitors_host.lua' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.lua"
         state: link
         force: yes
       tags: [configs]
 
-    # bindings.conf is a real file Omarchy owns and expects to be edited in
-    # place (its own migrations sed lines into it directly, e.g. 1771847961.sh
-    # adding a Tmux bind) — so compose via blockinfile instead of symlinking
-    # the whole file, same reasoning as the git role's config.personal include.
+    # bindings.lua is confirmed (manual/31-dotfiles.md) to be entirely ours —
+    # unlike the old hyprlang bindings.conf, no Quattro migration was found
+    # editing this path, so Omarchy itself never writes here. Still composed
+    # via blockinfile rather than a pure symlink: that's a deliberate,
+    # not-yet-settled choice (task T18d) pending live confirmation on a real
+    # Quattro machine that no future migration ever touches this file either —
+    # switch to a plain symlink once that's confirmed, not before.
+    # o.bind(combo, description, command) is the confirmed Lua keybind API
+    # (Omarchy - Keybindings.md, sourced from default/hypr/bindings/*.lua).
     # Opens the sesh picker (~/.bin/__sesh_start, symlinked by the dotfiles
     # role) from anywhere, not just from an already-open shell — complements
     # the zsh zle widget in the dotfiles role's sesh.sh, which only fires once
     # a zsh prompt already exists. xdg-terminal-exec resolves whichever
     # terminal is actually configured, same mechanism Omarchy's own Tmux bind
     # (SUPER ALT, RETURN) uses.
-    - name: "OMARCHY | Compose sesh keybind into native bindings.conf"
+    - name: "OMARCHY | Compose sesh keybind into native bindings.lua"
       ansible.builtin.blockinfile:
-        path: "{{ ansible_facts.user_dir }}/.config/hypr/bindings.conf"
-        marker: "# {mark} dotfiles — personal bindings"
+        path: "{{ ansible_facts.user_dir }}/.config/hypr/bindings.lua"
+        marker: "-- {mark} dotfiles — personal bindings"
         block: |
-          bindd = SUPER ALT, S, Sesh, exec, uwsm-app -- xdg-terminal-exec --dir="$(omarchy-cmd-terminal-cwd)" {{ ansible_facts.user_dir }}/.bin/__sesh_start
+          o.bind("SUPER + ALT + S", "Sesh picker", "uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start")
         create: yes
       tags: [configs]
