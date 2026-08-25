@@ -1,9 +1,14 @@
 #!/bin/bash
-# Omarchy post-update hook — reapplies the dotfiles symlinks after
+# Omarchy post-update hook — clears the pacman package cache (grows fast on
+# a rolling release; has previously filled the disk and broken subsequent
+# pacman/gnupg operations on it), then reapplies the dotfiles symlinks after
 # omarchy-update/omarchy-migrate, in case a config refresh/migration
 # clobbered one written through a symlink into the dotfiles repo.
 # See: Conflito de Configs no Omarchy / Tasks de Implementação (T7).
 set -e
+
+yes | sudo pacman -Scc || true
+sudo rm -rf /var/cache/pacman/pkg/download-* || true
 
 DOTFILES_DIR="$HOME/dotfiles"
 [ -d "$DOTFILES_DIR" ] || exit 0
