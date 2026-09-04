@@ -26,15 +26,25 @@ hl.monitor({ output = "eDP-1", mode = "1366x768@60", position = "2560x0", scale 
 {% endif %}
 
 -- Keyboard + mouse focus behavior
+-- Default layout is br (ABNT2) for the built-in keyboard and anything else
+-- plugged in. Hyprland has no if/else on device presence, so the Bluetooth
+-- keyboard (Logitech MX Keys, wants US intl.) gets its own hl.device()
+-- override below, scoped by device name — the standard way to get a
+-- per-keyboard layout. Find a device's exact name via `hyprctl devices`.
 hl.config({
 	input = {
-		kb_layout = "us",
-		kb_variant = "intl",
-		kb_model = "logitech_base",
-		kb_options = "compose:ralt",
+		kb_layout = "br",
 		follow_mouse = 1,
 		mouse_refocus = false,
 	},
+})
+
+hl.device({
+	name = "mx-keys-keyboard",
+	kb_layout = "us",
+	kb_variant = "intl",
+	kb_model = "logitech_base",
+	kb_options = "compose:ralt",
 })
 
 -- Custom keybinds

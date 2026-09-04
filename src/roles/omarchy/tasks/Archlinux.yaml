@@ -84,6 +84,19 @@
         force: yes
       tags: [configs]
 
+    # input.lua is the same kind of user-owned Omarchy stub as looknfeel.lua
+    # (deployed once at install time, untouched by omarchy-update/-migrate) —
+    # same collision analysis applies, safe to symlink at the file level. Sets
+    # the same br (ABNT2) default + Logitech MX Keys Bluetooth (`us` intl) per-
+    # device override as the hyde role's hyprland.lua.j2 equivalent.
+    - name: "OMARCHY | Symlink input.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/input.lua"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/input.lua"
+        state: link
+        force: yes
+      tags: [configs]
+
     # monitors.lua is host-specific (resolution/position differ per machine),
     # so pick the right source the same way the old `hyde` role did for its
     # monitors_host.conf/monitors_vm.conf pair (values carried over unchanged).
