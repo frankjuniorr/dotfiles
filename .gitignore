@@ -3,6 +3,9 @@ src/roles/tmux/files/tmux/plugins
 src/roles/yazi/files/plugins
 src/roles/yazi/files/package.toml
 
+# compiled spellfile (generated from tech-jargon.utf-8.add — only the .add source is versioned)
+src/roles/neovim/files/spell/*.add.spl
+
 # Personal, machine-local Claude Code settings/instructions (not shared/checked in)
 .claude/
 

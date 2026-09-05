@@ -15,3 +15,8 @@ vim.opt.guicursor = {
 
 -- keep LazyVim's default English dictionary, add Brazilian Portuguese too
 vim.opt.spelllang = { "en", "pt_br" }
+
+-- custom spellfile for day-to-day tech jargon not covered by en/pt_br
+-- (kubernetes, ansible, commitar, etc.) — versioned in the dotfiles repo so it
+-- travels across machines; `zg` on a word appends to this file directly.
+vim.opt.spellfile = vim.fn.stdpath("config") .. "/spell/tech-jargon.utf-8.add"
