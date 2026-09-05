@@ -12,3 +12,6 @@ vim.opt.guicursor = {
 	"r-cr:hor20", -- underline nos modos replace
 	"o:hor50", -- underline em operator-pending
 }
+
+-- keep LazyVim's default English dictionary, add Brazilian Portuguese too
+vim.opt.spelllang = { "en", "pt_br" }
