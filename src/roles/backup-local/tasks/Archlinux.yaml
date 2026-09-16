@@ -1,0 +1,17 @@
+---
+- name: "BACKUP-LOCAL | Stat backup-local Dropbox folder"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/Dropbox/code/03.backup/backup-local/Justfile"
+  register: backup_local_justfile_stat
+
+- name: "BACKUP-LOCAL | Warn if Dropbox folder not synced yet"
+  ansible.builtin.debug:
+    msg: "Dropbox not synced yet, skipping backup-local install (~/Dropbox/code/03.backup/backup-local/Justfile not found)."
+  when: not backup_local_justfile_stat.stat.exists
+
+- name: "BACKUP-LOCAL | Build and install via just"
+  ansible.builtin.command:
+    cmd: just install
+    chdir: "{{ ansible_facts.user_dir }}/Dropbox/code/03.backup/backup-local"
+  when: backup_local_justfile_stat.stat.exists
+  changed_when: true

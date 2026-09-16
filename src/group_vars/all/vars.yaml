@@ -97,6 +97,9 @@ default_roles:
   - spotify
   - obsidian
 
+  # Personal tooling (depends on dropbox/insync being synced and go/just being present)
+  - backup-local
+
   # Environment
   - dotfiles
   - hyde        # HyDE (Arch + Hyprland) — no-op on Omarchy/Ubuntu
