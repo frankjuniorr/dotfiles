@@ -21,6 +21,7 @@ alias back="cd -"
 alias ls='eza --icons=auto'
 alias ll='eza -la --icons=auto'
 alias lt='eza --tree --level=2 --icons=auto'
+alias ls-tree='eza --icons=auto --tree --level=3 --only-dirs'
 
 # grep padrão com cores automáticas
 alias grep='grep --color=auto'
