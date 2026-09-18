@@ -26,10 +26,10 @@
     - "{{ ansible_facts.user_dir }}/.config/sesh"
   tags: [configs]
 
-- name: "SESH | Copy sesh config"
+- name: "SESH | Symlink sesh.toml"
   ansible.builtin.file:
-    src: "{{ role_path }}/files"
-    dest: "{{ ansible_facts.user_dir }}/.config/sesh"
+    src: "{{ role_path }}/files/sesh.toml"
+    dest: "{{ ansible_facts.user_dir }}/.config/sesh/sesh.toml"
     state: link
     force: yes
   tags: [configs]
