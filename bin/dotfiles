@@ -63,6 +63,12 @@ function print_message() {
   gum style --bold --foreground="#FFFFFF" "$message"
 }
 
+function print_warning() {
+  local message="$1"
+
+  gum style --bold --foreground="#FFA500" --border normal --border-foreground="#FFA500" --padding "0 1" "$message"
+}
+
 function loading() {
   local title="$1"
   local command="$2"
@@ -101,10 +107,10 @@ function print_stats() {
   os_pretty_name=$(grep "^PRETTY_NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
   dotfiles_stats_file="/tmp/dotfiles-stats.csv"
 
-  echo "Dotfiles,$DOTFILES_VERSION" >"$dotfiles_stats_file"
-  echo "Distro Linux,$os_pretty_name" >>"$dotfiles_stats_file"
-  echo "Mode,${MODE:-auto}" >>"$dotfiles_stats_file"
-  echo "Role,$TAG_NAME" >>"$dotfiles_stats_file"
+  echo "Dotfiles,\"$DOTFILES_VERSION\"" >"$dotfiles_stats_file"
+  echo "Distro Linux,\"$os_pretty_name\"" >>"$dotfiles_stats_file"
+  echo "Mode,\"${MODE:-auto}\"" >>"$dotfiles_stats_file"
+  echo "Role,\"$TAG_NAME\"" >>"$dotfiles_stats_file"
 
   gum table --border rounded --print --file "$dotfiles_stats_file"
 }
@@ -176,7 +182,24 @@ function arch_setup() {
   sudo -v
   start_sudo_keepalive
 
-  if ! type yay >/dev/null 2>&1; then
+  # Omarchy now ships its own pre-transaction pacman hook that flat-out
+  # refuses a direct full-system-upgrade transaction ("Woah partner... This
+  # looks like a direct pacman system upgrade") whenever there's anything
+  # to actually upgrade — confirmed live: `yay -Syu --noconfirm` here fails
+  # with "failed to commit transaction (failed to run transaction hooks)"
+  # and, since this whole script runs under `set -e`, that non-zero exit
+  # from `loading()` silently kills the ENTIRE `bin/dotfiles` run right here
+  # — before Ansible ever starts, no matter which role/tag was requested.
+  # Omarchy already owns full-system updates via `omarchy-update`/
+  # `omarchy update`, so skip this step entirely under omarchy_mode instead
+  # of fighting it; the targeted single/few-package `pacman -S`/`yay -S`
+  # installs below and throughout the rest of this repo are unaffected —
+  # confirmed the hook only blocks full-system-upgrade transactions, not
+  # targeted package installs (every other pacman/yay task in this repo
+  # keeps working fine).
+  if [ "$MODE" = "omarchy" ]; then
+    print_message "Skipping full system upgrade (Omarchy manages this itself — run 'omarchy update' separately if needed)"
+  elif ! type yay >/dev/null 2>&1; then
     loading "Update System" "sudo pacman -Sy --noconfirm"
   else
     loading "Update System" "yay -Syu --noconfirm --answerclean None --answerdiff None --answeredit None"
@@ -216,7 +239,6 @@ os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
 check_dependencies
 
 show_header
-print_stats
 
 # --mode bypasses /etc/os-release detection: Omarchy is Arch-based but may not
 # report NAME="Arch Linux", so an explicit --mode omarchy always takes the Arch path.
@@ -241,8 +263,11 @@ ubuntu)
       ubuntu_setup
     fi
     ;;
-  "Arch Linux")
+  "Arch Linux" | Omarchy)
     os_color="#1793D1"
+    # Omarchy reports NAME="Omarchy", not "Arch Linux" — auto-detect it here too
+    # instead of requiring an explicit --mode omarchy, same effect either way.
+    [ "$os_name" = "Omarchy" ] && MODE="omarchy"
     if [ "$TAG_NAME" = "all" ]; then
       arch_setup
     fi
@@ -254,6 +279,8 @@ ubuntu)
   esac
   ;;
 esac
+
+print_stats
 
 # shellcheck disable=SC2069
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
@@ -275,14 +302,65 @@ print_message "Running playbook"
 # Ansible's interactive prompt code path entirely, so the bug never triggers.
 # Passed via a temp vars file (not `-e ansible_become_pass=...` on argv) so it
 # never shows up in `ps aux`.
+# Drain any stray bytes already sitting in the input buffer before reading
+# the password. Root cause confirmed live: gum's stats-table rendering just
+# above emits terminal capability queries (synchronized-output/grapheme-
+# clustering escape sequences, e.g. "\e[?2026$p"); the terminal's own
+# escape-sequence *response* to those queries (e.g. "\e[?2026;2$y") can
+# still be in flight when this script hands control to the `read` below,
+# and that whole response payload then lands inside $BECOME_PASS ahead of
+# the real password. That corrupts the become-pass temp file's YAML and
+# produces a very confusing failure right at Ansible startup: "Failed to
+# parse inventory with 'ini' plugin ... YAML parsing failed" (either an
+# "unacceptable character #x001b" or, once the ESC byte itself is stripped,
+# a "did not find expected ',' or ']'" from the leftover "[?2026;2$y..."
+# text) — pointing at the temp file's /tmp path, NOT actually an
+# inventory/hosts.ini problem (ansible-core's extra-vars-file loader shares
+# the same parser/error path as inventory parsing, so the real cause gets
+# misreported as an inventory failure). A plain `while read -t 0` drain
+# loop spun forever on this VM's pty (some bash/tty combinations always
+# report "readable" for `-t 0`), so this uses a real bounded timeout per
+# iteration instead — each pass either drains whatever is buffered or
+# times out in 30ms, capped at 5 passes (~0.15s worst case when there's
+# nothing to drain, the common case for a human typing at normal speed).
+for _ in 1 2 3 4 5; do
+  read -r -t 0.03 -n 4096 _drain 2>/dev/null || break
+done
+
 read -rs -p "BECOME password: " BECOME_PASS
 echo
+# Defense in depth on top of the drain above: strip any control characters
+# that still made it through — a corrupted value silently breaking the
+# whole playbook run is worse than trimming a rogue byte from it.
+BECOME_PASS="$(printf '%s' "$BECOME_PASS" | tr -d '[:cntrl:]')"
 BECOME_PASS_FILE=$(mktemp)
 chmod 600 "$BECOME_PASS_FILE"
 printf 'ansible_become_pass: %s\n' "$BECOME_PASS" >"$BECOME_PASS_FILE"
 unset BECOME_PASS
 
-cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook -e "@${BECOME_PASS_FILE}" --vault-password-file "$HOME/.config/homelab-iac/.vault_pass" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
+cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook -e "@${BECOME_PASS_FILE}" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
+
+# The git/dotfiles roles' GitHub token + SSH-signing-key tasks are gated on a
+# live `op whoami` (see src/roles/{git,dotfiles}/tasks/main.yaml) rather than
+# the old Ansible-Vault vars — they silently no-op when 1Password isn't
+# authenticated instead of failing the whole run. Remind here so that
+# silence doesn't get forgotten about, e.g. right after a fresh machine
+# format. Only relevant when this run actually touched those roles.
+tag_is_relevant() {
+  [ "$TAG_NAME" = "all" ] && return 0
+  local tag
+  IFS=',' read -ra __dotfiles_tags <<<"$TAG_NAME"
+  for tag in "${__dotfiles_tags[@]}"; do
+    [ "$tag" = "git" ] || [ "$tag" = "dotfiles" ] && return 0
+  done
+  return 1
+}
+
+if tag_is_relevant && { ! command -v op >/dev/null 2>&1 || ! op whoami >/dev/null 2>&1; }; then
+  print_warning "1Password not authenticated — GitHub token (gh CLI) and commit-signing config were skipped.
+To finish setup: log into 1Password, enable its SSH Agent (Settings → Developer → Use the SSH Agent), make sure your SSH key is in the vault, then re-run:
+  bin/dotfiles \"git\" && bin/dotfiles \"dotfiles\""
+fi
 
 # shellcheck disable=SC2069
 popd 2>&1 >/dev/null
