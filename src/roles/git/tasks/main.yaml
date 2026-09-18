@@ -20,11 +20,34 @@
     - "{{ ansible_facts.user_dir }}/.config/git"
   tags: [configs]
 
+# Live 1Password read replaces the old Ansible-Vault-sourced
+# vault_github_ssh_public_key. Gated on `op whoami` rather than assuming `op`
+# is authenticated: on a machine/VM where 1Password hasn't been signed into
+# (e.g. this repo's Omarchy test VM, by design), these two tasks no-op
+# instead of hard-failing the whole playbook the way a missing
+# --vault-password-file used to.
+- name: "GIT | Check 1Password CLI auth"
+  ansible.builtin.command: op whoami
+  register: op_status
+  changed_when: false
+  failed_when: false
+  tags: [configs]
+
+- name: "GIT | Read SSH signing key from 1Password"
+  ansible.builtin.command: op read "op://Personal/GitHub SSH/public_key"
+  register: op_ssh_key
+  when: op_status.rc == 0
+  changed_when: false
+  no_log: true
+  tags: [configs]
+
 - name: "GIT | Copy the credential file"
   ansible.builtin.template:
     src: "git-credentials-personal.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/git/.git-credentials-personal"
-  when: vault_github_ssh_public_key is defined
+  vars:
+    vault_github_ssh_public_key: "{{ op_ssh_key.stdout }}"
+  when: op_status.rc == 0
   tags: [configs]
 
 - name: "GIT | Create symbolic links"

@@ -71,11 +71,32 @@
     force: yes
   tags: [configs]
 
+# Live 1Password read replaces the old Ansible-Vault-sourced vault_github_token
+# — same gate-on-`op whoami` pattern as the git role, so a machine/VM without
+# 1Password signed in just skips this task instead of the whole playbook
+# failing on a missing --vault-password-file.
+- name: "DOTFILES | Check 1Password CLI auth"
+  ansible.builtin.command: op whoami
+  register: op_status
+  changed_when: false
+  failed_when: false
+  tags: [configs]
+
+- name: "DOTFILES | Read GitHub token from 1Password"
+  ansible.builtin.command: op read "op://Personal/Github Token/credential"
+  register: op_github_token
+  when: op_status.rc == 0
+  changed_when: false
+  no_log: true
+  tags: [configs]
+
 - name: "DOTFILES | generate private environment variables"
   ansible.builtin.template:
     src: "private-env.sh.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/dotfiles/private-env.sh"
-  when: vault_github_token is defined
+  vars:
+    vault_github_token: "{{ op_github_token.stdout }}"
+  when: op_status.rc == 0
   tags: [configs]
 
 - name: "DOTFILES | Ensure systemd user directory exists"

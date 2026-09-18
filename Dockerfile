@@ -18,12 +18,8 @@ USER ${USER}
 WORKDIR /home/${USER}
 
 # All provisioning in one layer so cleanup actually reduces image size
-# --mount=type=secret exposes the vault password only during this RUN step;
-# it is never written to any image layer and does not appear in docker history.
-# vault_pass is optional: vault.yml is excluded via .dockerignore so CI builds work without it.
 # hadolint ignore=DL3003,DL3004,SC2015
-RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,required=false \
-    set -eo pipefail && \
+RUN set -eo pipefail && \
     # Install AUR helper — build from source (avoids yay-bin's GitHub binary download, which can 502)
     sudo pacman -Sy --noconfirm --needed git go && \
     git clone https://aur.archlinux.org/yay.git /tmp/yay && \
@@ -35,16 +31,15 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,re
     ansible-galaxy collection install community.general && \
     ansible-galaxy install -r ~/.dotfiles/src/requirements/common.yml && \
     \
-    # Run playbook — CLI roles only. vault.yml is excluded via .dockerignore, so
-    # vault-sourced vars (vault_github_token, vault_github_ssh_public_key) stay
-    # undefined here and the tasks that need them skip themselves accordingly.
+    # Run playbook — CLI roles only. The git/dotfiles roles' GitHub-token and
+    # SSH-signing-key tasks are gated on a live `op whoami` (1Password CLI) —
+    # there's no 1Password session inside this build container, so `op` is
+    # either absent or unauthenticated and those two tasks just skip
+    # themselves, same as any machine without 1Password signed in.
     cd ~/.dotfiles/src && \
-    VAULT_OPT="" && \
-    if [ -f /run/secrets/vault_pass ]; then VAULT_OPT="--vault-password-file /run/secrets/vault_pass"; fi && \
     ANSIBLE_STDOUT_CALLBACK=default \
     ansible-playbook -i hosts.ini main.yml \
         --tags "cli" \
-        ${VAULT_OPT} \
         -e '{"is_docker_build": true}' && \
     \
     # Remove Ansible and its galaxy collections (build-time only)
