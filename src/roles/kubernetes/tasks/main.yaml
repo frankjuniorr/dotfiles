@@ -15,9 +15,16 @@
     path: "/usr/local/bin/k3d"
   register: k3d_bin
 
+# k3d's own install.sh does an internal `sudo mv` with no controlling tty when
+# piped straight into bash — same "bare sudo has no pty inside an Ansible shell
+# task" issue as the yay/AUR installs. `script -qec` allocates a pty for the
+# whole wrapped command so the primed ticket (via stdin) and the later
+# privileged use share the same tty — see the google-chrome role for the full
+# explanation.
 - name: "K3D | Install"
-  ansible.builtin.shell: "wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash' /dev/null"
   when: not k3d_bin.stat.exists
+  no_log: true
 
 - name: "K9S | Refresh {{ ansible_facts.user_dir }}/.config/k9s folder"
   ansible.builtin.file:
