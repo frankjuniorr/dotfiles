@@ -25,6 +25,7 @@
     - zip                 # for compact files
     - unrar               # for compact files
     - "duf"               # Better 'df' alternative
+    - tree                # directory listing as a tree (fallback for eza --tree in cf.sh)
 
 - name: "{{ ansible_facts.distribution }} | Install packages already in Omarchy"
   become: true
@@ -57,6 +58,7 @@
   when: not (is_docker_build | default(false))
   loop:
     - virt-viewer         # used by SPICE on Proxmox
+    - ddcui               # GUI to control brightness for external monitors — now in the official `extra` repo, no longer AUR-only
 
 - name: "{{ ansible_facts.distribution }} | Install GUI packages already in Omarchy"
   become: true
@@ -77,11 +79,4 @@
   when:
     - not (is_docker_build | default(false))
     - not (omarchy_mode | default(false))
-  no_log: true
-
-- name: "{{ ansible_facts.distribution }} | install AUR GUI packages"
-  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None {{ item }}' /dev/null"
-  when: not (is_docker_build | default(false))
-  loop:
-    - "ddcui"             # GUI to control brightness for external monitors
   no_log: true
