@@ -1,10 +1,15 @@
 ---
 # On Omarchy, use the CLI wrapper — it also installs dropbox-cli, libappindicator-gtk3,
-# python-gpgme and nautilus-dropbox, and wires up the systemd service.
+# python-gpgme and nautilus-dropbox, and enables the Quickshell tray plugin.
+# `omarchy-install-dropbox` was renamed `omarchy-install-service-dropbox`
+# (rolling-release drift, same class as the browser CLI rename) — confirmed
+# live on the VM: the old name is gone (`command not found`), current
+# binaries under /usr/share/omarchy/bin are omarchy-install-service-dropbox /
+# omarchy-installed-service-dropbox / omarchy-remove-service-dropbox.
 # script -qec gives the wrapper's internal sudo call a tty to read the primed
 # ticket from — see the google-chrome role for the full explanation.
 - name: "DROPBOX | Install via Omarchy CLI"
-  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-dropbox' /dev/null"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-service-dropbox' /dev/null"
   args:
     creates: /usr/bin/dropbox
   when: omarchy_mode | default(false)
