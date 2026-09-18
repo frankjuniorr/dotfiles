@@ -5,4 +5,4 @@ windows:
   - code: $EDITOR .
   - git: lazygit
   - servers: sshs --config ~/.ssh/config
-  - IA: claude
+  - IA: claude --continue

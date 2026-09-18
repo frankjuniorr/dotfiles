@@ -4,4 +4,4 @@ root: /home/frank/Dropbox/code/01.github/projects/ai-dotfiles
 windows:
   - code: $EDITOR .
   - git: lazygit
-  - IA: claude
+  - IA: claude --continue

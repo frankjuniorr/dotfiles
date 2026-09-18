@@ -5,4 +5,4 @@ windows:
   - code: $EDITOR .
   - git: lazygit
   - cmd: flow browse --workspace dotfiles
-  - IA: claude
+  - IA: claude --continue
