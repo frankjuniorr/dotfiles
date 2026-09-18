@@ -135,6 +135,42 @@
         path: "{{ ansible_facts.user_dir }}/.config/hypr/bindings.lua"
         marker: "-- {mark} dotfiles — personal bindings"
         block: |
-          o.bind("SUPER + ALT + S", "Sesh picker", "uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start")
+          o.bind("SUPER + ALT + P", "Sesh picker", "uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start")
+        create: yes
+      tags: [configs]
+
+    # The Super+K cheatsheet (omarchy-menu-keybindings) needs no entry here:
+    # it derives its list live from `hyprctl binds` (with a Lua-source
+    # rescan only to recover dispatcher metadata `hyprctl` can't report for
+    # Lua binds) — any o.bind() call with a non-nil description, like the
+    # Sesh picker above, is picked up automatically once Hyprland reloads
+    # the config. Confirmed live on the VM: `omarchy-menu-keybindings
+    # --print` lists "SUPER ALT + P → Sesh picker" with no extra
+    # registration. No file for this role to own/collide with.
+    #
+    # Super+Space's Omarchy root menu is a Quickshell plugin (Menu.qml) that
+    # merges two JSONC sources at render time: Omarchy's own
+    # default/omarchy/omarchy-menu.jsonc (untouched by us) and the sanctioned
+    # user overlay at ~/.config/omarchy/extensions/omarchy-menu.jsonc — the
+    # same compose-over-overwrite extension point as hooks/ and themed/*.tpl.
+    # Checked `rg extensions /usr/share/omarchy/migrations` and
+    # `omarchy-refresh-config`'s own target list on the VM: neither ever
+    # touches this path, so — unlike fastfetch/git/btop — there's no
+    # `omarchy-update` clobber risk here and no post-update hook re-apply is
+    # needed. Composed via blockinfile (not a full symlink) because Omarchy
+    # seeds this file once at install with its own commented usage
+    # instructions, which are worth preserving, same rationale as
+    # bindings.lua above. Dotted ids ("dotfiles.run") nest under the
+    # "dotfiles" parent id automatically; trailing commas are explicitly
+    # supported by this JSONC parser.
+    - name: "OMARCHY | Compose Dotfiles entry into Omarchy root menu"
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/omarchy/extensions/omarchy-menu.jsonc"
+        marker: "  // {mark} dotfiles — personal menu entries"
+        insertbefore: "^}$"
+        block: |2
+            "dotfiles": {"icon":"","label":"Dotfiles"},
+            "dotfiles.run": {"icon":"","label":"Rodar bin/dotfiles","action":"uwsm-app -- xdg-terminal-exec --dir=\"{{ ansible_facts.user_dir }}/dotfiles\" bin/dotfiles"},
+            "dotfiles.sesh": {"icon":"","label":"Sesh picker","action":"uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start"},
         create: yes
       tags: [configs]
