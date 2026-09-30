@@ -84,27 +84,33 @@
         force: yes
       tags: [configs]
 
-    # input.lua is the same kind of user-owned Omarchy stub as looknfeel.lua
-    # (deployed once at install time, untouched by omarchy-update/-migrate) —
-    # same collision analysis applies, safe to symlink at the file level. Sets
-    # the same br (ABNT2) default + Logitech MX Keys Bluetooth (`us` intl) per-
-    # device override as the hyde role's hyprland.lua.j2 equivalent.
-    - name: "OMARCHY | Symlink input.lua"
-      ansible.builtin.file:
-        src: "{{ role_path }}/files/hypr/input.lua"
-        dest: "{{ ansible_facts.user_dir }}/.config/hypr/input.lua"
-        state: link
-        force: yes
-      tags: [configs]
-
-    # monitors.lua is host-specific (resolution/position differ per machine),
-    # so pick the right source the same way the old `hyde` role did for its
-    # monitors_host.conf/monitors_vm.conf pair (values carried over unchanged).
+    # input.lua and monitors.lua are both host-specific (keyboard layout and
+    # resolution/position differ per machine), so detect VM vs host once here
+    # and pick the right source for both — same approach the old `hyde` role
+    # used for its monitors_host.conf/monitors_vm.conf pair.
     - name: "OMARCHY | Detect system: VM or Host"
       ansible.builtin.shell: systemd-detect-virt
       register: omarchy_virt_type
       changed_when: false
       ignore_errors: yes
+      tags: [configs]
+
+    # input.lua is the same kind of user-owned Omarchy stub as looknfeel.lua
+    # (deployed once at install time, untouched by omarchy-update/-migrate) —
+    # same collision analysis applies, safe to symlink at the file level.
+    # input_host.lua sets the br (ABNT2) default + Logitech MX Keys Bluetooth
+    # (`us` intl) per-device override (same as the hyde role's
+    # hyprland.lua.j2 equivalent); input_vm.lua just defaults straight to `us`
+    # — a VM (SPICE/QEMU virtual keyboard) has neither the physical BR
+    # keyboard nor the Bluetooth MX Keys, so the host's br-default-plus-
+    # override pair doesn't apply and was showing up as an unwanted PT-BR
+    # layout on the VM before this split.
+    - name: "OMARCHY | Symlink input.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/{{ 'input_vm.lua' if omarchy_virt_type.stdout != 'none' else 'input_host.lua' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/input.lua"
+        state: link
+        force: yes
       tags: [configs]
 
     - name: "OMARCHY | Symlink monitors.lua"
