@@ -3,4 +3,20 @@
 # from — see the google-chrome role for the full explanation.
 - name: "SOLAAR | install"
   ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None solaar-git' /dev/null"
+  when: not (omarchy_mode | default(false))
   no_log: true
+
+# CAUTION: unlike our own yay -S calls, omarchy-pkg-aur-add does not pass
+# --answerclean/--answerdiff/--answeredit — the exact flags added elsewhere
+# in this repo to fix a real hang from yay's interactive
+# cleanBuild/diff/PKGBUILD-edit prompts. solaar-git is a VCS (-git) package
+# that rebuilds from source on every update, making it one of the more
+# plausible packages to actually hit one of those prompts. Not verified
+# against a real Omarchy machine yet (test VM was offline during this
+# change) — if this hangs in practice, report back rather than assuming it's
+# fine.
+- name: "SOLAAR | install via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [solaar-git]
+    omarchy_pkg_aur: true

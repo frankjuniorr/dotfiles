@@ -7,6 +7,14 @@
       - helm
       - k9s
     state: present
+  when: not (omarchy_mode | default(false))
+
+# (Not to be confused with the k3d install task in tasks/main.yaml, which has
+# its own separate sudo-pty fix and is untouched here.)
+- name: "Kubernetes tools | Install kubectl, helm, k9s via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [kubectl, helm, k9s]
 
 - name: "KUBECOLOR | Check if installed"
   ansible.builtin.stat:

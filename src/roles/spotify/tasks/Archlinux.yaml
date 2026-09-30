@@ -12,6 +12,13 @@
   community.general.pacman:
     name: cava
     state: present
+  when: not (omarchy_mode | default(false))
+
+# cava is an official-repo package and isn't shipped by Omarchy.
+- name: "SPOTIFY | Install remaining packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [cava]
 
 - name: "SPOTIFY | Ensure config directory exists"
   ansible.builtin.file:

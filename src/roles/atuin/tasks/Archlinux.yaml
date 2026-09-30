@@ -4,3 +4,9 @@
   community.general.pacman:
     name: atuin
     state: present
+  when: not (omarchy_mode | default(false))
+
+- name: "ATUIN | install via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [atuin]

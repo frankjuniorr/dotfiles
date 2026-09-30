@@ -26,6 +26,12 @@
     - unrar               # for compact files
     - "duf"               # Better 'df' alternative
     - tree                # directory listing as a tree (fallback for eza --tree in cf.sh)
+  when: not (omarchy_mode | default(false))
+
+- name: "{{ ansible_facts.distribution }} | Install packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [stow, curl, wget, yq, ffmpeg, ncdu, figlet, bc, sshs, zip, unrar, duf, tree]
 
 - name: "{{ ansible_facts.distribution }} | Install packages already in Omarchy"
   become: true
@@ -55,10 +61,20 @@
   community.general.pacman:
     name: "{{ item }}"
     state: present
-  when: not (is_docker_build | default(false))
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
   loop:
     - virt-viewer         # used by SPICE on Proxmox
     - ddcui               # GUI to control brightness for external monitors — now in the official `extra` repo, no longer AUR-only
+
+# ddcui — GUI to control brightness for external monitors — now in the
+# official `extra` repo, no longer AUR-only.
+- name: "{{ ansible_facts.distribution }} | Install GUI packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [virt-viewer, ddcui]
+  when: not (is_docker_build | default(false))
 
 - name: "{{ ansible_facts.distribution }} | Install GUI packages already in Omarchy"
   become: true

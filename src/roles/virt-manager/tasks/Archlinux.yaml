@@ -15,6 +15,12 @@
     - guestfs-tools
     - libosinfo
     - tuned
+  when: not (omarchy_mode | default(false))
+
+- name: "VIRT-MANAGER | Install via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [qemu-full, libvirt, virt-manager, virt-viewer, edk2-ovmf, dnsmasq, swtpm, guestfs-tools, libosinfo, tuned]
 
 - name: "VIRT-MANAGER | Ensure that images directory exists"
   become: yes

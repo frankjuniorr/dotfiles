@@ -18,3 +18,9 @@
   loop:
     - git-delta       # for diffs (see more: https://github.com/dandavison/delta)
     - meld            # for diffs in GUI
+  when: not (omarchy_mode | default(false))
+
+- name: "GIT | Install remaining packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [git-delta, meld]

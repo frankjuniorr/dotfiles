@@ -18,6 +18,12 @@
     # - zoxide
     - ueberzugpp
     # - imagemagick
+  when: not (omarchy_mode | default(false))
+
+- name: "YAZI | install via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [yazi, 7zip, poppler, glow, ueberzugpp]
 
 - name: "YAZI | install ripgrep (already in Omarchy)"
   become: true

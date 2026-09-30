@@ -7,7 +7,29 @@
   retries: 3
   delay: 10
   until: sesh_install.rc == 0
+  when: not (omarchy_mode | default(false))
   no_log: true
+
+# NOTE: unlike our own yay -S calls, omarchy-pkg-aur-add does not pass
+# --answerclean/--answerdiff/--answeredit, so it could in principle hang on a
+# package whose PKGBUILD triggers one of yay's interactive prompts — flagged,
+# not expected to bite sesh-bin (a plain prebuilt binary package, `-bin`
+# suffix).
+#
+# retries/delay are passed through to the shared task file as
+# omarchy_pkg_retries/omarchy_pkg_delay rather than set directly on this
+# include_tasks call — Ansible rejects `until`/`retries` as attributes of a
+# TaskInclude ("'until' is not a valid attribute for a TaskInclude"), so the
+# actual retry loop lives on the shell task inside omarchy_pkg.yml, opt-in
+# via these vars. Every other caller of that shared file gets the default of
+# 1 attempt (no retry), unaffected by this.
+- name: "SESH | install via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [sesh-bin]
+    omarchy_pkg_aur: true
+    omarchy_pkg_retries: 3
+    omarchy_pkg_delay: 10
 
 - name: "SESH | Refresh {{ ansible_facts.user_dir }}/.config/sesh folder"
   ansible.builtin.file:
