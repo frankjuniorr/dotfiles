@@ -13,10 +13,15 @@ fi
 # Omarchy compensations — chsh to zsh loses the omarchy-* PATH and mise init
 # that Omarchy's own bash rc provides. Guarded: this file also runs in the
 # busybox container and on Ubuntu, where Omarchy doesn't exist.
-if [ -d "$HOME/.local/share/omarchy/bin" ]; then
-  export OMARCHY_PATH="$HOME/.local/share/omarchy"
-  path=("$OMARCHY_PATH/bin" $path)
-fi
+# Omarchy moved from ~/.local/share/omarchy to /usr/share/omarchy; try both.
+for _omarchy_dir in /usr/share/omarchy "$HOME/.local/share/omarchy"; do
+  if [ -d "$_omarchy_dir/bin" ]; then
+    export OMARCHY_PATH="$_omarchy_dir"
+    path=("$OMARCHY_PATH/bin" $path)
+    break
+  fi
+done
+unset _omarchy_dir
 
 if which mise > /dev/null 2>&1; then
   eval "$(mise activate zsh)"

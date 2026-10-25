@@ -1,5 +1,12 @@
 ---
-# Omarchy ships 1Password (beta + CLI) in the base ISO — skip install, still configure below.
+# Omarchy ships the 1Password GUI in the base ISO but NOT the CLI (`op`), which the
+# git/dotfiles roles need for `op read` — install it explicitly (1password-cli is
+# in the omarchy repo, so no AUR). Non-Omarchy hosts get both via the block below.
+- name: "1PASSWORD | Install 1password-cli (op) via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [1password-cli]
+
 - name: "1PASSWORD | Install on Arch Linux"
   when: not (omarchy_mode | default(false))
   block:

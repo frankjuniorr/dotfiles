@@ -19,6 +19,11 @@
     # allocates a pty for the whole wrapped command so the prime (piped in via
     # stdin) and the later privileged use share the same tty — same technique
     # Omarchy's own omarchy-update script uses.
+    - name: "OMARCHY | Install bluetui"
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+      vars:
+        omarchy_pkg_names: [bluetui]
+
     - name: "OMARCHY | Install Google Chrome"
       ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-browser chrome' /dev/null"
       args:

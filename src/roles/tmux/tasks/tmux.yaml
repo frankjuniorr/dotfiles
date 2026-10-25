@@ -74,7 +74,7 @@
 
 - name: "Tmux | Restore Omarchy's native tmux.conf if missing (omarchy_mode)"
   ansible.builtin.copy:
-    src: "{{ ansible_facts.user_dir }}/.local/share/omarchy/config/tmux/tmux.conf"
+    src: "{{ lookup('ansible.builtin.env', 'OMARCHY_PATH') | default('/usr/share/omarchy', true) }}/config/tmux/tmux.conf"
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/tmux.conf"
     remote_src: yes
     force: no
@@ -82,7 +82,7 @@
   tags: [configs]
 
 # Omarchy owns ~/.config/tmux/tmux.conf as a real file (copied from
-# ~/.local/share/omarchy/config/tmux/tmux.conf by omarchy-refresh-tmux and
+# $OMARCHY_PATH/config/tmux/tmux.conf (/usr/share/omarchy on current installs) by omarchy-refresh-tmux and
 # reapplied on updates) and it "follows the theme" by inheriting the
 # terminal's ANSI palette (fg=blue, bg=default, etc — no fixed hex), not by
 # being rewritten by Omarchy's theme engine (confirmed the 18 `default/themed/*.tpl`
