@@ -341,7 +341,7 @@ unset BECOME_PASS
 cd "${DOTFILES_DIR}/src" >/dev/null && ansible-playbook -e "@${BECOME_PASS_FILE}" -i hosts.ini "main.yml" --tags "$TAG_NAME" "${EXTRA_VARS_ARGS[@]}"
 
 # The git/dotfiles roles' GitHub token + SSH-signing-key tasks are gated on a
-# live `op whoami` (see src/roles/{git,dotfiles}/tasks/main.yaml) rather than
+# live `op vault list` (see src/roles/{git,dotfiles}/tasks/main.yaml) rather than
 # the old Ansible-Vault vars — they silently no-op when 1Password isn't
 # authenticated instead of failing the whole run. Remind here so that
 # silence doesn't get forgotten about, e.g. right after a fresh machine
@@ -356,7 +356,7 @@ tag_is_relevant() {
   return 1
 }
 
-if tag_is_relevant && { ! command -v op >/dev/null 2>&1 || ! op whoami >/dev/null 2>&1; }; then
+if tag_is_relevant && { ! command -v op >/dev/null 2>&1 || ! op vault list >/dev/null 2>&1; }; then
   print_warning "1Password not authenticated — GitHub token (gh CLI) and commit-signing config were skipped.
 To finish setup: log into 1Password, enable its SSH Agent (Settings → Developer → Use the SSH Agent), make sure your SSH key is in the vault, then re-run:
   bin/dotfiles \"git\" && bin/dotfiles \"dotfiles\""

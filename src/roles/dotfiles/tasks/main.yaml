@@ -72,11 +72,11 @@
   tags: [configs]
 
 # Live 1Password read replaces the old Ansible-Vault-sourced vault_github_token
-# — same gate-on-`op whoami` pattern as the git role, so a machine/VM without
+# — same gate-on-`op vault list` pattern as the git role, so a machine/VM without
 # 1Password signed in just skips this task instead of the whole playbook
 # failing on a missing --vault-password-file.
 - name: "DOTFILES | Check 1Password CLI auth"
-  ansible.builtin.command: op whoami
+  ansible.builtin.command: op vault list
   register: op_status
   changed_when: false
   failed_when: false
