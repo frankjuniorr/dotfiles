@@ -4,6 +4,8 @@
 
 [[session]]
 name = "Downloads folder"
+alias = "dl"
+alias_auto_connect = true
 path = "~/Downloads"
 startup_command = "y ~/Downloads"
 preview_command = "eza --tree --level=2 --icons=auto ~/Downloads/"
@@ -11,18 +13,24 @@ preview_command = "eza --tree --level=2 --icons=auto ~/Downloads/"
 
 [[session]]
 name = "Cockpit"
+alias = "ck"
+alias_auto_connect = true
 path = "~"
 startup_command = "flow ls"
 preview_command = "bat --color always ~/.config/flow/config.yaml"
 
 [[session]]
 name = "Dropbox folder"
+alias = "dbx"
+alias_auto_connect = true
 path = "~/Dropbox"
 startup_command = "y ~/Dropbox"
 preview_command = "eza --tree --level=2 --icons=auto ~/Dropbox"
 
 [[session]]
 name = "Code folder"
+alias = "cf"
+alias_auto_connect = true
 path = "~/Dropbox/code folder"
 startup_command = "y ~/Dropbox/code"
 preview_command = "eza --tree --level=2 --icons=auto ~/Dropbox/code"
@@ -32,6 +40,8 @@ preview_command = "eza --tree --level=2 --icons=auto ~/Dropbox/code"
 #############################################################
 [[session]]
 name = "tmuxinator config"
+alias = "tx"
+alias_auto_connect = true
 path = "~/.config/tmuxinator"
 startup_command = "nvim ."
 windows = [ "git" ]
@@ -39,17 +49,23 @@ windows = [ "git" ]
 
 [[session]]
 name = "Alias config"
+alias = "ac"
+alias_auto_connect = true
 path = "~/.config/dotfiles/"
 startup_command = "nvim ."
 
 
 [[session]]
 name = "tmux config"
+alias = "tc"
+alias_auto_connect = true
 path = "~/.config/tmux"
 startup_command = "nvim ."
 
 [[session]]
 name = "neovim config"
+alias = "vc"
+alias_auto_connect = true
 path = "~/.config/nvim"
 startup_command = "nvim ."
 preview_command = "eza --tree --level=3 --icons=auto ~/.config/nvim"
@@ -57,6 +73,8 @@ windows = [ "git" ]
 
 [[session]]
 name = "sesh config"
+alias = "ss"
+alias_auto_connect = true
 path = "~/.config/sesh"
 startup_command = "nvim ~/.config/sesh/sesh.toml"
 preview_command = "bat --color=always ~/.config/sesh/sesh.toml"
@@ -64,6 +82,8 @@ windows = [ "git" ]
 
 [[session]]
 name = "navi config"
+alias = "nc"
+alias_auto_connect = true
 path = "~/.config/navi"
 startup_command = "nvim ~/.config/navi/"
 preview_command = "eza --tree --level=2 --icons=auto ~/.config/navi"
@@ -71,6 +91,8 @@ windows = [ "git" ]
 
 [[session]]
 name = "claude config"
+alias = "cc"
+alias_auto_connect = true
 path = "~/.claude"
 startup_command = "nvim ~/.claude/"
 preview_command = "eza --tree --level=3 --icons=auto ~/.claude"
