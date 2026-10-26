@@ -72,8 +72,8 @@
     # deleted the file outright (hyprlock/hypridle/waybar/mako/swayosd/swaybg/
     # polkit-gnome all absorbed into a single Quickshell process). Idle/lock
     # timeouts now live in `~/.config/omarchy/shell.json`'s `idle` key
-    # (`{"screensaver": 150, "lock": 300}`) — no role manages that file today;
-    # add one if/when idle timeout customization is actually needed.
+    # (`{"screensaver": 150, "lock": 300}`) — see the "Set idle timeouts" task
+    # below, which patches just that key instead of owning the whole file.
     #
     # ~/.config/hypr is populated by Omarchy at install time, but its
     # automated update pipeline (omarchy-update -> omarchy-migrate) never
@@ -124,6 +124,54 @@
         dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.lua"
         state: link
         force: yes
+      tags: [configs]
+
+    # shell.json also holds the bar layout and plugins, which Omarchy itself
+    # may rewrite — so no symlink; only the `idle` key is patched in place with
+    # jq (values in seconds since user idle began). The new content is compared
+    # against the current file first so re-runs report "ok", not "changed".
+    - name: "OMARCHY | Set idle timeouts (screensaver 5min, lock 10min)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        f="{{ ansible_facts.user_dir }}/.config/omarchy/shell.json"
+        new=$(jq --indent 2 '.idle.screensaver = {{ omarchy_idle_screensaver }} | .idle.lock = {{ omarchy_idle_lock }}' "$f")
+        if [ "$new" = "$(cat "$f")" ]; then
+          echo unchanged
+        else
+          printf '%s\n' "$new" > "$f"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: omarchy_idle_result
+      changed_when: "omarchy_idle_result.stdout | trim == 'changed'"
+      vars:
+        omarchy_idle_screensaver: 300
+        omarchy_idle_lock: 600
+      tags: [configs]
+
+    # Same in-place jq patch as the idle task above, targeting the
+    # `omarchy.clock` entry of the bar layout. "ddd d MMM HH:mm" (24h) is one of the
+    # clock widget's own presets (Model.js CLOCK_FORMATS), so right-click
+    # cycling still walks the ring from here. Caveat: right-click rewrites
+    # `format` in shell.json, so the next role run resets it to this value.
+    - name: "OMARCHY | Show date in top-bar clock"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        f="{{ ansible_facts.user_dir }}/.config/omarchy/shell.json"
+        new=$(jq --indent 2 --arg fmt "{{ omarchy_clock_format }}" '(.bar.layout.center[] | select(.id == "omarchy.clock")).format = $fmt' "$f")
+        if [ "$new" = "$(cat "$f")" ]; then
+          echo unchanged
+        else
+          printf '%s\n' "$new" > "$f"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: omarchy_clock_result
+      changed_when: "omarchy_clock_result.stdout | trim == 'changed'"
+      vars:
+        omarchy_clock_format: "ddd d MMM HH:mm"
       tags: [configs]
 
     # bindings.lua is confirmed (manual/31-dotfiles.md) to be entirely ours —
