@@ -241,6 +241,6 @@
             "mise.upgrade": {"icon":"󰁝","label":"Atualizar tools","action":"omarchy-launch-tui zsh -c 'mise upgrade; read -k 1'"},
             "mise.prune": {"icon":"󰩺","label":"Limpar versões não usadas","action":"omarchy-launch-tui zsh -c 'mise prune; read -k 1'"},
             "mise.doctor": {"icon":"󰑓","label":"Doctor","action":"omarchy-launch-tui zsh -c 'mise doctor; read -k 1'"},
-            "snippets": {"icon":"󰅩","label":"Snippets","aliases":["navi","cheatsheets"],"description":"navi cheatsheets","action":"omarchy-launch-tui navi"},
+            "snippets": {"icon":"󰅩","label":"Snippets","aliases":["navi","cheatsheets"],"description":"navi cheatsheets","action":"omarchy-launch-tui {{ ansible_facts.user_dir }}/.bin/__navi_snippets"},
         create: yes
       tags: [configs]

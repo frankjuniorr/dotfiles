@@ -1,0 +1,12 @@
+#!/bin/env bash
+
+# navi picker for the Omarchy "Snippets" menu entry. Plain `navi` runs the
+# chosen snippet and exits, which closes a launcher-spawned terminal. Instead:
+# pick with --print, run the command in an interactive zsh (mise activated,
+# aliases loaded) and leave that shell open so the output stays visible.
+cmd="$(navi --print)" || exit 0
+[[ -z $cmd ]] && exit 0
+
+printf '\033[1;36m$ %s\033[0m\n' "$cmd"
+export NAVI_SNIPPET_CMD="$cmd"
+exec zsh -ic 'eval "$NAVI_SNIPPET_CMD"; exec zsh -i'
