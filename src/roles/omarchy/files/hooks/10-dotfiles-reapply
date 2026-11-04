@@ -10,8 +10,10 @@ set -e
 yes | sudo pacman -Scc || true
 sudo rm -rf /var/cache/pacman/pkg/download-* || true
 
-DOTFILES_DIR="$HOME/dotfiles"
-[ -d "$DOTFILES_DIR" ] || exit 0
+# This hook is symlinked from <repo>/src/roles/omarchy/files/hooks/, so resolve
+# the repo root from the script's real path instead of assuming a clone location.
+DOTFILES_DIR="$(cd "$(dirname "$(readlink -f "$0")")/../../../../.." && pwd)"
+[ -x "$DOTFILES_DIR/bin/dotfiles" ] || exit 0
 
 cd "$DOTFILES_DIR"
 bin/dotfiles --mode omarchy configs
