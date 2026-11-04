@@ -148,9 +148,25 @@
     repo: https://github.com/tmux-plugins/tpm
     dest: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm"
 
+# install_plugins.sh reads TMUX_PLUGIN_MANAGER_PATH from a running tmux
+# server's global env, which only `run tpm/tpm` sets — so it aborts ("Tmux
+# Plugin Manager not configured") when no server is up, or when the running
+# one predates our tmux.conf block. Run it against a throwaway server (private
+# TMUX_TMPDIR, TMUX unset so we never touch the user's live sessions) with the
+# variable set by hand.
 - name: "Tmux | Install plugins via TPM"
   ansible.builtin.shell:
-    cmd: "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
+    cmd: |
+      set -e
+      tmp="$(mktemp -d)"
+      trap 'tmux kill-server 2>/dev/null || true; rm -rf "$tmp"' EXIT
+      unset TMUX
+      export TMUX_TMPDIR="$tmp"
+      tmux new-session -d -s tpm-install
+      tmux set-environment -g TMUX_PLUGIN_MANAGER_PATH "{{ ansible_facts.user_dir }}/.config/tmux/plugins/"
+      "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
+    executable: /bin/bash
+  changed_when: false
 
 # Our 4 theme-repo clones (everforest/catppuccin/gruvbox/nord) back the hex
 # palettes in themes.conf/themes/, which only get sourced outside omarchy_mode
