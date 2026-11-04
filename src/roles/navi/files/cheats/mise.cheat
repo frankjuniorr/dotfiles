@@ -1,0 +1,197 @@
+%  mise
+
+# Install every tool declared in the current/global config
+mise install
+
+# Install a specific tool (does not add it to any config)
+mise install <registry_tool>@<tool_version>
+
+# Install a tool and add it to the GLOBAL config (~/.config/mise/config.toml)
+mise use --global <registry_tool>@latest
+
+# Install a tool and add it to the LOCAL config (./mise.toml)
+mise use <registry_tool>@<tool_version>
+
+# Install a tool pinned to a fixed version in the global config
+mise use --global --pin <registry_tool>@<tool_version>
+
+# Remove a tool request from the config and prune it
+mise unuse --global <installed_tool>
+
+# List installed tools and which config activates them
+mise ls
+
+# List only the tools requested by the global config
+mise ls --global
+
+# List installed tools as JSON
+mise ls --json
+
+# List requested tools that are not installed yet
+mise ls --missing
+
+# List the versions available to install for a tool
+mise ls-remote <registry_tool>
+
+# Print the latest version of a tool
+mise latest <registry_tool>
+
+# Show outdated tools
+mise outdated
+
+# Upgrade all outdated tools within their requested range
+mise upgrade
+
+# Upgrade a single tool
+mise upgrade <installed_tool>
+
+# Upgrade past the configured range (rewrites config to the newest release)
+mise upgrade --bump
+
+# Preview what an upgrade would change
+mise upgrade --dry-run
+
+# Pick which tools to upgrade interactively
+mise upgrade --interactive
+
+# Uninstall a specific tool version
+mise uninstall <installed_tool>@<installed_version>
+
+# Delete tool versions that nothing uses anymore
+mise prune
+
+# Preview what prune would delete
+mise prune --dry-run
+
+# Run a command with a tool version without activating it
+mise exec <registry_tool>@<tool_version> -- <command>
+
+# Run a command with the tools of the current config
+mise exec -- <command>
+
+# Show the path a tool executable resolves to
+mise which <installed_tool>
+
+# Show the install directory of a tool version
+mise where <installed_tool>
+
+# Show details about a tool (backend, versions, requested version)
+mise tool <installed_tool>
+
+# Regenerate shims (after installing something outside mise)
+mise reshim
+
+# List the registry (short name -> backend)
+mise registry
+
+# Show the backend(s) behind a registry short name
+mise registry <registry_tool>
+
+# Search for available tools
+mise search <query>
+
+# Check the mise setup for problems
+mise doctor
+
+# Print the activation snippet for a shell
+mise activate <shell>
+
+# Print the environment mise would export for the current directory
+mise env
+
+# Show the config files mise loaded
+mise config
+
+# Show the config files as a tree/list with their tools
+mise config ls
+
+# Mark a config file as trusted (fixes "not trusted" errors)
+mise trust
+
+# Mark a specific config file as trusted
+mise trust <config_file>
+
+# Remove explicit trust from a config
+mise untrust <config_file>
+
+# List tasks defined in mise.toml
+mise tasks
+
+# Run a task
+mise run <task>
+
+# Run a task and forward extra arguments
+mise run <task> -- <args>
+
+# Set an environment variable in mise.toml
+mise set <env_key>=<env_value>
+
+# Show the environment variables set in mise.toml
+mise set
+
+# Remove an environment variable from mise.toml
+mise unset <env_key>
+
+# List installed plugins (asdf/vfox)
+mise plugins ls
+
+# Install a plugin
+mise plugins install <plugin_name>
+
+# List all mise settings
+mise settings
+
+# Change a mise setting (written to the global config)
+mise settings set <setting_key> <setting_value>
+
+# Show where mise keeps its data and cache
+mise cache path
+
+# Clear the mise cache
+mise cache clear
+
+# Update mise itself
+mise self-update
+
+# --- backend syntax: mise use -g <backend>:<spec> ---
+
+# aqua registry (preferred, checksum-verified GitHub release binaries)
+mise use --global aqua:<owner>/<repo>@latest
+
+# Any GitHub release asset
+mise use --global github:<owner>/<repo>@latest
+
+# GitHub release with an explicit asset pattern
+mise use --global "github:<owner>/<repo>[asset_pattern=*linux*amd64*]@latest"
+
+# GitLab release
+mise use --global gitlab:<owner>/<repo>@latest
+
+# npm package
+mise use --global npm:<package>@latest
+
+# Rust crate (compiles with cargo)
+mise use --global cargo:<crate>@latest
+
+# Python CLI in an isolated environment (pipx / uv)
+mise use --global pipx:<package>@latest
+
+# Go module (go install)
+mise use --global go:<module_path>@latest
+
+# Ruby gem
+mise use --global gem:<gem_name>@latest
+
+# Direct URL download
+mise use --global "http:<tool_name>[url=<download_url>]@<tool_version>"
+
+$ registry_tool: mise registry | awk '{print $1}'
+$ installed_tool: mise ls --json | jq -r 'keys[]'
+$ installed_version: mise ls --json | jq -r '.[][].version' | sort -u
+$ shell: echo -e "zsh\nbash\nfish"
+$ config_file: fd -H -t f '^(mise|\.mise)(\..+)?\.toml$|^config\.toml$' . ~/.config/mise 2>/dev/null
+$ task: mise tasks --no-header | awk '{print $1}'
+$ plugin_name: mise plugins ls --all 2>/dev/null
+$ setting_key: mise settings ls | awk '{print $1}'
+$ env_key: mise set 2>/dev/null | awk 'NR>1 {print $1}'
+$ tool_version: echo -e "latest\nlts\nprefix:1"
