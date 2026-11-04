@@ -1,12 +1,6 @@
 ---
-- name: "NAVI | Install"
-  become: true
-  community.general.pacman:
-    name: navi
-    state: present
-  when: not (omarchy_mode | default(false))
-
-- name: "NAVI | Install via Omarchy CLI"
-  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+# navi comes from mise (see roles/mise).
+- name: "NAVI | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
   vars:
-    omarchy_pkg_names: [navi]
+    mise_tools: [navi]

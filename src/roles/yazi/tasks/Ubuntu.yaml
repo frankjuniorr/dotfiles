@@ -1,44 +1,16 @@
 ---
-- name: "YAZI | Install packages"
+# yazi, glow and ripgrep come from mise (the Charm apt repo is no longer needed);
+# the preview deps below are system packages and stay on apt.
+- name: "YAZI | Install yazi, glow, ripgrep via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [yazi, glow, ripgrep]
+
+- name: "YAZI | Install preview dependencies"
   become: yes
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   loop:
-    - yazi
-    # - ffmpeg
     - 7zip
-    # - jq
     - poppler-utils
-    # - fd-find
-    - ripgrep
-    # - fzf
-    # - zoxide
-    # - imagemagick
-
-- name: "YAZI | Ensure keyrings directory exists"
-  become: true
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-
-- name: "YAZI | Add Charm GPG key"
-  become: true
-  ansible.builtin.shell:
-    cmd: curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-    creates: /etc/apt/keyrings/charm.gpg
-
-- name: "YAZI | Add Charm APT repository"
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
-    filename: charm
-    state: present
-
-- name: "YAZI | Install glow"
-  become: true
-  ansible.builtin.apt:
-    name: glow
-    state: present
-    update_cache: yes

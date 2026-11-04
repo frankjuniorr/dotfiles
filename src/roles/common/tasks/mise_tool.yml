@@ -1,0 +1,29 @@
+---
+# Shared task snippet — installs CLI tools globally through mise
+# (`mise use --global <tool>@<version>`), the same premise Omarchy follows for
+# dev tooling. Not a standalone role: included by other roles via an absolute
+# path off playbook_dir, like omarchy_pkg.yml.
+#
+# Usage:
+#   - ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+#     vars:
+#       mise_tools: [bat, fd, "github:joshmedeski/sesh"]
+#
+# Each entry is a mise registry short name or a full backend spec; "@latest" is
+# appended unless the entry already pins a version with "@".
+#
+# Requires the `mise` role to have run first (default_roles order). mise is not
+# on PATH for Ansible's non-interactive shell when installed to ~/.local/bin,
+# hence the explicit PATH below; no `mise activate` is needed since `mise use`
+# works on the binary directly.
+- name: "MISE | Install {{ mise_tools | join(', ') }}"
+  ansible.builtin.command:
+    cmd: "mise use --global {{ item if '@' in item else item ~ '@latest' }}"
+  environment:
+    PATH: "{{ ansible_facts.user_dir }}/.local/bin:{{ ansible_facts.env.PATH }}"
+  loop: "{{ mise_tools }}"
+  register: mise_tool_result
+  retries: 3
+  delay: 5
+  until: mise_tool_result is succeeded
+  changed_when: "'install' in (mise_tool_result.stderr | default('') ~ mise_tool_result.stdout | default('')) and 'already' not in (mise_tool_result.stderr | default('') ~ mise_tool_result.stdout | default(''))"

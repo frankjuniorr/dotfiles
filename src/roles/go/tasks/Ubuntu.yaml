@@ -1,4 +1,5 @@
 ---
+# go itself comes from mise; these are the build deps `go install` / cgo need.
 - name: "GO | Install dependencies"
   become: true
   apt:
@@ -12,15 +13,12 @@
       - 'make'
       - 'rsync'
       - 'tar'
-      - 'jq'
   register: apt_result
   until: apt_result is success
   retries: 1
   delay: 2
 
-- name: "GO | Install"
-  become: true
-  ansible.builtin.apt:
-    name: "golang"
-    state: present
-    update_cache: true
+- name: "GO | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [go]

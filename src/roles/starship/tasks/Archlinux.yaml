@@ -1,7 +1,7 @@
 ---
-- name: "STARSHIP | Install" 
-  become: true
-  community.general.pacman:
-    name: starship
-    state: present
+# starship comes from mise (see roles/mise). Omarchy already ships it via pacman, so skip there.
+- name: "STARSHIP | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [starship]
   when: not (omarchy_mode | default(false))

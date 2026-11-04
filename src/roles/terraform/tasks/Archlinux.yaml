@@ -1,24 +1,6 @@
 ---
-# script -qec gives yay's internal sudo call a tty to read the primed ticket
-# from — see the google-chrome role for the full explanation.
-- name: "TFENV | Install"
-  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None tfenv' /dev/null"
-  when: not (omarchy_mode | default(false))
-  no_log: true
-
-# NOTE: unlike our own yay -S calls, omarchy-pkg-aur-add does not pass
-# --answerclean/--answerdiff/--answeredit, so it could in principle hang on a
-# package whose PKGBUILD triggers one of yay's interactive prompts — flagged,
-# not expected to bite tfenv (a plain shell-script AUR package).
-- name: "TFENV | Install via Omarchy CLI"
-  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+# terraform comes from mise (replaces tfenv, which needed AUR + a tfenv group).
+- name: "TERRAFORM | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
   vars:
-    omarchy_pkg_names: [tfenv]
-    omarchy_pkg_aur: true
-
-- name: "TFENV | Add to group"
-  become: true
-  ansible.builtin.user:
-    append: true
-    groups: tfenv
-    name: "{{ ansible_facts.user_id }}"
+    mise_tools: [terraform]

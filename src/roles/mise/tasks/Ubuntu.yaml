@@ -1,0 +1,28 @@
+---
+# Official mise apt repository: https://mise.jdx.dev/installing-mise.html#apt
+- name: "MISE | Ubuntu | Ensure keyrings directory exists"
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: "MISE | Ubuntu | Add mise GPG key"
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg
+    creates: /etc/apt/keyrings/mise-archive-keyring.gpg
+
+- name: "MISE | Ubuntu | Add mise APT repository"
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main"
+    filename: mise
+    state: present
+
+- name: "MISE | Ubuntu | Install mise"
+  become: true
+  ansible.builtin.apt:
+    name: mise
+    state: present
+    update_cache: true

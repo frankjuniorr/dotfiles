@@ -25,7 +25,7 @@
 # check and .zshrc's PATH both expect. Force GOBIN back to ~/go/bin so the
 # installed binary ends up in the same place regardless of how go itself was
 # provisioned (mise or pacman).
-- name: GO | Install Golang Packages (omarchy_mode, via mise)
+- name: GO | Install Golang Packages (via mise)
   ansible.builtin.command:
     cmd: "mise exec -- go install {{ item.package }}"
     creates: "~/go/bin/{{ item.cmd }}"
@@ -36,15 +36,5 @@
   loop_control:
     label: "{{ item.package }}"
   loop: "{{ go.packages }}"
-  when: go.packages is defined and (omarchy_mode | default(false))
+  when: go.packages is defined
 
-- name: GO | Install Golang Packages
-  ansible.builtin.command:
-    cmd: "go install {{ item.package }}"
-    creates: "~/go/bin/{{ item.cmd }}"
-  register: go_install
-  changed_when: go_install.rc != 0
-  loop_control:
-    label: "{{ item.package }}"
-  loop: "{{ go.packages }}"
-  when: go.packages is defined and not (omarchy_mode | default(false))

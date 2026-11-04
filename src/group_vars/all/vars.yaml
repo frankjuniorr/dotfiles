@@ -12,6 +12,7 @@ cli_roles:
   - system-base
   - 1password
   - git
+  - mise
   - fzf
   - atuin
   - bat
@@ -54,6 +55,7 @@ default_roles:
   - system-base
   - 1password     # password manager first
   - git
+  - mise          # tool installer; MUST precede every role that installs via mise
 
   # CLI Tools
   - fzf

@@ -10,7 +10,7 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-  # Install
-##############################################################################
-- name: "Just | Install"
-  ansible.builtin.shell: "sh -c \"$(curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to {{ primary_installation_path }})\""
+- name: "JUST | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [just]

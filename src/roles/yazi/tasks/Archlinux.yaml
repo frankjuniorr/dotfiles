@@ -1,33 +1,23 @@
 ---
+# yazi, glow and ripgrep come from mise; the preview deps below are system
+# packages/libraries (no mise equivalent) and stay on pacman.
+- name: "YAZI | Install yazi, glow, ripgrep via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [yazi, glow, ripgrep]
 
-# Yazi dependencies
-- name: "YAZI | install"
+- name: "YAZI | Install preview dependencies"
   become: true
   community.general.pacman:
     name: "{{ item }}"
     state: present
   loop:
-    - yazi
-    # - ffmpeg
     - 7zip
-    # - jq
     - poppler
-    # - fd
-    - glow        # Charm's utility to read Markdown (https://github.com/charmbracelet/glow)
-    # - fzf
-    # - zoxide
     - ueberzugpp
-    # - imagemagick
   when: not (omarchy_mode | default(false))
 
-- name: "YAZI | install via Omarchy CLI"
+- name: "YAZI | Install preview dependencies via Omarchy CLI"
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
   vars:
-    omarchy_pkg_names: [yazi, 7zip, poppler, glow, ueberzugpp]
-
-- name: "YAZI | install ripgrep (already in Omarchy)"
-  become: true
-  community.general.pacman:
-    name: ripgrep
-    state: present
-  when: not (omarchy_mode | default(false))
+    omarchy_pkg_names: [7zip, poppler, ueberzugpp]

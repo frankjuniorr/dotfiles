@@ -1,7 +1,7 @@
 ---
-- name: "FD | Install"
-  become: true
-  community.general.pacman:
-    name: fd
-    state: present
+# fd comes from mise (see roles/mise). Omarchy already ships it via pacman, so skip there.
+- name: "FD | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [fd]
   when: not (omarchy_mode | default(false))

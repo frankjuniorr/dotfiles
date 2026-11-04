@@ -1,10 +1,11 @@
----
-- name: "Tmux | Archlinux | Install tmux"
-  become: true
-  community.general.pacman:
-    name: tmux
-    state: present
-  when: not (omarchy_mode | default(false))
+# tmux comes from mise on every host, Omarchy included (Omarchy's own tmux.conf
+# is composed on top of by tmux.yaml, so only the binary's origin changes).
+# Registry: aqua:tmux/tmux-builds (static builds). tmuxinator is a Ruby gem with
+# no mise registry entry, so it stays on the system package manager below.
+- name: "Tmux | Archlinux | Install tmux via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [tmux]
 
 # script -qec gives yay's internal sudo call a tty to read the primed ticket
 # from — see the google-chrome role for the full explanation of why this is

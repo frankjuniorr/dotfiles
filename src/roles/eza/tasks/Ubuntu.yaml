@@ -1,6 +1,7 @@
 ---
-- name: "EZA | Install"
-  become: yes
-  ansible.builtin.apt:
-    name: "eza"
-    state: present
+# eza comes from mise (see roles/mise). Omarchy already ships it via pacman, so skip there.
+- name: "EZA | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [eza]
+  when: not (omarchy_mode | default(false))
