@@ -17,6 +17,9 @@ COPY --chown=${USER}:${USER} . /home/${USER}/.dotfiles/
 USER ${USER}
 WORKDIR /home/${USER}
 
+# bash (not POSIX sh) so `pipefail` is defined; also makes hadolint lint the RUN as bash
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # All provisioning in one layer so cleanup actually reduces image size
 # hadolint ignore=DL3003,DL3004,SC2015
 RUN set -eo pipefail && \
