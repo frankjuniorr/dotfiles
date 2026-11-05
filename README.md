@@ -14,9 +14,8 @@ My dotfiles, for personal use.
 
 This repository supports **Omarchy**, **Arch Linux** and **Ubuntu**, and is driven by Ansible roles (`src/roles/`) that install applications and symlink their config files.
 - For **Omarchy** (Arch + Hyprland), use `--mode omarchy`. Omarchy owns most of `~/.config`, so the roles compose with it instead of overwriting it (see `CLAUDE.md`, "Omarchy Config Collision Policy").
-- For **Arch Linux**, it was designed to be used with [Hyprland](https://wiki.hyprland.org/) using [HyDE](https://github.com/HyDE-Project/HyDE) as a pre-configuration.
+- For **Arch Linux**, use the default mode (the OS is auto-detected).
 - For **Ubuntu**, it was intended to be used with the standard Ubuntu LTS (using **GNOME**).
-
 
 # Install
 
@@ -25,11 +24,7 @@ cd ~
 git clone https://github.com/frankjuniorr/dotfiles
 cd dotfiles
 
-# only for Arch Linux + Hyprland + HyDE
-cd scripts
-./hyde-init.sh
-
-# after reboot, install the dotfiles
+# install the dotfiles
 cd ~/dotfiles/bin
 ./dotfiles                    # Arch / Ubuntu (OS is auto-detected)
 ./dotfiles --mode omarchy     # Omarchy
@@ -58,9 +53,6 @@ Like Omarchy, this repo uses [`mise`](https://mise.jdx.dev) as the installer for
 - The system package manager (pacman/apt) is only used for what mise can't provide: GUI apps, system services, libraries, and things needed before mise exists (`jq`, `yq`, `zsh`, `docker`, `tmuxinator`, ...).
 - On Omarchy, tools it already ships (bat, fd, zoxide, eza, starship, fzf, neovim) are skipped.
 - `mise` only activates in interactive shells; Ansible tasks that call a mise-installed tool must put `~/.local/share/mise/shims` on `PATH` (or use `mise exec --`).
-
-## Secrets
-There is no Ansible Vault. The GitHub token and SSH public key are read live from 1Password (`op read`) by the `git` and `dotfiles` roles, and those steps skip themselves when `op` isn't authenticated.
 
 ## Cheatsheets and the Omarchy menu
 `navi` cheatsheets live in `src/roles/navi/files/cheats/` (including one for `mise`). On Omarchy, the `omarchy` role adds **Dotfiles**, **Mise** and **Snippets** entries to the Omarchy menu (`~/.config/omarchy/extensions/omarchy-menu.jsonc`).
