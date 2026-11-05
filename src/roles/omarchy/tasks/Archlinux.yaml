@@ -1,5 +1,5 @@
 ---
-# Replaces the `hyde` role on Omarchy hosts. Uses the Omarchy CLI wrappers instead of
+# Omarchy-specific setup. Uses the Omarchy CLI wrappers instead of
 # raw pacman/yay so the integrations Omarchy manages itself (xdg-settings, .desktop
 # files, theming) stay intact. Only runs with `--mode omarchy` (omarchy_mode=true) —
 # on any other Arch host this role is a no-op.
@@ -91,8 +91,7 @@
 
     # input.lua and monitors.lua are both host-specific (keyboard layout and
     # resolution/position differ per machine), so detect VM vs host once here
-    # and pick the right source for both — same approach the old `hyde` role
-    # used for its monitors_host.conf/monitors_vm.conf pair.
+    # and pick the right source for both.
     - name: "OMARCHY | Detect system: VM or Host"
       ansible.builtin.shell: systemd-detect-virt
       register: omarchy_virt_type
@@ -104,8 +103,7 @@
     # (deployed once at install time, untouched by omarchy-update/-migrate) —
     # same collision analysis applies, safe to symlink at the file level.
     # input_host.lua sets the br (ABNT2) default + Logitech MX Keys Bluetooth
-    # (`us` intl) per-device override (same as the hyde role's
-    # hyprland.lua.j2 equivalent); input_vm.lua just defaults straight to `us`
+    # (`us` intl) per-device override; input_vm.lua just defaults straight to `us`
     # — a VM (SPICE/QEMU virtual keyboard) has neither the physical BR
     # keyboard nor the Bluetooth MX Keys, so the host's br-default-plus-
     # override pair doesn't apply and was showing up as an unwanted PT-BR

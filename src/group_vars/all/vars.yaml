@@ -48,7 +48,6 @@ gui_roles:
   - telegram
   - spotify
   - obsidian
-  - hyde
   - omarchy
 
 default_roles:
@@ -105,7 +104,6 @@ default_roles:
 
   # Environment
   - dotfiles
-  - hyde        # HyDE (Arch + Hyprland) — no-op on Omarchy/Ubuntu
   - omarchy     # Omarchy-specific setup — no-op unless omarchy_mode is true
 
 go:

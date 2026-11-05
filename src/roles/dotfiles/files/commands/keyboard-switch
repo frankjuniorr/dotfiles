@@ -17,37 +17,6 @@ function ubuntu_switch(){
     esac
 }
 
-function arch_switch(){
-    local layout="$1"
-    # HyDE's Lua migration retired userprefs.conf; keyboard settings now live
-    # as hl.config({ input = {...} }) fields in ~/.config/hypr/hyprland.lua
-    # (rendered by the `hyde` Ansible role). This edits the live file directly,
-    # so it takes effect immediately via Hyprland's config watcher, but does
-    # NOT persist across the next `bin/dotfiles hyde` run — re-run this after.
-    local config_file="${HOME}/.config/hypr/hyprland.lua"
-
-    case $layout in
-        "pt_br")
-            sed -i \
-                -e 's/kb_layout = "us"/kb_layout = "br"/' \
-                -e 's/kb_variant = "intl"/kb_variant = "abnt2"/' \
-                -e 's/kb_model = "logitech_base"/kb_model = ""/' \
-                "$config_file"
-            ;;
-        "us")
-            sed -i \
-                -e 's/kb_layout = "br"/kb_layout = "us"/' \
-                -e 's/kb_variant = "abnt2"/kb_variant = "intl"/' \
-                -e 's/kb_model = ""/kb_model = "logitech_base"/' \
-                "$config_file"
-            ;;
-        *)
-            print_message "Unsupported Layout"
-            exit 1
-            ;;
-    esac
-}
-
 ############################################################################
 # MAIN
 ############################################################################
@@ -64,9 +33,6 @@ layout=$(gum choose \
 case $os_name in
   "Ubuntu")
     ubuntu_switch "$layout"
-    ;;
-  "Arch Linux")
-    arch_switch "$layout"
     ;;
   *)
     print_message "Unsupported OS"

@@ -1,10 +1,8 @@
 #!/bin/bash
 
 # sesh session picker, bound directly in zsh so it works from any terminal
-# and any environment (Omarchy, HyDE, Ubuntu — anywhere zsh runs), not just
-# from inside kitty. kitty.conf (hyde role) still binds ctrl+shift+s at the
-# terminal-app level for HyDE; this widget is the terminal-agnostic
-# equivalent. There's also a SUPER+ALT+S Hyprland bind (omarchy role) that
+# and any environment (Omarchy, Ubuntu — anywhere zsh runs), not just
+# from inside one terminal app. There's also a SUPER+ALT+S Hyprland bind (omarchy role) that
 # opens a fresh terminal running this same script from anywhere — useful
 # when there's no shell open yet. This widget only fires once you already
 # have a zsh prompt.

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-Personal dotfiles manager for Arch Linux + Hyprland (HyDE) and Ubuntu 24.04 LTS + GNOME. Uses Ansible roles to install applications and symlink config files. Each role handles distribution-specific logic and may integrate with 1Password for secrets.
+Personal dotfiles manager for Omarchy (Arch + Hyprland), Arch Linux and Ubuntu 24.04 LTS + GNOME. Uses Ansible roles to install applications and symlink config files. Each role handles distribution-specific logic and may integrate with 1Password for secrets.
 
 ## Running Dotfiles
 
@@ -92,7 +92,7 @@ Omarchy owns `~/.config` by copying (`cp -R`/`cp -f` via `omarchy-refresh-config
 Full rationale and the file-by-file collision matrix live in the "Migração pro Omarchy" plan notes (not in this repo).
 
 ### Default Role Install Order
-System base → CLI tools → terminal/shell (zsh, tmux) → DevOps tools (docker, terraform, go) → Kubernetes stack (kubectl, k9s, helm) → GUI apps → config roles (dotfiles, hyde)
+System base → CLI tools → terminal/shell (zsh, tmux) → DevOps tools (docker, terraform, go) → Kubernetes stack (kubectl, k9s, helm) → GUI apps → config roles (dotfiles, omarchy)
 
 ### Secrets (1Password CLI)
 No Ansible-Vault anymore — `src/group_vars/all/vault.yml` was removed, along with `--vault-password-file` from both `bin/dotfiles` and the Justfile's `ansible_cmd`, and the `just secrets-*` recipes. The vault's only two secrets (`vault_github_token`, `vault_github_ssh_public_key`) are now read live via `op read` in the `git`/`dotfiles` roles, gated on `op vault list` succeeding — see "Secrets in Templates" above for the exact mechanism and item paths. This was a deliberate removal, not just a migration detail: since `group_vars/all/vault.yml` is auto-loaded by Ansible before any task runs regardless of `--tags`, a missing `~/.config/homelab-iac/.vault_pass` (e.g. on a freshly formatted machine) used to fail the *entire* playbook, not just the 2 git/github tasks. `~/.config/homelab-iac/.vault_pass` itself still exists on disk and is still used by the separate `homelab-iac` project — this repo just no longer references it.

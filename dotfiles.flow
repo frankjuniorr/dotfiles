@@ -15,11 +15,3 @@ executables:
           envKey: ROLE
       file: bin/dotfiles
 
-
-  - verb: run
-    name: hyde-update
-    description: |
-      Update HyDE from my Dotfiles repo
-    exec:
-      logMode: logfmt
-      file: scripts/hyde-update.sh
