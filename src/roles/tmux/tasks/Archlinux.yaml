@@ -1,11 +1,45 @@
----
-- name: "Tmux | Archlinux | Install tmux"
-  become: true
-  community.general.pacman:
-    name: tmux
-    state: present
+# tmux comes from mise on every host, Omarchy included (Omarchy's own tmux.conf
+# is composed on top of by tmux.yaml, so only the binary's origin changes).
+# Registry: aqua:tmux/tmux-builds (static builds). tmuxinator is a Ruby gem with
+# no mise registry entry, so it stays on the system package manager below.
+- name: "Tmux | Archlinux | Install tmux via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [tmux]
 
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation of why this is
+# needed at all.
 - name: "Tmuxinator | Archlinux | Install tmuxinator"
-  ansible.builtin.shell: "yay -S --needed --noconfirm tmuxinator"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None tmuxinator' /dev/null"
   args:
     creates: /usr/bin/tmuxinator
+  when:
+    - not (omarchy_mode | default(false))
+    - not (is_docker_build | default(false))
+  no_log: true
+
+# Docker image build: there is no become password (the build user has
+# NOPASSWD sudo), so the primed-ticket trick above can't be used — call yay
+# directly.
+- name: "Tmuxinator | Archlinux | Install tmuxinator (docker build)"
+  ansible.builtin.shell: "yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None tmuxinator"
+  args:
+    creates: /usr/bin/tmuxinator
+  when:
+    - not (omarchy_mode | default(false))
+    - is_docker_build | default(false)
+
+# NOTE: unlike our own yay -S calls, omarchy-pkg-aur-add does not pass
+# --answerclean/--answerdiff/--answeredit, so it could in principle hang on a
+# package whose PKGBUILD triggers one of yay's interactive prompts — flagged,
+# not expected to bite a plain, actively-maintained binary/source package
+# like tmuxinator. (omarchy-pkg-aur-add already runs Omarchy's own
+# missing-package check internally, so there's no need for a `creates:`
+# idempotency guard here like the non-Omarchy task above — include_tasks
+# doesn't support `args` anyway.)
+- name: "Tmuxinator | Archlinux | Install tmuxinator via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [tmuxinator]
+    omarchy_pkg_aur: true

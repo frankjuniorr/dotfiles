@@ -1,31 +1,16 @@
 ---
-- name: "FZF | Download Latest Version JSON"
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/junegunn/fzf/releases/latest
-  register: fzf_latest_version_json
-  changed_when: false
-
-- name: "FZF | Registering FZF Latest Release"
-  ansible.builtin.set_fact:
-    fzf_latest_release: "{{ fzf_latest_version_json.json.tag_name | replace('v', '') }}"
-
-- name: "FZF | Download .deb package"
-  ansible.builtin.get_url:
-    url: "https://github.com/junegunn/fzf/releases/download/v{{ fzf_latest_release }}/fzf-{{ fzf_latest_release }}-linux_amd64.tar.gz"
-    dest: /tmp/fzf.tar.gz
+# fzf binary comes from mise (see roles/mise); only the zsh key-bindings helper
+# is fetched here (it is not part of the binary release).
+- name: "FZF | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [fzf]
 
 - name: "FZF | Ensure {{ primary_installation_path }} directory exists"
   ansible.builtin.file:
     path: "{{ primary_installation_path }}"
     state: directory
     mode: '0755'
-
-- name: "FZF | Extract fzf tarball"
-  become: yes
-  ansible.builtin.unarchive:
-    src: /tmp/fzf.tar.gz
-    dest: "{{ primary_installation_path }}"
-
 
 - name: "FZF | Download key-bindings.zsh from GitHub"
   ansible.builtin.get_url:

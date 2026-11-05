@@ -1,8 +1,6 @@
 set shell := ["bash", "-c"]
 
-export VAULT_PASS_FILE := home_dir() + "/.config/homelab-iac/.vault_pass"
-
-ansible_cmd := "ansible-playbook -i " + quote(invocation_directory() + "/src/hosts.ini") + " --vault-password-file " + VAULT_PASS_FILE
+ansible_cmd := "ansible-playbook -i " + quote(invocation_directory() + "/src/hosts.ini")
 
 image        := "frank-env"
 registry_img := "ghcr.io/frankjuniorr/dotfiles-env"
@@ -16,51 +14,17 @@ install-hooks:
 	@echo "Hook installed successfully."
 
 ############################################################################
-# SECRETS (Ansible-Vault)
-############################################################################
-# Cria um novo arquivo de senha para o vault se não existir em ~/.config/homelab-iac/.vault_pass
-secrets-keygen:
-	@test ! -d ~/.config/homelab-iac && mkdir -p ~/.config/homelab-iac || true
-	@test ! -f {{VAULT_PASS_FILE}} && openssl rand -base64 32 > {{VAULT_PASS_FILE}} && chmod 600 {{VAULT_PASS_FILE}} || echo "Vault password file already exists"
-
-# Criptografa o vault.yml (garante segurança no Git)
-secrets-encrypt:
-	@if ! grep -q "\$ANSIBLE_VAULT" src/group_vars/all/vault.yml; then \
-		ansible-vault encrypt src/group_vars/all/vault.yml --vault-password-file {{VAULT_PASS_FILE}} && echo "vault.yml encrypted"; \
-	else \
-		echo "vault.yml already encrypted"; \
-	fi
-
-# Abre o vault.yml criptografado diretamente no editor padrão
-secrets-edit:
-	@ansible-vault edit src/group_vars/all/vault.yml --vault-password-file {{VAULT_PASS_FILE}}
-
-# Descriptografa o vault.yml permanentemente (use com cautela)
-secrets-decrypt:
-	@if grep -q "\$ANSIBLE_VAULT" src/group_vars/all/vault.yml; then \
-		ansible-vault decrypt src/group_vars/all/vault.yml --vault-password-file {{VAULT_PASS_FILE}} && echo "vault.yml decrypted"; \
-	else \
-		echo "vault.yml is already decrypted"; \
-	fi
-
-# Apenas visualiza os segredos descriptografados no terminal
-secrets-view:
-	@ansible-vault view src/group_vars/all/vault.yml --vault-password-file {{VAULT_PASS_FILE}}
-
-############################################################################
 # DOCKER (personal-busybox)
 ############################################################################
-# Build the CLI image locally (BuildKit enabled; vault password passed as a build secret)
+# Build the CLI image locally (BuildKit enabled)
 docker-build:
 	DOCKER_BUILDKIT=1 docker build \
-		--secret id=vault_pass,src={{VAULT_PASS_FILE}} \
 		-t {{image}} .
 
 # Force a clean rebuild from scratch (bypasses all Docker layer cache)
 docker-rebuild: docker-clean
 	DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
-		--secret id=vault_pass,src={{VAULT_PASS_FILE}} \
 		-t {{image}} .
 
 # Run smoke tests (builds first if needed)

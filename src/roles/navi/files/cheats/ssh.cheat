@@ -1,0 +1,109 @@
+% 🔐 ssh
+
+# Connect to a host from ~/.ssh/config
+ssh <host>
+
+# Connect with explicit user and address
+ssh <user>@<address>
+
+# Connect on a custom port
+ssh -p <port> <user>@<address>
+
+# Connect with a specific identity file
+ssh -i <key> <user>@<address>
+
+# Connect forcing password auth (no key)
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no <user>@<address>
+
+# Connect to a rebuilt/throwaway VM ignoring host key changes (insecure, lab only)
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null <user>@<address>
+
+# Debug a connection (verbose)
+ssh -vvv <host>
+
+# Show the effective config ssh will use for a host
+ssh -G <host>
+
+# Run a single command on a host
+ssh <host> '<command>'
+
+# Run an interactive command on a host (allocate a TTY)
+ssh -t <host> '<command>'
+
+# Jump through a bastion host (ProxyJump)
+ssh -J <jump_host> <host>
+
+# Local port forward: reach a remote service on a local port
+ssh -N -L <local_port>:localhost:<remote_port> <host>
+
+# Local port forward to a third host through <host>
+ssh -N -L <local_port>:<target_host>:<remote_port> <host>
+
+# Remote port forward: expose a local port on the remote host
+ssh -N -R <remote_port>:localhost:<local_port> <host>
+
+# SOCKS5 proxy through a host (browser/curl --socks5-hostname)
+ssh -N -D <local_port> <host>
+
+# Open a tunnel in the background
+ssh -f -N -L <local_port>:localhost:<remote_port> <host>
+
+# Kill a background tunnel on a local port
+pkill -f "ssh.*-L <local_port>:"
+
+# Check if the multiplexed connection to a host is alive
+ssh -O check <host>
+
+# Close the multiplexed connection to a host
+ssh -O exit <host>
+
+# Test authentication against GitHub
+ssh -T git@github.com
+
+# List hosts defined in ~/.ssh/config and ~/.ssh/servers
+awk '/^Host / && $2 !~ /[*?]/ {print $2}' ~/.ssh/config ~/.ssh/servers/*.conf
+
+# Generate an ed25519 key pair
+ssh-keygen -t ed25519 -C "<comment>" -f ~/.ssh/<key_name>
+
+# Copy a public key to a host
+ssh-copy-id -i <pubkey> <host>
+
+# List keys loaded in the ssh agent (1Password)
+ssh-add -L
+
+# Show a public key fingerprint
+ssh-keygen -lf <pubkey>
+
+# Remove a host from known_hosts (after a legitimate host key change)
+ssh-keygen -R <address>
+
+# Fetch a host's public keys (compare fingerprints before trusting)
+ssh-keyscan -H <address>
+
+# Copy a local file to a host
+scp <local_file> <host>:<remote_path>
+
+# Copy a file from a host to the current directory
+scp <host>:<remote_path> .
+
+# Copy a directory to a host
+scp -r <local_dir> <host>:<remote_path>
+
+# Sync a directory to a host over ssh (dry run first)
+rsync -avzn --progress -e ssh <local_dir>/ <host>:<remote_path>/
+
+# Sync a directory to a host over ssh
+rsync -avz --progress -e ssh <local_dir>/ <host>:<remote_path>/
+
+# Sync a directory from a host over ssh
+rsync -avz --progress -e ssh <host>:<remote_path>/ <local_dir>/
+
+$ host: awk '/^Host / && $2 !~ /[*?]/ {print $2}' ~/.ssh/config ~/.ssh/servers/*.conf
+$ jump_host: awk '/^Host / && $2 !~ /[*?]/ {print $2}' ~/.ssh/config ~/.ssh/servers/*.conf
+$ key: ls ~/.ssh/*.pub 2>/dev/null | sed 's/\.pub$//'
+$ pubkey: ls ~/.ssh/*.pub 2>/dev/null
+$ port: echo -e "22\n2222\n2200"
+$ local_port: echo -e "8080\n8888\n5432\n3306\n6443\n9090"
+$ remote_port: echo -e "80\n443\n5432\n3306\n6443\n9090"
+$ local_dir: fd -t d --max-depth 2 . ~ 2>/dev/null

@@ -1,0 +1,35 @@
+---
+# Shared task snippet — installs packages via Omarchy's own package-manager
+# wrapper (omarchy-pkg-add / omarchy-pkg-aur-add) instead of raw pacman/yay.
+# Not a standalone role (no tasks/main.yaml dispatcher, not in
+# default_roles/gui_roles/cli_roles) — just a shared library file, included
+# by other roles via an absolute path off playbook_dir, the same pattern the
+# dotfiles role uses for {{ playbook_dir }}/../bin/dotfiles.
+#
+# Usage:
+#   - ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+#     vars:
+#       omarchy_pkg_names: [pkg1, pkg2]
+#       omarchy_pkg_aur: true      # optional, defaults to false (official repo)
+#       omarchy_pkg_retries: 3     # optional, defaults to 1 (no retry)
+#       omarchy_pkg_delay: 10      # optional, defaults to 5 seconds between retries
+#
+# omarchy_pkg_retries/omarchy_pkg_delay exist for callers like the sesh role
+# that need to retry a flaky AUR build — `until`/`retries` are NOT valid
+# attributes on the include_tasks task itself (Ansible rejects
+# "'until' is not a valid attribute for a TaskInclude"), so the retry loop
+# has to live on the shell task inside this shared file instead, gated behind
+# these opt-in vars. Every other caller gets the default of 1 attempt, i.e.
+# unchanged behavior.
+#
+# script -qec gives the wrapper's internal sudo call a tty to read the primed
+# ticket from — see the google-chrome role for the full explanation.
+# Centralized here instead of duplicated per-role.
+- name: "COMMON | Install {{ omarchy_pkg_names | join(', ') }} via omarchy-pkg-{{ 'aur-' if omarchy_pkg_aur | default(false) else '' }}add"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-pkg-{{ 'aur-' if omarchy_pkg_aur | default(false) else '' }}add {{ omarchy_pkg_names | join(' ') }}' /dev/null"
+  when: omarchy_mode | default(false)
+  no_log: true
+  register: omarchy_pkg_install_result
+  retries: "{{ omarchy_pkg_retries | default(1) }}"
+  delay: "{{ omarchy_pkg_delay | default(5) }}"
+  until: omarchy_pkg_install_result is succeeded

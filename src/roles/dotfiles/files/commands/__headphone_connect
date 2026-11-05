@@ -2,12 +2,17 @@
 
 HEADPHONE_MAC="FC:E8:06:8A:2E:F9"
 RETRY_INTERVAL=8
+MAX_RETRY_INTERVAL=60
 
 # wait for bluetooth daemon before attempting anything
 until systemctl is-active --quiet bluetooth 2>/dev/null; do
     sleep 3
 done
 
+# Exponential backoff (8s -> 16s -> 32s -> capped at 60s) instead of a fixed
+# 8s loop — a tight fixed-interval retry against a controller that's mid-reset
+# (e.g. recovering from the known RTL8761B firmware hang under 0x200c) just
+# re-triggers the same failed connect attempt over and over.
 while true; do
     if bluetoothctl info "$HEADPHONE_MAC" | grep -q "Connected: yes"; then
         exit 0
@@ -17,4 +22,6 @@ while true; do
     echo "$result" | grep -q "Connection successful" && exit 0
 
     sleep "$RETRY_INTERVAL"
+    RETRY_INTERVAL=$((RETRY_INTERVAL * 2))
+    [ "$RETRY_INTERVAL" -gt "$MAX_RETRY_INTERVAL" ] && RETRY_INTERVAL=$MAX_RETRY_INTERVAL
 done

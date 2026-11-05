@@ -1,6 +1,7 @@
 ---
-- name: "Zoxide | {{ ansible_facts.distribution }} | Install zoxide"
-  ansible.builtin.apt:
-    name: zoxide
-    state: present
-  become: true
+# zoxide comes from mise (see roles/mise). Omarchy already ships it via pacman, so skip there.
+- name: "ZOXIDE | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [zoxide]
+  when: not (omarchy_mode | default(false))

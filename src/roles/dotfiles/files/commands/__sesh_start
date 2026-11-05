@@ -1,35 +1,7 @@
 #!/bin/env bash
 
-# Load FZF configs
-if [ -f ~/.config/dotfiles/__fzf_config.sh ]; then
-  source ~/.config/dotfiles/__fzf_config.sh
-fi
-
-# CTRL + a: all
-# CTRL + t: tmux
-# CTRL + p: tmuxinator
-# CTRL + g: sesh custom command
-# CTRL + x: zoxide
-# CTRL + f: find file
-# CTRL + d: delete tmux session
-sesh connect "$(
-  sesh list --tmux --icons | fzf --no-border \
-    --ansi \
-    --list-border \
-    --no-sort --prompt '🪟  ' \
-    --header '📌  ^A:All | ^T:Tmux | ^P:Tmuxinator | ^G:configs | ^X:zoxide' \
-    --color 'list-border:6,input-border:3,preview-border:4,header-bg:-1,header-border:6' \
-    --input-border \
-    --header-border \
-    --bind 'tab:down,btab:up' \
-    --bind 'ctrl-a:change-prompt(⚡  )+reload(sesh list --icons)' \
-    --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list --tmux --icons)' \
-    --bind 'ctrl-p:change-prompt(🪟  )+reload(sesh list --tmuxinator --icons)' \
-    --bind 'ctrl-g:change-prompt(⚙️  )+reload(sesh list --config --icons)' \
-    --bind 'ctrl-x:change-prompt(📁  )+reload(sesh list --zoxide --icons)' \
-    --bind 'ctrl-f:change-prompt(🔎  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
-    --bind 'ctrl-d:execute(tmux kill-session -t {2..})+change-prompt(⚡  )+reload(sesh list --icons)' \
-    --preview-window 'right:70%' \
-    --preview 'sesh preview {}'
-)"
-
+# Built-in sesh picker (replaces the old `sesh list | fzf` pipeline).
+# -H hide attached, -d hide duplicates, -i icons, -s separator-aware matching.
+# In-picker keys: ctrl+x kill session (asks to confirm), / filter by alias,
+# # index mode (jump by number).
+exec sesh picker -Hdis --preview

@@ -1,6 +1,6 @@
 # FZF - ENVIRONMENT VARIABLES
-# PS: this is necessary to fzf config works together 'sesh' into kitty keybing.
-# But this environment variables are duplicated, and there are on '~/.bin/env.sh' (loaded by '~/.zshrc')
+# PS: these environment variables are duplicated, and there are on '~/.bin/env.sh' (loaded by '~/.zshrc')
+# (sesh no longer depends on them: ~/.bin/__sesh_start uses the built-in `sesh picker`, not fzf)
 ############################################################
 export FZF_BASE="/home/${USER}/bin"
 

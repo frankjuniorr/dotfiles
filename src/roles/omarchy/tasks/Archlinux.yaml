@@ -1,0 +1,246 @@
+---
+# Replaces the `hyde` role on Omarchy hosts. Uses the Omarchy CLI wrappers instead of
+# raw pacman/yay so the integrations Omarchy manages itself (xdg-settings, .desktop
+# files, theming) stay intact. Only runs with `--mode omarchy` (omarchy_mode=true) —
+# on any other Arch host this role is a no-op.
+- name: "OMARCHY | Setup"
+  when: omarchy_mode | default(false)
+  block:
+    # `omarchy-remove-browser` no longer accepts "chromium" as a target (rolling
+    # release drift since the migration was first audited against 4.0.0.alpha —
+    # chromium is now an internal fallback, not something you remove). The
+    # current flow is install + set-default instead, via omarchy-default-browser.
+    #
+    # yay's own internal `sudo pacman -U` needs a real tty to prompt for a
+    # password — Ansible detaches shell/command tasks from any controlling tty,
+    # so a bare `sudo` call inside a wrapped command always fails with "a
+    # password is required", no matter how recently sudo -v was run beforehand
+    # (that ticket lives on a different tty and isn't visible here). `script`
+    # allocates a pty for the whole wrapped command so the prime (piped in via
+    # stdin) and the later privileged use share the same tty — same technique
+    # Omarchy's own omarchy-update script uses.
+    - name: "OMARCHY | Install bluetui"
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+      vars:
+        omarchy_pkg_names: [bluetui]
+
+    - name: "OMARCHY | Install Google Chrome"
+      ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && omarchy-install-browser chrome' /dev/null"
+      args:
+        creates: /usr/bin/google-chrome-stable
+      no_log: true
+
+    # omarchy-default-browser is unprivileged (xdg-settings/xdg-mime only) —
+    # doesn't need the script/sudo wrapping above.
+    - name: "OMARCHY | Set Google Chrome as default browser"
+      ansible.builtin.shell: "omarchy-default-browser chrome"
+      changed_when: true
+
+    # omarchy-update calls `omarchy-hook post-update`, which runs everything in
+    # this directory (Omarchy itself ships a `.sample` file here — skipped by
+    # omarchy-hook, harmless to sit next to). Symlinked (not omarchy-hook-install's
+    # `cp`) so it stays live and self-updating on `git pull`, like every other
+    # config in this repo. Needs the `configs` tag (T6) to exist first.
+    - name: "OMARCHY | Ensure post-update hooks directory exists"
+      ansible.builtin.file:
+        path: "{{ ansible_facts.user_dir }}/.config/omarchy/hooks/post-update.d"
+        state: directory
+        mode: "0755"
+      tags: [configs]
+
+    - name: "OMARCHY | Install post-update hook to reapply dotfiles symlinks"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hooks/10-dotfiles-reapply"
+        dest: "{{ ansible_facts.user_dir }}/.config/omarchy/hooks/post-update.d/10-dotfiles-reapply"
+        state: link
+        force: yes
+      tags: [configs]
+
+    # Omarchy "Quattro" (v4.0, confirmed against the real v4.0.0 tag) made the
+    # Lua Hyprland config (`hyprland.lua` entry point requiring hypr.monitors/
+    # input/bindings/looknfeel/autostart) the stable default — the old
+    # hyprlang `.conf` era (see git history around commit 7fed51b for why this
+    # role briefly reverted to `.conf` while `dev` was ahead of `stable`) is
+    # over on any current install. looknfeel.lua/monitors_*.lua content below
+    # is recovered from that pre-revert commit (7fed51b^) rather than
+    # rewritten from scratch, since it was already real Omarchy `dev`-branch
+    # syntax that `stable` has now caught up to — values (rounding=8, the same
+    # host/VM monitor layouts) were diffed against the `.conf` files being
+    # replaced here and confirmed unchanged.
+    #
+    # hypridle.conf has no `.lua` equivalent to symlink: Omarchy Quattro
+    # deleted the file outright (hyprlock/hypridle/waybar/mako/swayosd/swaybg/
+    # polkit-gnome all absorbed into a single Quickshell process). Idle/lock
+    # timeouts now live in `~/.config/omarchy/shell.json`'s `idle` key
+    # (`{"screensaver": 150, "lock": 300}`) — see the "Set idle timeouts" task
+    # below, which patches just that key instead of owning the whole file.
+    #
+    # ~/.config/hypr is populated by Omarchy at install time, but its
+    # automated update pipeline (omarchy-update -> omarchy-migrate) never
+    # touches these specific files today — only the manual, confirmation-gated
+    # "reset Hyprland to defaults" action (omarchy-refresh-hyprland, exposed in
+    # omarchy-menu) does. Symlinking them here is safe: no silent clobber risk
+    # like fastfetch/git/btop.
+    - name: "OMARCHY | Symlink looknfeel.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/looknfeel.lua"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/looknfeel.lua"
+        state: link
+        force: yes
+      tags: [configs]
+
+    # input.lua and monitors.lua are both host-specific (keyboard layout and
+    # resolution/position differ per machine), so detect VM vs host once here
+    # and pick the right source for both — same approach the old `hyde` role
+    # used for its monitors_host.conf/monitors_vm.conf pair.
+    - name: "OMARCHY | Detect system: VM or Host"
+      ansible.builtin.shell: systemd-detect-virt
+      register: omarchy_virt_type
+      changed_when: false
+      ignore_errors: yes
+      tags: [configs]
+
+    # input.lua is the same kind of user-owned Omarchy stub as looknfeel.lua
+    # (deployed once at install time, untouched by omarchy-update/-migrate) —
+    # same collision analysis applies, safe to symlink at the file level.
+    # input_host.lua sets the br (ABNT2) default + Logitech MX Keys Bluetooth
+    # (`us` intl) per-device override (same as the hyde role's
+    # hyprland.lua.j2 equivalent); input_vm.lua just defaults straight to `us`
+    # — a VM (SPICE/QEMU virtual keyboard) has neither the physical BR
+    # keyboard nor the Bluetooth MX Keys, so the host's br-default-plus-
+    # override pair doesn't apply and was showing up as an unwanted PT-BR
+    # layout on the VM before this split.
+    - name: "OMARCHY | Symlink input.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/{{ 'input_vm.lua' if omarchy_virt_type.stdout != 'none' else 'input_host.lua' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/input.lua"
+        state: link
+        force: yes
+      tags: [configs]
+
+    - name: "OMARCHY | Symlink monitors.lua"
+      ansible.builtin.file:
+        src: "{{ role_path }}/files/hypr/{{ 'monitors_vm.lua' if omarchy_virt_type.stdout != 'none' else 'monitors_host.lua' }}"
+        dest: "{{ ansible_facts.user_dir }}/.config/hypr/monitors.lua"
+        state: link
+        force: yes
+      tags: [configs]
+
+    # shell.json also holds the bar layout and plugins, which Omarchy itself
+    # may rewrite — so no symlink; only the `idle` key is patched in place with
+    # jq (values in seconds since user idle began). The new content is compared
+    # against the current file first so re-runs report "ok", not "changed".
+    - name: "OMARCHY | Set idle timeouts (screensaver 5min, lock 10min)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        f="{{ ansible_facts.user_dir }}/.config/omarchy/shell.json"
+        new=$(jq --indent 2 '.idle.screensaver = {{ omarchy_idle_screensaver }} | .idle.lock = {{ omarchy_idle_lock }}' "$f")
+        if [ "$new" = "$(cat "$f")" ]; then
+          echo unchanged
+        else
+          printf '%s\n' "$new" > "$f"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: omarchy_idle_result
+      changed_when: "omarchy_idle_result.stdout | trim == 'changed'"
+      vars:
+        omarchy_idle_screensaver: 300
+        omarchy_idle_lock: 600
+      tags: [configs]
+
+    # Same in-place jq patch as the idle task above, targeting the
+    # `omarchy.clock` entry of the bar layout. "ddd d MMM HH:mm" (24h) is one of the
+    # clock widget's own presets (Model.js CLOCK_FORMATS), so right-click
+    # cycling still walks the ring from here. Caveat: right-click rewrites
+    # `format` in shell.json, so the next role run resets it to this value.
+    - name: "OMARCHY | Show date in top-bar clock"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        f="{{ ansible_facts.user_dir }}/.config/omarchy/shell.json"
+        new=$(jq --indent 2 --arg fmt "{{ omarchy_clock_format }}" '(.bar.layout.center[] | select(.id == "omarchy.clock")).format = $fmt' "$f")
+        if [ "$new" = "$(cat "$f")" ]; then
+          echo unchanged
+        else
+          printf '%s\n' "$new" > "$f"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: omarchy_clock_result
+      changed_when: "omarchy_clock_result.stdout | trim == 'changed'"
+      vars:
+        omarchy_clock_format: "ddd d MMM HH:mm"
+      tags: [configs]
+
+    # bindings.lua is confirmed (manual/31-dotfiles.md) to be entirely ours —
+    # unlike the old hyprlang bindings.conf, no Quattro migration was found
+    # editing this path, so Omarchy itself never writes here. Still composed
+    # via blockinfile rather than a pure symlink: that's a deliberate,
+    # not-yet-settled choice (task T18d) pending live confirmation on a real
+    # Quattro machine that no future migration ever touches this file either —
+    # switch to a plain symlink once that's confirmed, not before.
+    # o.bind(combo, description, command) is the confirmed Lua keybind API
+    # (Omarchy - Keybindings.md, sourced from default/hypr/bindings/*.lua).
+    # Opens the sesh picker (~/.bin/__sesh_start, symlinked by the dotfiles
+    # role) from anywhere, not just from an already-open shell — complements
+    # the zsh zle widget in the dotfiles role's sesh.sh, which only fires once
+    # a zsh prompt already exists. xdg-terminal-exec resolves whichever
+    # terminal is actually configured, same mechanism Omarchy's own Tmux bind
+    # (SUPER ALT, RETURN) uses.
+    - name: "OMARCHY | Compose sesh keybind into native bindings.lua"
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/hypr/bindings.lua"
+        marker: "-- {mark} dotfiles — personal bindings"
+        block: |
+          o.bind("SUPER + ALT + P", "Sesh picker", "uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start")
+        create: yes
+      tags: [configs]
+
+    # The Super+K cheatsheet (omarchy-menu-keybindings) needs no entry here:
+    # it derives its list live from `hyprctl binds` (with a Lua-source
+    # rescan only to recover dispatcher metadata `hyprctl` can't report for
+    # Lua binds) — any o.bind() call with a non-nil description, like the
+    # Sesh picker above, is picked up automatically once Hyprland reloads
+    # the config. Confirmed live on the VM: `omarchy-menu-keybindings
+    # --print` lists "SUPER ALT + P → Sesh picker" with no extra
+    # registration. No file for this role to own/collide with.
+    #
+    # Super+Space's Omarchy root menu is a Quickshell plugin (Menu.qml) that
+    # merges two JSONC sources at render time: Omarchy's own
+    # default/omarchy/omarchy-menu.jsonc (untouched by us) and the sanctioned
+    # user overlay at ~/.config/omarchy/extensions/omarchy-menu.jsonc — the
+    # same compose-over-overwrite extension point as hooks/ and themed/*.tpl.
+    # Checked `rg extensions /usr/share/omarchy/migrations` and
+    # `omarchy-refresh-config`'s own target list on the VM: neither ever
+    # touches this path, so — unlike fastfetch/git/btop — there's no
+    # `omarchy-update` clobber risk here and no post-update hook re-apply is
+    # needed. Composed via blockinfile (not a full symlink) because Omarchy
+    # seeds this file once at install with its own commented usage
+    # instructions, which are worth preserving, same rationale as
+    # bindings.lua above. "snippets" is a root-level row that opens navi in a TUI
+    # window (omarchy-launch-tui, same launcher Omarchy's own TUI rows use; navi
+    # resolves through the mise shims that Omarchy's env-bootstrap adds to PATH).
+    # Icons are Material Design (󰀻-style, 5-digit codepoints) like Omarchy's own.
+    # Dotted ids ("dotfiles.run") nest under the
+    # "dotfiles" parent id automatically; trailing commas are explicitly
+    # supported by this JSONC parser.
+    - name: "OMARCHY | Compose Dotfiles entry into Omarchy root menu"
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/omarchy/extensions/omarchy-menu.jsonc"
+        marker: "  // {mark} dotfiles — personal menu entries"
+        insertbefore: "^}$"
+        block: |2
+            "dotfiles": {"icon":"󰊢","label":"Dotfiles"},
+            "dotfiles.run": {"icon":"󰐊","label":"Rodar bin/dotfiles","action":"uwsm-app -- xdg-terminal-exec --dir=\"{{ playbook_dir | dirname }}\" bin/dotfiles"},
+            "dotfiles.sesh": {"icon":"󰆍","label":"Sesh picker","action":"uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" {{ ansible_facts.user_dir }}/.bin/__sesh_start"},
+            "mise": {"icon":"󰆧","label":"Mise","description":"dev-tools manager"},
+            "mise.ls": {"icon":"󰋗","label":"Tools instaladas","action":"omarchy-launch-tui zsh -c 'mise ls; read -k 1'"},
+            "mise.outdated": {"icon":"󰚰","label":"Atualizações disponíveis","action":"omarchy-launch-tui zsh -c 'mise outdated; read -k 1'"},
+            "mise.upgrade": {"icon":"󰁝","label":"Atualizar tools","action":"omarchy-launch-tui zsh -c 'mise upgrade; read -k 1'"},
+            "mise.prune": {"icon":"󰩺","label":"Limpar versões não usadas","action":"omarchy-launch-tui zsh -c 'mise prune; read -k 1'"},
+            "mise.doctor": {"icon":"󰑓","label":"Doctor","action":"omarchy-launch-tui zsh -c 'mise doctor; read -k 1'"},
+            "snippets": {"icon":"󰅩","label":"Snippets","aliases":["navi","cheatsheets"],"description":"navi cheatsheets","action":"omarchy-launch-tui {{ ansible_facts.user_dir }}/.bin/__navi_snippets"},
+        create: yes
+      tags: [configs]

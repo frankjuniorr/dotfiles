@@ -1,0 +1,76 @@
+---
+# Vial (https://get.vial.today) — VIA-compatible QMK keyboard configurator for
+# the split keyboard. No pacman/AUR package exists for it (checked); upstream
+# only ships a Linux AppImage via GitHub Releases, so it's fetched directly
+# here instead of going through a distro-specific task file like other roles.
+#
+# Omarchy-only for now: Frank's split keyboard setup only exists on his
+# Omarchy machine, not the Ubuntu work machine. Every task below is gated on
+# omarchy_mode instead of splitting into Archlinux.yaml/Ubuntu.yaml, since
+# there's no Ubuntu behavior to fall back to yet — revisit if that changes.
+
+# fuse2/fuse3 are official-repo packages, not AUR-only, and aren't in
+# Omarchy's base package list (checked omarchy-base.packages directly), so a
+# fresh Omarchy install won't have them — needed here as the AppImage runtime
+# dependency.
+- name: "SPLIT-KEYBOARD | Install fuse2/fuse3 via Omarchy CLI (AppImage runtime dependency)"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [fuse2, fuse3]
+
+- name: "SPLIT-KEYBOARD | Get latest Vial release"
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/vial-kb/vial-gui/releases/latest
+    return_content: yes
+  register: vial_release_info
+  changed_when: false
+  when: omarchy_mode | default(false)
+
+- name: "SPLIT-KEYBOARD | Extract Vial version"
+  ansible.builtin.set_fact:
+    vial_version: "{{ vial_release_info.json.tag_name }}"
+  when: omarchy_mode | default(false)
+
+- name: "SPLIT-KEYBOARD | Download Vial AppImage"
+  ansible.builtin.get_url:
+    url: "https://github.com/vial-kb/vial-gui/releases/download/{{ vial_version }}/Vial-{{ vial_version }}-x86_64.AppImage"
+    dest: "{{ primary_installation_path }}/vial"
+    mode: "0755"
+    force: true
+  when: omarchy_mode | default(false)
+
+- name: "SPLIT-KEYBOARD | Ensure ~/.local/share/applications exists"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.local/share/applications"
+    state: directory
+    mode: "0755"
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "SPLIT-KEYBOARD | Symlink Vial desktop entry"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/vial.desktop"
+    dest: "{{ ansible_facts.user_dir }}/.local/share/applications/vial.desktop"
+    state: link
+    force: yes
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+# Confirmed hands-on on the real machine (2026-09-29): this exact rule was
+# already present at /etc/udev/rules.d/59-vial.rules, untracked by any pacman
+# package (`pacman -Qo` finds no owner — it was created by hand at some point),
+# and matches upstream's recommended rule byte-for-byte
+# (https://get.vial.today/manual/linux-udev.html). It's genuinely required:
+# VIA/Vial talks to the keyboard directly over the `hidraw` kernel driver,
+# which is root-only by default, so without this rule Vial can't see the
+# keyboard as a non-root user. The magic `vial:f64c2b3c` string is embedded in
+# the USB serial by any Vial-enabled QMK firmware, so one rule covers every
+# Vial keyboard rather than needing per-device vendor/product IDs.
+- name: "SPLIT-KEYBOARD | Install udev rule for Vial hidraw access"
+  become: true
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/59-vial.rules"
+    dest: /etc/udev/rules.d/59-vial.rules
+    mode: "0644"
+  when: omarchy_mode | default(false)
+  notify: Reload udev rules

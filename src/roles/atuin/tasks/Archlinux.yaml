@@ -1,6 +1,6 @@
 ---
-- name: "ATUIN | install"
-  become: true
-  community.general.pacman:
-    name: atuin
-    state: present
+# atuin comes from mise (see roles/mise).
+- name: "ATUIN | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [atuin]

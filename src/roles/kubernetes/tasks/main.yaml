@@ -10,19 +10,16 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "K3D | Check if installed"
-  ansible.builtin.stat:
-    path: "/usr/local/bin/k3d"
-  register: k3d_bin
-
-- name: "K3D | Install"
-  ansible.builtin.shell: "wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash"
-  when: not k3d_bin.stat.exists
+- name: "K3D | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [k3d]
 
 - name: "K9S | Refresh {{ ansible_facts.user_dir }}/.config/k9s folder"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/k9s"
     state: absent
+  tags: [configs]
 
 - name: "K9s | Ensure k9s directory structure exists"
   ansible.builtin.file:
@@ -32,6 +29,7 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/k9s"
+  tags: [configs]
 
 - name: "K9s | Link k9s config files"
   ansible.builtin.file:
@@ -39,3 +37,4 @@
     dest: "{{ ansible_facts.user_dir }}/.config/k9s"
     state: link
     force: yes
+  tags: [configs]

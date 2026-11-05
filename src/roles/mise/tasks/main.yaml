@@ -1,0 +1,27 @@
+---
+- name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_facts.distribution }}.yaml"
+  register: system_distribution_config
+  no_log: true
+
+- name: "System | Run Tasks: {{ ansible_facts.distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts.distribution }}.yaml"
+  when: system_distribution_config.stat.exists
+  no_log: true
+
+# Shell activation lives in roles/zsh/files/.zshrc (guarded by `which mise`);
+# nothing to symlink here. Tools themselves are declared by the roles that own
+# them (via common/tasks/mise_tool.yml), which write ~/.config/mise/config.toml
+# through `mise use --global`.
+- name: "MISE | Ensure ~/.config/mise exists"
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/mise"
+    state: directory
+    mode: '0755'
+
+- name: "MISE | Verify"
+  ansible.builtin.command: mise --version
+  environment:
+    PATH: "{{ ansible_facts.user_dir }}/.local/bin:{{ ansible_facts.env.PATH }}"
+  changed_when: false

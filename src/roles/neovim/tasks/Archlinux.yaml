@@ -1,6 +1,8 @@
 ---
-- name: "NEOVIM | Install"
-  become: true
-  community.general.pacman:
-    name: neovim
-    state: present
+# Omarchy ships neovim + LazyVim as omarchy-nvim — patched, not replaced, in main.yaml.
+# Everywhere else neovim comes from mise.
+- name: "NEOVIM | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [neovim]
+  when: not (omarchy_mode | default(false))

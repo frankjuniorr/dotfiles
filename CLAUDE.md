@@ -19,7 +19,7 @@ bin/dotfiles "neovim"
 ROLE=tmux bin/dotfiles
 ```
 
-The `bin/dotfiles` script auto-installs dependencies (`gum`, Ansible), detects the OS, and runs the Ansible playbook in `src/`. It uses `--vault-password-file ~/.config/homelab-iac/.vault_pass` — no `become` password prompt.
+The `bin/dotfiles` script auto-installs dependencies (`gum`, Ansible), detects the OS, and runs the Ansible playbook in `src/`. It always prompts for a "BECOME password" up front (own `read -rs`, not Ansible's `--ask-become-pass`) and feeds it to `ansible-playbook` via a temp vars file — a deliberate workaround for a real ansible-core 2.21.x bug ("Duplicate become password prompt encountered") that `--ask-become-pass` hits whenever the `become` task comes from a dynamically included role, which is every task here since `main.yml` selects roles via `include_role`. See `bin/dotfiles` around the `BECOME password` prompt for details.
 
 ## Ansible Playbook Commands
 
@@ -59,7 +59,7 @@ src/roles/<name>/
 │   ├── Archlinux.yaml     # Tasks for Arch Linux
 │   └── Ubuntu.yaml        # Tasks for Ubuntu
 ├── files/                 # Static config files to symlink
-├── templates/             # Jinja2 templates (used for secrets via 1Password)
+├── templates/             # Jinja2 templates (used for op-sourced secrets)
 └── handlers/              # Service reload handlers
 ```
 
@@ -67,35 +67,37 @@ src/roles/<name>/
 
 ### Key Variables (`src/group_vars/all/`)
 `all.yaml` was split into two files — do not recreate `all.yaml`:
-- `vars.yaml` — plain vars: `primary_installation_path`, `scripts_installation_path`, `default_roles`, `fonts_list`, `go.packages`
-- `vault.yml` — Ansible-Vault encrypted secrets (always encrypted in git; managed via `just secrets-*`)
+- `vars.yaml` — plain vars: `primary_installation_path`, `scripts_installation_path`, `default_roles`, `fonts_list`, `go.packages`, `github_email` (not secret — already public in every commit)
+
+There is no `vault.yml` anymore — the two secrets it used to hold (`vault_github_token`, `vault_github_ssh_public_key`) are now read live from 1Password instead. See "Secrets (1Password CLI)" below.
 
 ### Pre-tasks (`src/pre_tasks/`)
-Two pre-tasks always run before roles:
+One pre-task always runs before roles:
 1. `whoami.yaml` — captures current user into `host_user` fact
-2. `detect_1password.yaml` — sets `op_installed` fact (controls whether 1Password-dependent tasks run)
 
-### 1Password Integration
-Roles that need secrets (git credentials, GitHub token, SSH keys) use the `op` CLI. They conditionally skip if `op_installed` is false. Templates like `private-env.sh.j2` and `git-credentials-personal.j2` read secrets at provision time.
+### Secrets in Templates
+`git` and `dotfiles` roles render templates (`git-credentials-personal.j2`, `private-env.sh.j2`) from vars named `vault_github_ssh_public_key`/`vault_github_token` (names kept for template compatibility, no longer vault-sourced) plus the plain `github_email`. Each role's `tasks/main.yaml` reads the real value live via `op read` right before the template task, and passes it in through that task's own `vars:` block. Both roles run an `op vault list` check first (`register: op_status`) and gate everything on `op_status.rc == 0` — on a machine/VM where 1Password isn't authenticated (e.g. this repo's Omarchy test VM, by design), the read and the template task both no-op cleanly instead of failing. `bin/dotfiles` prints a `gum`-styled reminder at the end of a `git`/`dotfiles`/`all`-tagged run if `op` is missing or unauthenticated, since otherwise the skip is silent. Current 1Password item paths: `op://Personal/GitHub SSH/public_key` and `op://Personal/Github Token/credential` — if either item is renamed/restructured in the vault, update the `op read` calls in `src/roles/git/tasks/main.yaml` and `src/roles/dotfiles/tasks/main.yaml` to match. 1Password itself is still used at the OS level too (SSH agent, commit signing via `op-ssh-sign` — `gpg.format = ssh`/`gpg.ssh.program` are set unconditionally in `src/roles/git/files/config.personal`).
 
 ### Symlinks Pattern
 Roles symlink config files from `roles/<name>/files/` to the appropriate `~/.config/<tool>/` location. The neovim role removes and recreates the entire `~/.config/nvim/` directory on each run.
 
+### Omarchy Config Collision Policy
+Omarchy owns `~/.config` by copying (`cp -R`/`cp -f` via `omarchy-refresh-config`, `omarchy-reinstall-configs`, and update migrations), not by symlinking. A **directory** symlink at a path Omarchy also populates gets silently written through — Omarchy's copy lands inside this git repo. Rules, in priority order:
+
+1. **Never symlink a directory at a path Omarchy also populates** (check `~/omarchy/config/` in a local clone of the [Omarchy repo](https://github.com/basecamp/omarchy)). Symlink individual files instead — see the `btop` role for the pattern (Omarchy writes `~/.config/btop/themes/current.theme` next to our `btop.conf` symlink).
+2. **Prefer composing over overwriting** where the tool supports an include mechanism, so Omarchy's own file is left untouched: `git` (`config.personal` + `[include] path`), `starship` (`STARSHIP_CONFIG` env var instead of fighting `~/.config/starship.toml`).
+3. **Cede ownership** where Omarchy's default is fine and not worth maintaining a fork of (e.g. `lazygit` in omarchy_mode).
+4. Where overwriting is unavoidable, symlink at the file level and rely on the `configs` playbook tag (`bin/dotfiles --mode omarchy configs`) — installed as the `omarchy` role's `post-update` hook — to reapply the symlink after any `omarchy-update`/`omarchy-migrate` run.
+
+Full rationale and the file-by-file collision matrix live in the "Migração pro Omarchy" plan notes (not in this repo).
+
 ### Default Role Install Order
 System base → CLI tools → terminal/shell (zsh, tmux) → DevOps tools (docker, terraform, go) → Kubernetes stack (kubectl, k9s, helm) → GUI apps → config roles (dotfiles, hyde)
 
-### Secrets (Ansible-Vault)
-Secrets live in `src/group_vars/all/vault.yml`, encrypted with AES256. The vault password is stored at `~/.config/homelab-iac/.vault_pass` (shared with `homelab-iac`).
+### Secrets (1Password CLI)
+No Ansible-Vault anymore — `src/group_vars/all/vault.yml` was removed, along with `--vault-password-file` from both `bin/dotfiles` and the Justfile's `ansible_cmd`, and the `just secrets-*` recipes. The vault's only two secrets (`vault_github_token`, `vault_github_ssh_public_key`) are now read live via `op read` in the `git`/`dotfiles` roles, gated on `op vault list` succeeding — see "Secrets in Templates" above for the exact mechanism and item paths. This was a deliberate removal, not just a migration detail: since `group_vars/all/vault.yml` is auto-loaded by Ansible before any task runs regardless of `--tags`, a missing `~/.config/homelab-iac/.vault_pass` (e.g. on a freshly formatted machine) used to fail the *entire* playbook, not just the 2 git/github tasks. `~/.config/homelab-iac/.vault_pass` itself still exists on disk and is still used by the separate `homelab-iac` project — this repo just no longer references it.
 
-```bash
-just secrets-keygen    # generate vault password file (one-time setup)
-just secrets-edit      # open vault in $EDITOR
-just secrets-view      # print decrypted secrets to terminal
-just secrets-encrypt   # encrypt vault.yml (idempotent)
-just secrets-decrypt   # decrypt vault.yml permanently (use with care)
-```
-
-The pre-commit hook (`scripts/pre-commit.sh`) auto-encrypts `vault.yml` if it is unencrypted before any commit. Install it once with:
+The pre-commit hook (`scripts/pre-commit.sh`) no longer has any vault-encryption step; it now only handles the `beautiful_output` toggle, executable-bit fixups, and re-staging. Install it once with:
 ```bash
 just install-hooks
 ```

@@ -4,11 +4,7 @@
 # CI/CD workflows — irrelevant to image content, prevents cache invalidation on workflow-only changes
 .github
 
-# Ansible vault — NEVER include secrets in the build context
-src/group_vars/all/vault.yml
-
-# Vault password and other secret files
-.vault_pass
+# Secret files
 *.env
 .env
 *.key

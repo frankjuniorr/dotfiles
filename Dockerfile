@@ -17,13 +17,12 @@ COPY --chown=${USER}:${USER} . /home/${USER}/.dotfiles/
 USER ${USER}
 WORKDIR /home/${USER}
 
+# bash (not POSIX sh) so `pipefail` is defined; also makes hadolint lint the RUN as bash
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # All provisioning in one layer so cleanup actually reduces image size
-# --mount=type=secret exposes the vault password only during this RUN step;
-# it is never written to any image layer and does not appear in docker history.
-# vault_pass is optional: vault.yml is excluded via .dockerignore so CI builds work without it.
 # hadolint ignore=DL3003,DL3004,SC2015
-RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,required=false \
-    set -eo pipefail && \
+RUN set -eo pipefail && \
     # Install AUR helper — build from source (avoids yay-bin's GitHub binary download, which can 502)
     sudo pacman -Sy --noconfirm --needed git go && \
     git clone https://aur.archlinux.org/yay.git /tmp/yay && \
@@ -35,26 +34,27 @@ RUN --mount=type=secret,id=vault_pass,uid=1000,target=/run/secrets/vault_pass,re
     ansible-galaxy collection install community.general && \
     ansible-galaxy install -r ~/.dotfiles/src/requirements/common.yml && \
     \
-    # Run playbook — CLI roles only, no 1Password (vault.yml excluded via .dockerignore)
+    # Run playbook — CLI roles only. The git/dotfiles roles' GitHub-token and
+    # SSH-signing-key tasks are gated on a live `op whoami` (1Password CLI) —
+    # there's no 1Password session inside this build container, so `op` is
+    # either absent or unauthenticated and those two tasks just skip
+    # themselves, same as any machine without 1Password signed in.
     cd ~/.dotfiles/src && \
-    VAULT_OPT="" && \
-    if [ -f /run/secrets/vault_pass ]; then VAULT_OPT="--vault-password-file /run/secrets/vault_pass"; fi && \
     ANSIBLE_STDOUT_CALLBACK=default \
     ansible-playbook -i hosts.ini main.yml \
         --tags "cli" \
-        ${VAULT_OPT} \
-        -e '{"op_installed": false, "is_docker_build": true}' && \
+        -e '{"is_docker_build": true}' && \
     \
     # Remove Ansible and its galaxy collections (build-time only)
-    sudo pacman -Rns --noconfirm ansible ansible-core python-resolvelib 2>/dev/null || true && \
+    (sudo pacman -Rns --noconfirm ansible ansible-core python-resolvelib 2>/dev/null || true) && \
     sudo rm -rf /usr/lib/python*/site-packages/ansible* \
                 /usr/lib/python*/site-packages/ansible_collections && \
     \
     # Clear all caches
     yay -Scc --noconfirm && \
     sudo pacman -Scc --noconfirm && \
-    go clean -cache 2>/dev/null || true && \
-    sudo rm -rf /tmp/* /root/.ansible ~/.ansible \
-                ~/.cache/pip ~/.cargo/registry 2>/dev/null || true
+    (go clean -cache 2>/dev/null || true) && \
+    (sudo rm -rf /tmp/* /root/.ansible ~/.ansible \
+                ~/.cache/pip ~/.cargo/registry 2>/dev/null || true)
 
 ENTRYPOINT ["/usr/bin/tmux", "new-session", "-As", "main"]

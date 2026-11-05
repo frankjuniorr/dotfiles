@@ -10,12 +10,22 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "BTOP | Refresh {{ ansible_facts.user_dir }}/.config/btop folder"
+- name: "BTOP | Stat {{ ansible_facts.user_dir }}/.config/btop"
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/.config/btop"
+  register: btop_config_stat
+  tags: [configs]
+
+# Omarchy owns ~/.config/btop as a real directory (it writes themes/current.theme
+# there on every theme switch) — a directory symlink would clobber that. Only
+# btop.conf itself is ours, so symlink the file, not the folder.
+- name: "BTOP | Remove symlink if ~/.config/btop is a symlink"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/btop"
     state: absent
+  when: btop_config_stat.stat.islnk | default(false)
+  tags: [configs]
 
-# Link the Config File
 - name: "BTOP | Ensure btop directory structure exists"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -24,10 +34,12 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/btop"
+  tags: [configs]
 
-- name: "BTOP | Copy btop config"
+- name: "BTOP | Symlink btop.conf"
   ansible.builtin.file:
-    src: "{{ role_path }}/files"
-    dest: "{{ ansible_facts.user_dir }}/.config/btop"
+    src: "{{ role_path }}/files/btop.conf"
+    dest: "{{ ansible_facts.user_dir }}/.config/btop/btop.conf"
     state: link
     force: yes
+  tags: [configs]

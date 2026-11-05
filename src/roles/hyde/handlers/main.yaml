@@ -1,0 +1,40 @@
+---
+# HyDE's theme engine caches decoration/color values it derives from
+# ~/.config/hypr/themes/theme.conf into a Lua state file under
+# ~/.local/state/hyde/lua_state/ (see hl.config(theme_config) in
+# ~/.local/share/hypr/lua/dynamic.lua). That cache isn't regenerated just
+# because hyprland.lua changed, so anything theme-driven (e.g. decoration.rounding)
+# can silently go stale — most notably right after HyDE's Lua config migration,
+# per ~/HyDE/MIGRATION-LUA.md: "Theme colours were never generated for the Lua
+# state. Run: hyde-shell reload". failed_when is disabled because this only
+# means anything inside a live Hyprland session (HYPRLAND_INSTANCE_SIGNATURE) —
+# it's a harmless no-op during initial provisioning, before any session exists.
+- name: Reload HyDE theme state
+  become: false
+  ansible.builtin.command: hyde-shell reload
+  register: hyde_shell_reload
+  changed_when: hyde_shell_reload.rc == 0
+  failed_when: false
+  notify: Ensure single waybar instance
+
+# hyde-shell reload's theme pipeline relaunches waybar directly (outside
+# systemd) on top of the hyde-Hyprland-bar.service instance that's already
+# running it, leaving two waybar processes stacked on screen. Rather than
+# depend on the internals of that pipeline staying fixed, force a clean
+# single-instance state afterward: restart the systemd unit (fresh MainPID)
+# and kill any waybar process that isn't it.
+- name: Ensure single waybar instance
+  become: false
+  ansible.builtin.shell: |
+    set -euo pipefail
+    systemctl --user restart hyde-Hyprland-bar.service
+    sleep 1
+    main_pid=$(systemctl --user show hyde-Hyprland-bar.service -p MainPID --value)
+    for pid in $(pgrep waybar || true); do
+      if [ "$pid" != "$main_pid" ]; then
+        kill "$pid" || true
+      fi
+    done
+  register: waybar_cleanup
+  changed_when: true
+  failed_when: false

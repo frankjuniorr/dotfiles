@@ -1,15 +1,16 @@
 ---
-- name: "SESH | install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm sesh-bin"
-  register: sesh_install
-  retries: 3
-  delay: 10
-  until: sesh_install.rc == 0
+# sesh is not in the mise registry; the github backend pulls the release binary
+# (replaces sesh-bin AUR on Arch and the manual GitHub-release download on Ubuntu).
+- name: "SESH | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: ["github:joshmedeski/sesh"]
 
 - name: "SESH | Refresh {{ ansible_facts.user_dir }}/.config/sesh folder"
   ansible.builtin.file:
     path: "{{ ansible_facts.user_dir }}/.config/sesh"
     state: absent
+  tags: [configs]
 
 # Link the Config File
 - name: "SESH | Ensure sesh directory structure exists"
@@ -20,10 +21,12 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config"
     - "{{ ansible_facts.user_dir }}/.config/sesh"
+  tags: [configs]
 
-- name: "SESH | Copy sesh config"
+- name: "SESH | Symlink sesh.toml"
   ansible.builtin.file:
-    src: "{{ role_path }}/files"
-    dest: "{{ ansible_facts.user_dir }}/.config/sesh"
+    src: "{{ role_path }}/files/sesh.toml"
+    dest: "{{ ansible_facts.user_dir }}/.config/sesh/sesh.toml"
     state: link
     force: yes
+  tags: [configs]

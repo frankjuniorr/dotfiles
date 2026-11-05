@@ -1,4 +1,12 @@
 ---
+- name: "{{ ansible_facts.distribution }} | Disable pacman's ILoveCandy"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    regexp: '^ILoveCandy'
+    line: '# ILoveCandy'
+    backrefs: true
+
 - name: "{{ ansible_facts.distribution }} | Install packages"
   become: true
   community.general.pacman:
@@ -8,35 +16,83 @@
     - stow                # symlink manager
     - curl                # request and donwload CLI (like "wget")
     - wget                # request and donwload CLI (like "curl")
-    - less                # pager on CLI (like "more")
-    - jq                  # JSON processor (https://github.com/jqlang/jq)
     - yq                  # "JSON, XML, CSV, TOML and properties processor" (https://github.com/mikefarah/yq)
     - ffmpeg              # media manipulation on CLI
-    - imagemagick         # image manipulation on CLI
     - ncdu                # Disk Usage on CLI
     - figlet              # write ASCII texts on terminal
     - bc                  # simple calculator CLI
     - sshs                # TUI for SSH (https://github.com/quantumsheep/sshs)
-    - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
     - zip                 # for compact files
     - unrar               # for compact files
     - "duf"               # Better 'df' alternative
+    - tree                # directory listing as a tree (fallback for eza --tree in cf.sh)
+  when: not (omarchy_mode | default(false))
+
+- name: "{{ ansible_facts.distribution }} | Install packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [stow, curl, wget, yq, ffmpeg, ncdu, figlet, bc, sshs, zip, unrar, duf, tree]
+
+- name: "{{ ansible_facts.distribution }} | Install packages already in Omarchy"
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  when: not (omarchy_mode | default(false))
+  loop:
+    - less                # pager on CLI (like "more")
+    - jq                  # JSON processor (https://github.com/jqlang/jq)
+    - imagemagick         # image manipulation on CLI
+    - gum                 # "A tool for glamorous shell scripts" (https://github.com/charmbracelet/gum)
+
+# emote is AUR-only (not in the official repos pacman can see) and, on Omarchy,
+# redundant — Omarchy ships its own emoji picker (Super+Ctrl+E, via walker/elephant).
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation.
+- name: "{{ ansible_facts.distribution }} | Install emoji picker (emote)"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None emote' /dev/null"
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+  no_log: true
 
 - name: "{{ ansible_facts.distribution }} | Install GUI packages"
   become: true
   community.general.pacman:
     name: "{{ item }}"
     state: present
-  when: not (is_docker_build | default(false))
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
   loop:
-    - emote               # emoji picker gtk3 (https://github.com/tom-james-watson/Emote)
     - virt-viewer         # used by SPICE on Proxmox
-    - gnome-calculator    # default Gnome Calculator
+    - ddcui               # GUI to control brightness for external monitors — now in the official `extra` repo, no longer AUR-only
 
-# Because the tradicional package by `pacman` doesn't work on Wayland.
-- name: "{{ ansible_facts.distribution }} | install AUR GUI packages"
-  ansible.builtin.shell: "yay -S --needed --noconfirm {{ item }}"
+# ddcui — GUI to control brightness for external monitors — now in the
+# official `extra` repo, no longer AUR-only.
+- name: "{{ ansible_facts.distribution }} | Install GUI packages via Omarchy CLI"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/omarchy_pkg.yml"
+  vars:
+    omarchy_pkg_names: [virt-viewer, ddcui]
   when: not (is_docker_build | default(false))
-  loop:
-    - "flameshot-git"     # Because the tradicional package by `pacman` doesn't work on Wayland.
-    - "ddcui"             # GUI to control brightness for external monitors
+
+- name: "{{ ansible_facts.distribution }} | Install GUI packages already in Omarchy"
+  become: true
+  community.general.pacman:
+    name: gnome-calculator
+    state: present
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+
+# flameshot doesn't work well on Wayland and, on Omarchy, is redundant — Omarchy
+# ships its own screenshot tool with built-in OCR (grim+slurp+satty+tesseract,
+# see omarchy-capture-screenshot / omarchy-capture-text-extraction).
+# script -qec gives yay's internal sudo call a tty to read the primed ticket
+# from — see the google-chrome role for the full explanation.
+- name: "{{ ansible_facts.distribution }} | install flameshot (AUR)"
+  ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None flameshot-git' /dev/null"
+  when:
+    - not (is_docker_build | default(false))
+    - not (omarchy_mode | default(false))
+  no_log: true

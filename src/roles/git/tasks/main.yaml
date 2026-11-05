@@ -10,18 +10,6 @@
   when: system_distribution_config.stat.exists
   no_log: true
 
-- name: "GIT | Read email from vault"
-  ansible.builtin.shell: op read "op://Personal/GitHub/email"
-  register: github_email
-  changed_when: false
-  when: op_installed
-
-- name: "GIT | Read ssh key from vault"
-  ansible.builtin.shell: op read "op://Personal/GitHub SSH/public key"
-  register: github_ssh_public_key
-  changed_when: false
-  when: op_installed
-
 - name: "GIT | Ensure directories structure exists"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -30,12 +18,37 @@
   loop:
     - "{{ ansible_facts.user_dir }}/.config/lazygit"
     - "{{ ansible_facts.user_dir }}/.config/git"
+  tags: [configs]
+
+# Live 1Password read replaces the old Ansible-Vault-sourced
+# vault_github_ssh_public_key. Gated on `op vault list` rather than assuming `op`
+# is authenticated: on a machine/VM where 1Password hasn't been signed into
+# (e.g. this repo's Omarchy test VM, by design), these two tasks no-op
+# instead of hard-failing the whole playbook the way a missing
+# --vault-password-file used to.
+- name: "GIT | Check 1Password CLI auth"
+  ansible.builtin.command: op vault list
+  register: op_status
+  changed_when: false
+  failed_when: false
+  tags: [configs]
+
+- name: "GIT | Read SSH signing key from 1Password"
+  ansible.builtin.command: op read "op://Personal/GitHub SSH/public_key"
+  register: op_ssh_key
+  when: op_status.rc == 0
+  changed_when: false
+  no_log: true
+  tags: [configs]
 
 - name: "GIT | Copy the credential file"
   ansible.builtin.template:
     src: "git-credentials-personal.j2"
     dest: "{{ ansible_facts.user_dir }}/.config/git/.git-credentials-personal"
-  when: op_installed
+  vars:
+    vault_github_ssh_public_key: "{{ op_ssh_key.stdout }}"
+  when: op_status.rc == 0
+  tags: [configs]
 
 - name: "GIT | Create symbolic links"
   ansible.builtin.file:
@@ -44,6 +57,48 @@
     state: link
     force: yes
   loop:
-    - { src: "{{ role_path }}/files/config", dest: "{{ ansible_facts.user_dir }}/.config/git/config" }
     - { src: "{{ role_path }}/files/template", dest: "{{ ansible_facts.user_dir }}/.config/git/template" }
-    - { src: "{{ role_path }}/files/config.yml", dest: "{{ ansible_facts.user_dir }}/.config/lazygit/config.yml" }
+  tags: [configs]
+
+# Omarchy ships its own ~/.config/git/config and ~/.config/lazygit/config.yml,
+# refreshed by omarchy-refresh-config/omarchy-reinstall-configs. Overwriting
+# either breaks on the next refresh. Compose instead of clobbering: our config
+# lives at config.personal and gets included from Omarchy's config; lazygit is
+# ceded entirely (Omarchy's default is fine and untouched by migrations).
+- name: "GIT | Symlink personal config (omarchy_mode)"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config.personal"
+    dest: "{{ ansible_facts.user_dir }}/.config/git/config.personal"
+    state: link
+    force: yes
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "GIT | Compose with Omarchy's git config (omarchy_mode)"
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_facts.user_dir }}/.config/git/config"
+    marker: "# {mark} dotfiles — personal include"
+    block: |
+      [include]
+          path = {{ ansible_facts.user_dir }}/.config/git/config.personal
+    create: yes
+  when: omarchy_mode | default(false)
+  tags: [configs]
+
+- name: "GIT | Symlink full config (non-omarchy)"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config.personal"
+    dest: "{{ ansible_facts.user_dir }}/.config/git/config"
+    state: link
+    force: yes
+  when: not (omarchy_mode | default(false))
+  tags: [configs]
+
+- name: "GIT | Symlink lazygit config (non-omarchy)"
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config.yml"
+    dest: "{{ ansible_facts.user_dir }}/.config/lazygit/config.yml"
+    state: link
+    force: yes
+  when: not (omarchy_mode | default(false))
+  tags: [configs]

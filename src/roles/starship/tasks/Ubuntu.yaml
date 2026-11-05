@@ -1,18 +1,7 @@
 ---
-- name: "STARSHIP | Download the install script"
-  ansible.builtin.get_url:
-    url: https://starship.rs/install.sh
-    dest: /tmp/starship-install.sh
-    mode: '0755'
-
-- name: "STARSHIP | Run the install script"
-  ansible.builtin.shell:
-    cmd: /tmp/starship-install.sh --bin-dir "{{ primary_installation_path }}" --yes
-  args:
-    chdir: /tmp
-
-- name: "STARSHIP | Ensure clean Starship Installations file"
-  ansible.builtin.file:
-    path: "/tmp/starship-install.sh"
-    state: absent
-
+# starship comes from mise (see roles/mise). Omarchy already ships it via pacman, so skip there.
+- name: "STARSHIP | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [starship]
+  when: not (omarchy_mode | default(false))

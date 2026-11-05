@@ -1,0 +1,18 @@
+---
+# Omarchy ships mise in the base ISO (and activates it from its own shell rc /
+# uwsm env), so there is nothing to install there. Vanilla Arch (HyDE) gets it
+# from the official `extra` repo.
+- name: "MISE | Archlinux | Check if mise is already installed"
+  ansible.builtin.command: which mise
+  register: mise_present
+  changed_when: false
+  failed_when: false
+
+- name: "MISE | Archlinux | Install mise (non-Omarchy)"
+  become: true
+  community.general.pacman:
+    name: mise
+    state: present
+  when:
+    - mise_present.rc != 0
+    - not (omarchy_mode | default(false))

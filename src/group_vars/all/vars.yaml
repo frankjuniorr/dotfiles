@@ -4,15 +4,20 @@
 primary_installation_path: "{{ ansible_facts.user_dir }}/.local/bin"
 scripts_installation_path: "{{ ansible_facts.user_dir }}/.bin"
 
+# Git identity — not sensitive (already public in every commit), so it lives
+# here rather than in vault.yml or being fetched from 1Password at runtime.
+github_email: "frankcbjunior@gmail.com"
+
 cli_roles:
   - system-base
   - 1password
   - git
+  - mise
   - fzf
   - atuin
   - bat
   - zoxide
-  - lsd
+  - eza
   - btop
   - fetchs
   - just
@@ -35,6 +40,7 @@ gui_roles:
   - terminal
   - solaar
   - funny-apps
+  - split-keyboard
   - dropbox
   - insync
   - vscode
@@ -43,18 +49,20 @@ gui_roles:
   - spotify
   - obsidian
   - hyde
+  - omarchy
 
 default_roles:
   - system-base
   - 1password     # password manager first
   - git
+  - mise          # tool installer; MUST precede every role that installs via mise
 
   # CLI Tools
   - fzf
   - atuin
   - bat
   - zoxide
-  - lsd
+  - eza
   - btop
   - fetchs
   - just
@@ -75,6 +83,9 @@ default_roles:
   - solaar
   - funny-apps
 
+  # Vial (split keyboard configurator)
+  - split-keyboard
+
   # Devops tools
   - docker
   - terraform
@@ -94,7 +105,8 @@ default_roles:
 
   # Environment
   - dotfiles
-  - hyde
+  - hyde        # HyDE (Arch + Hyprland) — no-op on Omarchy/Ubuntu
+  - omarchy     # Omarchy-specific setup — no-op unless omarchy_mode is true
 
 go:
   packages:

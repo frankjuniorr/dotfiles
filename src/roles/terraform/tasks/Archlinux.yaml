@@ -1,10 +1,6 @@
 ---
-- name: "TFENV | Install"
-  ansible.builtin.shell: "yay -S --needed --noconfirm tfenv"
-
-- name: "TFENV | Add to group"
-  become: true
-  ansible.builtin.user:
-    append: true
-    groups: tfenv
-    name: "{{ ansible_facts.user_id }}"
+# terraform comes from mise (replaces tfenv, which needed AUR + a tfenv group).
+- name: "TERRAFORM | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [terraform]

@@ -1,0 +1,50 @@
+% 🌐 network, ip
+
+# Add temporary IP to an interface
+sudo ip addr add <ip>/<prefix> dev <interface>
+
+# Add temporary default gateway through an interface
+sudo ip route add default via <gateway> dev <interface>
+
+# Show current IP addresses on an interface
+ip addr show <interface>
+
+# Show current routing table
+ip route show
+
+# Remove temporary default gateway
+sudo ip route del default via <gateway> dev <interface>
+
+# Remove temporary IP from an interface
+sudo ip addr del <ip>/<prefix> dev <interface>
+
+$ interface: ip -o link show | awk -F': ' '{print $2}'
+$ prefix: echo -e "24\n16\n8\n32"
+
+
+
+% 🌐 network, dns
+
+# Set temporary DNS servers on an interface (systemd-resolved)
+sudo resolvectl dns <interface> <dns_ip>
+
+# Set an interface as default DNS route (systemd-resolved)
+sudo resolvectl domain <interface> "~."
+
+# Revert interface DNS to default (DHCP/NetworkManager)
+sudo resolvectl revert <interface>
+
+# Set DNS directly via /etc/resolv.conf (fallback, no systemd-resolved)
+echo "nameserver <dns_ip>" | sudo tee /etc/resolv.conf
+
+# Test DNS resolution with dig
+dig <domain>
+
+# Test DNS resolution with nslookup
+nslookup <domain>
+
+# Test DNS resolution with host
+host <domain>
+
+$ interface: ip -o link show | awk -F': ' '{print $2}'
+$ dns_ip: echo -e "8.8.8.8\n1.1.1.1\n9.9.9.9"

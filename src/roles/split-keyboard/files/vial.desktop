@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Vial
+Comment=Configurator for VIA/Vial-enabled QMK split keyboards
+Exec=vial %U
+Icon=input-keyboard
+Terminal=false
+Type=Application
+Categories=Utility;Settings;
