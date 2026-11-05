@@ -166,6 +166,9 @@
       tmux set-environment -g TMUX_PLUGIN_MANAGER_PATH "{{ ansible_facts.user_dir }}/.config/tmux/plugins/"
       "{{ ansible_facts.user_dir }}/.config/tmux/plugins/tpm/scripts/install_plugins.sh"
     executable: /bin/bash
+  # tmux comes from mise; put the shims on PATH (no activated shell here).
+  environment:
+    PATH: "{{ ansible_facts.user_dir }}/.local/share/mise/shims:{{ ansible_facts.user_dir }}/.local/bin:{{ ansible_facts.env.PATH }}"
   changed_when: false
 
 # Our 4 theme-repo clones (everforest/catppuccin/gruvbox/nord) back the hex

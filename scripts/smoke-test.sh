@@ -14,12 +14,14 @@ FAIL=0
 # Outside: run via `docker run` against the given image.
 if [ -f /.dockerenv ]; then
     CONTEXT="inside container"
-    run_cmd() { bash -c "$1" > /dev/null 2>&1; }
+    run_cmd() { bash -c "export PATH=\"\$HOME/.local/share/mise/shims:\$PATH\"; $1" > /dev/null 2>&1; }
 else
     IMAGE="${1:?Usage: smoke-test.sh <image-name>  (or run inside the container without args)}"
     CONTEXT="docker image: ${IMAGE}"
-    # Source zshenv (sets ZDOTDIR) + .zshrc (sets PATH) without -i so it works without a TTY (CI)
-    run_cmd() { docker run --rm --entrypoint zsh "$IMAGE" -c ". /etc/zsh/zshenv 2>/dev/null; . \${ZDOTDIR:-\$HOME}/.zshrc 2>/dev/null; $1" > /dev/null 2>&1; }
+    # Source zshenv (sets ZDOTDIR) + .zshrc (sets PATH) without -i so it works without a TTY (CI).
+    # `mise activate` only hooks into interactive prompts, so put the mise shims
+    # (where mise-installed tools live) on PATH explicitly.
+    run_cmd() { docker run --rm --entrypoint zsh "$IMAGE" -c ". /etc/zsh/zshenv 2>/dev/null; . \${ZDOTDIR:-\$HOME}/.zshrc 2>/dev/null; export PATH=\"\$HOME/.local/share/mise/shims:\$PATH\"; $1" > /dev/null 2>&1; }
 fi
 
 # ── Check helper ─────────────────────────────────────────────────────────────
@@ -87,7 +89,7 @@ check "helm"           "helm version --short"
 check "k9s"            "k9s version"
 check "go"             "go version"
 check "cobra-cli"      "command -v cobra-cli"
-check "tfenv"          "tfenv --version"
+check "terraform"      "terraform version"
 
 echo "Dotfiles"
 check "aliases symlink"   "test -L ~/.config/dotfiles/alias.sh"

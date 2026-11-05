@@ -62,5 +62,9 @@
 
 - name: "NEOVIM | Sync and update neovim"
   ansible.builtin.shell: "nvim --headless \"+Lazy! sync\" +qa"
+  # nvim comes from mise; Ansible's shell isn't an activated one, so put the
+  # mise shims on PATH explicitly.
+  environment:
+    PATH: "{{ ansible_facts.user_dir }}/.local/share/mise/shims:{{ ansible_facts.user_dir }}/.local/bin:{{ ansible_facts.env.PATH }}"
 
 

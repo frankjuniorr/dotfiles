@@ -43,15 +43,15 @@ RUN set -eo pipefail && \
         -e '{"is_docker_build": true}' && \
     \
     # Remove Ansible and its galaxy collections (build-time only)
-    sudo pacman -Rns --noconfirm ansible ansible-core python-resolvelib 2>/dev/null || true && \
+    (sudo pacman -Rns --noconfirm ansible ansible-core python-resolvelib 2>/dev/null || true) && \
     sudo rm -rf /usr/lib/python*/site-packages/ansible* \
                 /usr/lib/python*/site-packages/ansible_collections && \
     \
     # Clear all caches
     yay -Scc --noconfirm && \
     sudo pacman -Scc --noconfirm && \
-    go clean -cache 2>/dev/null || true && \
-    sudo rm -rf /tmp/* /root/.ansible ~/.ansible \
-                ~/.cache/pip ~/.cargo/registry 2>/dev/null || true
+    (go clean -cache 2>/dev/null || true) && \
+    (sudo rm -rf /tmp/* /root/.ansible ~/.ansible \
+                ~/.cache/pip ~/.cargo/registry 2>/dev/null || true)
 
 ENTRYPOINT ["/usr/bin/tmux", "new-session", "-As", "main"]

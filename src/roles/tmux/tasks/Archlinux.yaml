@@ -14,8 +14,21 @@
   ansible.builtin.shell: "script -qec 'echo {{ ansible_become_pass }} | sudo -S -v >/dev/null 2>&1 && yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None tmuxinator' /dev/null"
   args:
     creates: /usr/bin/tmuxinator
-  when: not (omarchy_mode | default(false))
+  when:
+    - not (omarchy_mode | default(false))
+    - not (is_docker_build | default(false))
   no_log: true
+
+# Docker image build: there is no become password (the build user has
+# NOPASSWD sudo), so the primed-ticket trick above can't be used — call yay
+# directly.
+- name: "Tmuxinator | Archlinux | Install tmuxinator (docker build)"
+  ansible.builtin.shell: "yay -S --needed --noconfirm --answerclean None --answerdiff None --answeredit None tmuxinator"
+  args:
+    creates: /usr/bin/tmuxinator
+  when:
+    - not (omarchy_mode | default(false))
+    - is_docker_build | default(false)
 
 # NOTE: unlike our own yay -S calls, omarchy-pkg-aur-add does not pass
 # --answerclean/--answerdiff/--answeredit, so it could in principle hang on a
