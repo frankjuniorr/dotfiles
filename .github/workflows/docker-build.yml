@@ -1,11 +1,40 @@
 name: Build & Publish CLI Image
 
+# Skip the image pipeline when only files that don't end up in (or affect) the
+# image change: docs, license, local tooling, and workflow-unrelated helpers.
+# `.dockerignore` and `.hadolint.yaml` are deliberately NOT listed — they change
+# what/how we build and lint. Path filters are not evaluated for tag pushes, so
+# `v*` releases always run the full pipeline.
 on:
   push:
     branches: [main]
     tags: ["v*"]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".claude/**"
+      - ".crush/**"
+      - "Justfile"
+      - "docker-compose.yml"
+      - "install-env.sh"
+      - "flow.yaml"
+      - "dotfiles.flow"
+      - "scripts/pre-commit.sh"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".claude/**"
+      - ".crush/**"
+      - "Justfile"
+      - "docker-compose.yml"
+      - "install-env.sh"
+      - "flow.yaml"
+      - "dotfiles.flow"
+      - "scripts/pre-commit.sh"
 
 env:
   REGISTRY: ghcr.io
