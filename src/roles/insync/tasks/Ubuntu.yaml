@@ -3,16 +3,24 @@
   ansible.builtin.shell: grep "DISTRIB_CODENAME" /etc/lsb-release | cut -d "=" -f2
   register: so_codename
 
-- name: "Insync | Add Insync GPG key"
+# apt-key is gone on Ubuntu 26.04: deb822_repository fetches the key (id ACCAF35C)
+# from the Ubuntu keyserver itself.
+- name: "Insync | Install python3-debian (for deb822_repository)"
   become: yes
-  ansible.builtin.apt_key:
-    keyserver: keyserver.ubuntu.com
-    id: ACCAF35C
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
 
 - name: "Insync | Add Insync repository"
   become: yes
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] http://apt.insync.io/ubuntu {{ so_codename.stdout }} non-free contrib"
+  ansible.builtin.deb822_repository:
+    name: insync
+    types: [deb]
+    uris: http://apt.insync.io/ubuntu
+    suites: ["{{ so_codename.stdout }}"]
+    components: [non-free, contrib]
+    architectures: [amd64]
+    signed_by: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xACCAF35C"
     state: present
 
 - name: "Insync | Update apt cache"

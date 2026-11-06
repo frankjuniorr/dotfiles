@@ -1,50 +1,7 @@
 ---
-- name: "ONEFETCH | Add PPA repository"
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "ppa:o2sh/onefetch"
-    state: present
-
-- name: "ONEFETCH | Update packages"
-  become: true
-  ansible.builtin.apt:
-    update_cache: yes
-
-- name: "ONEFETCH | install"
-  become: true
-  ansible.builtin.apt:
-    name: onefetch
-    state: present
-
-# Install
-# #########################################################################
-- name: "FASTFETCH | Download Latest Version JSON"
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest
-  register: fastfetch_latest_version_json
-  changed_when: false
-
-- name: "FASTFETCH | Registering FASTFETCH Latest Release"
-  ansible.builtin.set_fact:
-    fastfetch_latest_release: "{{ fastfetch_latest_version_json.json.tag_name }}"
-
-- name: "FASTFETCH | Registering FASTFETCH Latest Version"
-  ansible.builtin.set_fact:
-    fastfetch_latest_version: "{{ fastfetch_latest_release | replace('v', '') }}"
-
-- name: "FASTFETCH | Download .deb package"
-  ansible.builtin.get_url:
-    url: "https://github.com/fastfetch-cli/fastfetch/releases/download/{{ fastfetch_latest_version }}/fastfetch-linux-amd64.deb"
-    dest: /tmp/fastfetch.deb
-
-- name: "FASTFETCH | Install .deb package"
-  become: yes
-  ansible.builtin.command:
-    cmd: dpkg -i /tmp/fastfetch.deb
-  ignore_errors: yes
-
-- name: "FASTFETCH | Clean up the downloaded .deb file"
-  ansible.builtin.file:
-    path: /tmp/fastfetch.deb
-    state: absent
-
+# onefetch and fastfetch are in the mise registry (priority: mise > apt > GitHub
+# releases), which replaces the o2sh PPA and the fastfetch GitHub .deb download.
+- name: "FETCHS | Install onefetch and fastfetch via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [onefetch, fastfetch]

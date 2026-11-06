@@ -54,28 +54,8 @@
     state: present
 
 # --- github-cli ---
-- name: "GH CLI | Add GPG key"
-  become: true
-  ansible.builtin.apt_key:
-    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
-    keyring: /etc/apt/keyrings/githubcli-archive-keyring.gpg
-    state: present
-
-- name: "GH CLI | Get system architecture"
-  ansible.builtin.command: dpkg --print-architecture
-  register: dpkg_architecture
-  changed_when: false
-
-- name: "GH CLI | Add repository"
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [arch={{ dpkg_architecture.stdout }} signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
-    filename: github-cli
-    state: present
-
-- name: "GH CLI | Install"
-  become: true
-  ansible.builtin.apt:
-    name: gh
-    state: present
-    update_cache: yes
+# gh is in the mise registry (priority: mise > apt), and apt_key is gone on Ubuntu 26.04.
+- name: "GH CLI | Install via mise"
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
+  vars:
+    mise_tools: [gh]
