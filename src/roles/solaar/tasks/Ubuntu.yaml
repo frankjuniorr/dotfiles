@@ -49,19 +49,11 @@
       - libgirepository1.0-dev
       - python3-dbus
 
-- name: "Solaar | Add PPA repository"
-  become: yes
-  ansible.builtin.apt_repository:
-    repo: ppa:solaar-unifying/ppa
-    state: present
-
-- name: "Solaar | Update apt cache"
-  become: yes
-  ansible.builtin.apt:
-    update_cache: yes
-
+# solaar is in Ubuntu's own apt repos (26.04 ships 1.1.x), so no PPA needed
+# (priority: mise > apt > GitHub releases; not in the mise registry).
 - name: "Solaar | Install solaar"
   become: yes
   ansible.builtin.apt:
     name: solaar
     state: present
+    update_cache: yes

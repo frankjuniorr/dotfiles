@@ -13,6 +13,30 @@
     dest: "{{ ansible_facts.user_dir }}/.local/share/fonts/{{ item.split('/')[-1] }}"
   loop: "{{ fonts_list }}"
 
+# JetBrainsMono Nerd Font (used by the Ghostty config). The nerd-fonts repo no
+# longer keeps per-file raw TTFs for it, so take the 4 styles from the release zip.
+- name: "Fonts | Download JetBrainsMono Nerd Font release"
+  ansible.builtin.get_url:
+    url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ nerd_fonts_version }}/JetBrainsMono.zip"
+    dest: /tmp/JetBrainsMono.zip
+    mode: "0644"
+
+- name: "Fonts | Extract JetBrainsMono Nerd Font (Regular, Bold, Italic, BoldItalic)"
+  ansible.builtin.unarchive:
+    src: /tmp/JetBrainsMono.zip
+    dest: "{{ ansible_facts.user_dir }}/.local/share/fonts"
+    remote_src: true
+    include:
+      - JetBrainsMonoNerdFont-Regular.ttf
+      - JetBrainsMonoNerdFont-Bold.ttf
+      - JetBrainsMonoNerdFont-Italic.ttf
+      - JetBrainsMonoNerdFont-BoldItalic.ttf
+
+- name: "Fonts | Remove downloaded zip"
+  ansible.builtin.file:
+    path: /tmp/JetBrainsMono.zip
+    state: absent
+
 - name: "Fonts | Install dependencies"
   become: true
   ansible.builtin.apt:
@@ -20,4 +44,9 @@
     state: present
 
 - name: "Fonts | Refresh font cache"
-  ansible.builtin.shell: "fc-cache -f -v"
+  ansible.builtin.command: "fc-cache -f"
+  register: fc_cache_result
+  retries: 3
+  delay: 3
+  until: fc_cache_result.rc == 0
+  changed_when: true

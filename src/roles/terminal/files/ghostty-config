@@ -1,0 +1,45 @@
+# Ghostty config — ported from the old Terminator setup (Gruvbox Dark theme,
+# translucent background, I-beam cursor, Alt+N tab switching).
+
+# Theme / colors
+theme = Gruvbox Dark
+
+# Font (installed by the `fonts` role)
+font-family = JetBrainsMono Nerd Font
+font-size = 11
+# U+262F (yin-yang, used by the starship prompt) is not in JetBrainsMono, and the
+# automatic fallback picks the color-emoji font, which renders it badly. Force a
+# monochrome text font for that glyph.
+font-codepoint-map = U+262F=DejaVu Sans Mono
+
+# Look & feel
+background-opacity = 0.9
+background-blur = true
+# NOTE: do not set `window-decoration = none` — on GNOME/Wayland it removes the
+# titlebar and border, leaving a window that cannot be moved or resized.
+window-padding-x = 6
+window-padding-y = 4
+cursor-style = bar
+cursor-style-blink = false
+
+# Behaviour
+# Always start zsh: the Ghostty background process inherits $SHELL from the login
+# session, which can still say bash right after the zsh role's `chsh`.
+command = zsh
+copy-on-select = clipboard
+scrollback-limit = 100000000
+confirm-close-surface = false
+
+# Keybindings (same muscle memory as Terminator)
+keybind = shift+alt+down=new_split:down
+keybind = shift+alt+right=new_split:right
+keybind = alt+1=goto_tab:1
+keybind = alt+2=goto_tab:2
+keybind = alt+3=goto_tab:3
+keybind = alt+4=goto_tab:4
+keybind = alt+5=goto_tab:5
+keybind = alt+6=goto_tab:6
+keybind = alt+7=goto_tab:7
+keybind = alt+8=goto_tab:8
+keybind = alt+9=goto_tab:9
+keybind = ctrl+comma=open_config
