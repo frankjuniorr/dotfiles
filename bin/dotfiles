@@ -74,6 +74,13 @@ function loading() {
     --spinner.foreground="$os_color" -- sh -c "$command"
 }
 
+# Skip the prompt when sudo already works non-interactively (NOPASSWD, or a warm
+# ticket). sudo-rs (Ubuntu 26.04) makes `sudo -v` ask for a password even under
+# NOPASSWD, which would otherwise abort the whole run under `set -e`.
+function prime_sudo() {
+  sudo -n true 2>/dev/null || sudo -v
+}
+
 SUDO_KEEPALIVE_PID=""
 BECOME_PASS_FILE=""
 
@@ -93,7 +100,7 @@ function start_sudo_keepalive() {
   # Refresh it in the background for the life of the script so it never does.
   (
     while kill -0 "$$" 2>/dev/null; do
-      sudo -n -v
+      sudo -n -v 2>/dev/null || true
       sleep 60
     done
   ) &
@@ -140,7 +147,7 @@ function ubuntu_setup() {
   # from the wrapped command — sometimes it comes through, sometimes it just
   # hangs forever with no visible output. A cached ticket means none of the
   # sudo calls below ever need to prompt while wrapped.
-  sudo -v
+  prime_sudo
   start_sudo_keepalive
 
   test -f /var/lib/apt/lists/lock && sudo rm -rf /var/lib/apt/lists/lock
@@ -176,7 +183,7 @@ function arch_setup() {
   # See the comment in ubuntu_setup(): prime sudo here, outside of gum spin,
   # so the wrapped sudo calls below reuse the cached ticket instead of
   # risking a swallowed password prompt.
-  sudo -v
+  prime_sudo
   start_sudo_keepalive
 
   # Omarchy now ships its own pre-transaction pacman hook that flat-out
@@ -358,7 +365,7 @@ tag_is_relevant() {
   return 1
 }
 
-if tag_is_relevant && { ! command -v op >/dev/null 2>&1 || ! op vault list >/dev/null 2>&1; }; then
+if tag_is_relevant && { ! command -v op >/dev/null 2>&1 || ! op vault list </dev/null >/dev/null 2>&1; }; then
   print_warning "1Password not authenticated — GitHub token (gh CLI) and commit-signing config were skipped.
 To finish setup: log into 1Password, enable its SSH Agent (Settings → Developer → Use the SSH Agent), make sure your SSH key is in the vault, then re-run:
   bin/dotfiles \"git\" && bin/dotfiles \"dotfiles\""
