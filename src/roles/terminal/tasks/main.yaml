@@ -1,7 +1,7 @@
 ---
 # Omarchy 4.0 defaults to `foot` (xdg-terminal-exec + theming) — no Archlinux.yaml
 # here on purpose, so this role stays a no-op on Arch/Omarchy (Decision #7 in the
-# migration plan). It only does anything on Ubuntu (terminator).
+# migration plan). It only does anything on Ubuntu (ghostty, set as the default terminal).
 # `configs` is intrinsically tagged on this dispatcher because the config symlink
 # lives inside Ubuntu.yaml, mixed with the install step.
 - name: "System | Checking for Distribution Config: {{ ansible_facts.distribution }}"

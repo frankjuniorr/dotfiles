@@ -1,24 +1,85 @@
 ---
-- name: "Terminator | {{ ansible_facts.distribution }} | Install terminator"
-  ansible.builtin.apt:
-    name: terminator
-    state: present
-  become: true
+# Install priority (mise > apt > GitHub releases): ghostty is not in the mise
+# registry; recent Ubuntu releases (26.04+) have it in apt, older ones (24.04)
+# don't, so fall back to the GitHub-releases .deb of mkasberg/ghostty-ubuntu.
+- name: "Ghostty | {{ ansible_facts.distribution }} | Check if ghostty is installed"
+  ansible.builtin.command: dpkg-query -W ghostty
+  register: ghostty_dpkg
+  changed_when: false
+  failed_when: false
 
-- name: "Terminator | Ensure terminator directory structure exists"
+- name: "Ghostty | {{ ansible_facts.distribution }} | Check if apt provides ghostty"
+  ansible.builtin.command: apt-cache show ghostty
+  register: ghostty_apt
+  changed_when: false
+  failed_when: false
+  when: ghostty_dpkg.rc != 0
+
+- name: "Ghostty | {{ ansible_facts.distribution }} | Install via apt"
+  become: true
+  ansible.builtin.apt:
+    name: ghostty
+    state: present
+    update_cache: true
+  when:
+    - ghostty_dpkg.rc != 0
+    - ghostty_apt.rc == 0
+
+- name: "Ghostty | {{ ansible_facts.distribution }} | Fallback: .deb from GitHub releases"
+  when:
+    - ghostty_dpkg.rc != 0
+    - ghostty_apt.rc != 0
+  block:
+    - name: "Ghostty | Download .deb"
+      ansible.builtin.get_url:
+        url: "https://github.com/mkasberg/ghostty-ubuntu/releases/download/{{ ghostty_ubuntu_version }}/ghostty_{{ ghostty_ubuntu_version | replace('-ppa', '.ppa') }}_{{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'amd64' }}_{{ ansible_facts.distribution_version }}.deb"
+        dest: /tmp/ghostty.deb
+        mode: "0644"
+
+    - name: "Ghostty | Install .deb"
+      become: true
+      ansible.builtin.apt:
+        deb: /tmp/ghostty.deb
+        state: present
+
+  always:
+    - name: "Ghostty | Remove downloaded .deb"
+      ansible.builtin.file:
+        path: /tmp/ghostty.deb
+        state: absent
+
+- name: "Ghostty | Ensure config directory exists"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ ansible_facts.user_dir }}/.config/ghostty"
     mode: "0755"
     state: directory
-  loop:
-    - "{{ ansible_facts.user_dir }}/.config"
-    - "{{ ansible_facts.user_dir }}/.config/terminator"
   tags: [configs]
 
-- name: "Terminator | Create symbolic links for configuration files"
+- name: "Ghostty | Create symbolic link for the configuration file"
   ansible.builtin.file:
-    src: "{{ role_path }}/files/config"
-    dest: "{{ ansible_facts.user_dir }}/.config/terminator/config"
+    src: "{{ role_path }}/files/ghostty-config"
+    dest: "{{ ansible_facts.user_dir }}/.config/ghostty/config"
     force: true
     state: link
+  tags: [configs]
+
+# Default terminal: x-terminal-emulator alternative + GNOME's default terminal
+# (what Ctrl+Alt+T and "Open in Terminal" use).
+- name: "Ghostty | Register as x-terminal-emulator alternative"
+  become: true
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/bin/ghostty
+    link: /usr/bin/x-terminal-emulator
+    priority: 50
+  when: not (is_docker_build | default(false))
+
+- name: "Ghostty | Set GNOME default terminal"
+  ansible.builtin.command: "gsettings set org.gnome.desktop.default-applications.terminal {{ item.key }} '{{ item.value }}'"
+  loop:
+    - { key: exec, value: ghostty }
+    - { key: exec-arg, value: "-e" }
+  changed_when: false
+  failed_when: false
+  when: not (is_docker_build | default(false))
   tags: [configs]

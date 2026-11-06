@@ -9,7 +9,7 @@ add_newline = true
 
 # Configuração do prompt principal (lado esquerdo)
 format = """\
-  󰣇 ☯ \
+  ${custom.distro_icon} ☯ \
   $directory\
   $git_branch$git_commit$git_state $git_status\
   $character\n
@@ -431,3 +431,15 @@ pure_msg = '[⌾](bold dimmed green)'
 style = 'bold italic dimmed blue'
 symbol = ' '
 unknown_msg = '[◌](bold dimmed ellow)'
+
+
+###########################################################
+# ÍCONE DA DISTRO
+###########################################################
+# Ubuntu shows its own logo; everything else (Arch, Omarchy, ...) keeps the Arch
+# icon it always had. Reads /etc/os-release, so the same file works on every host.
+[custom.distro_icon]
+command = '. /etc/os-release; if [ "$ID" = ubuntu ]; then printf "\357\214\233"; else printf "\363\260\243\207"; fi'
+when = true
+format = "$output"
+description = "Distro logo (Ubuntu vs Arch/Omarchy)"

@@ -1,16 +1,23 @@
 ---
-- name: "1Password | Add APT Key"
-  ansible.builtin.apt_key:
-    url: https://downloads.1password.com/linux/keys/1password.asc
-    keyring: /usr/share/keyrings/1password-archive-keyring.gpg
+# apt-key was removed in Ubuntu 26.04 (so ansible's apt_key fails there) and
+# apt_repository is deprecated: use deb822_repository, which fetches and stores
+# the signing key itself. It needs python3-debian on the target.
+- name: "1Password | Install python3-debian (for deb822_repository)"
+  ansible.builtin.apt:
+    name: python3-debian
     state: present
   become: true
 
 - name: "1Password | Add APT Repo"
-  ansible.builtin.apt_repository:
-    repo: "deb [arch={{ ansible_facts.machine | replace('x86_64', 'amd64') }} signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/{{ ansible_facts.machine | replace('x86_64', 'amd64') }} stable main"
+  ansible.builtin.deb822_repository:
+    name: 1password
+    types: [deb]
+    uris: "https://downloads.1password.com/linux/debian/{{ ansible_facts.machine | replace('x86_64', 'amd64') }}"
+    suites: [stable]
+    components: [main]
+    architectures: ["{{ ansible_facts.machine | replace('x86_64', 'amd64') }}"]
+    signed_by: https://downloads.1password.com/linux/keys/1password.asc
     state: present
-    mode: "0644"
   become: true
 
 - name: "1Password | Add debsig-verify policy"
@@ -34,10 +41,21 @@
         state: directory
         mode: "0755"
 
-    - name: "1Password | Add debsig keyring"
-      ansible.builtin.apt_key:
+    - name: "1Password | Download signing key"
+      ansible.builtin.get_url:
         url: https://downloads.1password.com/linux/keys/1password.asc
-        keyring: /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+        dest: /tmp/1password.asc
+        mode: "0644"
+
+    - name: "1Password | Add debsig keyring"
+      ansible.builtin.command:
+        cmd: gpg --dearmor --yes -o /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg /tmp/1password.asc
+        creates: /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+
+    - name: "1Password | Remove downloaded key"
+      ansible.builtin.file:
+        path: /tmp/1password.asc
+        state: absent
 
 - name: "1Password | Install 1Password"
   ansible.builtin.apt:

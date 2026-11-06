@@ -1,17 +1,33 @@
 ---
-- name: "Telegram | Add Telegram PPA"
-  become: yes
-  ansible.builtin.apt_repository:
-    repo: ppa:atareao/telegram
-    state: present
+# Telegram Desktop is not in the mise registry nor in Ubuntu's apt repos (the old
+# atareao PPA is dropped), so per the package priority (mise > apt > GitHub
+# releases) it comes from the official GitHub release (a self-updating binary
+# tarball), installed under ~/.local/opt and linked into ~/.local/bin.
+- name: "Telegram | Get latest release"
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/telegramdesktop/tdesktop/releases/latest
+  register: telegram_latest
+  changed_when: false
 
-- name: "Telegram | Update apt cache"
-  become: yes
-  ansible.builtin.apt:
-    update_cache: yes
+- name: "Telegram | Ensure install directories exist"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ ansible_facts.user_dir }}/.local/opt"
+    - "{{ ansible_facts.user_dir }}/.local/bin"
 
-- name: "Telegram | Install Telegram"
-  become: yes
-  ansible.builtin.apt:
-    name: telegram
-    state: present
+- name: "Telegram | Download and extract release"
+  ansible.builtin.unarchive:
+    src: "https://github.com/telegramdesktop/tdesktop/releases/download/{{ telegram_latest.json.tag_name }}/td-setup-linux-x64-{{ telegram_latest.json.tag_name | replace('v', '') }}.tar.xz"
+    dest: "{{ ansible_facts.user_dir }}/.local/opt"
+    remote_src: true
+    creates: "{{ ansible_facts.user_dir }}/.local/opt/Telegram/Telegram"
+
+- name: "Telegram | Link binary into ~/.local/bin"
+  ansible.builtin.file:
+    src: "{{ ansible_facts.user_dir }}/.local/opt/Telegram/Telegram"
+    dest: "{{ ansible_facts.user_dir }}/.local/bin/telegram-desktop"
+    state: link
+    force: true
