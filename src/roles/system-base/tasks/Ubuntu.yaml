@@ -35,6 +35,7 @@
     - imagemagick
     - ncdu
     - figlet
+    - nmap
 
 - name: "{{ ansible_facts.distribution }} | Install GUI tools"
   become: true

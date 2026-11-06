@@ -48,3 +48,30 @@ host <domain>
 
 $ interface: ip -o link show | awk -F': ' '{print $2}'
 $ dns_ip: echo -e "8.8.8.8\n1.1.1.1\n9.9.9.9"
+
+
+
+% 🌐 network, ports
+
+# List all listening TCP/UDP ports on localhost with the owning process
+sudo ss -tulnp
+
+# List only listening TCP ports (no process lookup, no sudo)
+ss -tln
+
+# List only listening UDP ports
+ss -uln
+
+# Show which process is listening on a port
+sudo ss -tulnp 'sport = :<port>'
+
+# Show which process uses a port (lsof)
+sudo lsof -i :<port> -P -n
+
+# List all established TCP connections
+ss -tn state established
+
+# Check if a remote port is open (bash built-in, no extra tools)
+timeout 3 bash -c '</dev/tcp/<host>/<port>' && echo "open" || echo "closed"
+
+$ port: ss -tulnH | awk '{n=split($5,a,":"); print a[n]}' | sort -un

@@ -1,0 +1,144 @@
+% 🛡️ security, nmap
+
+# Quick scan of the most common 1000 ports on a host
+nmap <target>
+
+# Scan every TCP port (1-65535) on a host
+nmap -p- <target>
+
+# Scan specific ports
+nmap -p <ports> <target>
+
+# Detect service names and versions on open ports
+nmap -sV <target>
+
+# Detect OS, services and run default scripts (needs root)
+sudo nmap -A <target>
+
+# Fast scan (top 100 ports)
+nmap -F <target>
+
+# Ping sweep: discover live hosts on a subnet (no port scan)
+nmap -sn <subnet>
+
+# Scan the open ports of this machine (localhost)
+nmap -p- localhost
+
+# Scan a host skipping host discovery (when ICMP is blocked)
+nmap -Pn <target>
+
+# Scan UDP top 100 ports (needs root, slow)
+sudo nmap -sU --top-ports 100 <target>
+
+# Run vulnerability NSE scripts against a host
+nmap --script vuln <target>
+
+# Check TLS ciphers supported by a host:port
+nmap --script ssl-enum-ciphers -p <port> <target>
+
+# Save scan results in all formats (normal, XML, grepable)
+nmap -oA <output_prefix> <target>
+
+$ subnet: ip -o -f inet addr show scope global | awk '{print $4}'
+$ ports: echo -e "22\n80,443\n22,80,443\n1-1024\n8000-9000"
+
+
+
+% 🛡️ security, tls
+
+# Show the certificate of a host (subject, issuer, validity)
+echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -subject -issuer -dates
+
+# Check certificate expiry date of a host
+echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -enddate
+
+# Show the full certificate chain of a host
+openssl s_client -connect <host>:443 -servername <host> -showcerts </dev/null
+
+# Inspect a local certificate file
+openssl x509 -in <cert_file> -noout -text
+
+# Test which TLS version a host accepts (tls1_2 / tls1_3)
+openssl s_client -connect <host>:443 -servername <host> -<tls_version> </dev/null
+
+$ tls_version: echo -e "tls1_2\ntls1_3"
+
+
+
+% 🛡️ security, secrets
+
+# Scan the current git repo (including history) for leaked secrets
+gitleaks git .
+
+# Scan files in a directory for secrets (no git history)
+gitleaks dir <path>
+
+# Scan only staged changes for secrets (pre-commit style)
+gitleaks git --staged
+
+# Generate a strong random password (32 bytes, base64)
+openssl rand -base64 32
+
+# Generate a random hex token (32 bytes)
+openssl rand -hex 32
+
+# Generate a new ed25519 SSH key pair
+ssh-keygen -t ed25519 -C "<comment>"
+
+# Show the fingerprint of an SSH public key
+ssh-keygen -lf <pubkey_file>
+
+
+
+% 🛡️ security, scan
+
+# Scan a container image for CRITICAL/HIGH vulnerabilities
+trivy image --severity CRITICAL,HIGH <image>
+
+# Scan the current directory (deps, IaC, secrets) for issues
+trivy fs .
+
+# Scan IaC/Kubernetes manifests for misconfigurations
+trivy config <path>
+
+# Scan the running Kubernetes cluster for vulnerabilities and misconfigs
+trivy k8s --report summary cluster
+
+# Generate an SBOM (SPDX) for an image
+trivy image --format spdx-json --output sbom.spdx.json <image>
+
+$ image: docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>'
+
+
+
+% 🛡️ security, system
+
+# Show failed SSH login attempts (last 50)
+journalctl -u sshd --no-pager | grep -i "failed" | tail -50
+
+# Show last logins
+last -n 20
+
+# Show failed login attempts
+sudo lastb -n 20
+
+# List users with a login shell
+grep -vE '(nologin|false)$' /etc/passwd | cut -d: -f1,7
+
+# List users with sudo privileges
+getent group sudo wheel | cut -d: -f4
+
+# Find SUID binaries (privilege escalation candidates)
+find / -perm -4000 -type f 2>/dev/null
+
+# Find world-writable files outside /proc and /sys
+find / -xdev -type f -perm -0002 2>/dev/null
+
+# Check the firewall status (ufw)
+sudo ufw status verbose
+
+# Show active firewall rules (nftables)
+sudo nft list ruleset
+
+# Show systemd services that are enabled at boot
+systemctl list-unit-files --state=enabled --type=service

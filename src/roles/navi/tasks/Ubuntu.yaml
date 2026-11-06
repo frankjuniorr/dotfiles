@@ -3,4 +3,4 @@
 - name: "NAVI | Install via mise"
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/mise_tool.yml"
   vars:
-    mise_tools: [navi]
+    mise_tools: [navi, gitleaks, trivy]  # gitleaks/trivy: used by cheats/security.cheat
