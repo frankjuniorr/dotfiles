@@ -58,7 +58,7 @@ Like Omarchy, this repo uses [`mise`](https://mise.jdx.dev) as the installer for
 `navi` cheatsheets live in `src/roles/navi/files/cheats/` (including one for `mise`). On Omarchy, the `omarchy` role adds **Dotfiles**, **Mise** and **Snippets** entries to the Omarchy menu (`~/.config/omarchy/extensions/omarchy-menu.jsonc`).
 
 # Docker image
-A CLI-only environment (`--tags cli`) is built from the `Dockerfile` and published to `ghcr.io/frankjuniorr/dotfiles-env` by GitHub Actions (lint, build, smoke test, Trivy scan; tags `v*` also get an SBOM and a cosign signature).
+A CLI-only environment (`--tags cli`) is built from the `Dockerfile` and published to `ghcr.io/frankjuniorr/dotfiles-env` by GitHub Actions: pushes and PRs only run the Dockerfile lint, while pushing a `v*` tag runs the full pipeline (build, smoke test, Trivy scan, SBOM, cosign signature).
 ```bash
 just docker-build    # build locally
 just docker-smoke    # build + run scripts/smoke-test.sh
