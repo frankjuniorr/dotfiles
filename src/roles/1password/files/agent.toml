@@ -2,4 +2,4 @@
 vault = "Personal"
 
 [[ssh-keys]]
-vault = "Homelab"
+vault = "Homelab | Local"
