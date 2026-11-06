@@ -1,11 +1,19 @@
 [Unit]
 Description=Start detached tmuxinator sessions on login
-After=default.target
+# Wait for the graphical session so the environment imported by the compositor
+# (uwsm) is in place; tmux comes from mise shims, which are not in systemd's
+# default user PATH.
+Requires=graphical-session.target
+After=graphical-session.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+# Fallback PATH for when the imported environment is still incomplete.
+Environment="PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin"
+# Never let tmuxinator block on its "unsupported tmux version" ENTER prompt.
+StandardInput=null
 ExecStart=%h/.bin/__tmuxinator_start
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

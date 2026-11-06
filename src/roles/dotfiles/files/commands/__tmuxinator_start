@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# tmux comes from mise shims, absent from systemd's default user PATH at login.
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "tmux not found in PATH: $PATH" >&2
+  exit 1
+fi
+
 sessions=(
   dotfiles
   homelab-iac
