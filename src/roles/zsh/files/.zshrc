@@ -1,15 +1,3 @@
-if [ -f "${HOME}/.atuin/bin/env" ];then
-  source "${HOME}/.atuin/bin/env"
-fi
-
-if which atuin > /dev/null 2>&1 ;then
-  eval "$(atuin init zsh --disable-up-arrow)"
-fi
-
-if which zoxide > /dev/null 2>&1 ;then
-  eval "$(zoxide init zsh)"
-fi
-
 # Omarchy compensations — chsh to zsh loses the omarchy-* PATH and mise init
 # that Omarchy's own bash rc provides. Guarded: this file also runs in the
 # busybox container and on Ubuntu, where Omarchy doesn't exist.
@@ -25,6 +13,20 @@ unset _omarchy_dir
 
 if which mise > /dev/null 2>&1; then
   eval "$(mise activate zsh)"
+fi
+
+# Tools installed through mise (atuin, zoxide, ...) are only on PATH after the
+# `mise activate` above, so their shell init must come after it, not before.
+if [ -f "${HOME}/.atuin/bin/env" ];then
+  source "${HOME}/.atuin/bin/env"
+fi
+
+if which atuin > /dev/null 2>&1 ;then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+if which zoxide > /dev/null 2>&1 ;then
+  eval "$(zoxide init zsh)"
 fi
 
 
@@ -49,20 +51,6 @@ if [ -d ${HOME}/.config/dotfiles ]; then
       source $dotfiles
    done
 fi
-
-# OH-MY-ZSH
-############################################################
-#export ZSH="$HOME/.oh-my-zsh"
-#ZSH_THEME=""
-
-#DISABLE_AUTO_TITLE="true"
-
-#plugins=(
-#    zsh-syntax-highlighting
-#    zsh-autosuggestions
-#   )
-
-# source $ZSH/oh-my-zsh.sh
 
 # SSH
 ############################################################
