@@ -1,0 +1,35 @@
+---
+# Ubuntu Dock (dash-to-dock) customization via gsettings.
+# Final layout: dock at the BOTTOM with only Chrome, Ghostty and Files (Nautilus) pinned; the Trash is
+# the only other item (show-trash), mounted drives are hidden (show-mounts false).
+# The main-menu (Show Applications) button is moved to the start of the dock
+# (show-apps-at-top true; the Ubuntu default puts it at the end).
+# Icons are 30px (Ubuntu default is 48) for a slimmer dock.
+# Must run after the google-chrome and terminal roles so both .desktop files exist.
+# Values use gsettings' own text format so the "already set?" check is a plain
+# string comparison against `gsettings get`.
+- name: "GNOME | Configure the dock"
+  ansible.builtin.shell: |
+    current="$(gsettings get {{ item.schema }} {{ item.key }})"
+    if [ "$current" = "{{ item.value }}" ]; then
+      exit 0
+    fi
+    gsettings set {{ item.schema }} {{ item.key }} "{{ item.value }}"
+    echo changed
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts.user_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_facts.user_uid }}/bus"
+  register: gnome_dock
+  changed_when: "'changed' in gnome_dock.stdout"
+  failed_when: gnome_dock.rc != 0
+  loop:
+    - { schema: org.gnome.shell, key: favorite-apps, value: "['google-chrome.desktop', 'com.mitchellh.ghostty.desktop', 'org.gnome.Nautilus.desktop']" }
+    - { schema: org.gnome.shell.extensions.dash-to-dock, key: dock-position, value: "'BOTTOM'" }
+    - { schema: org.gnome.shell.extensions.dash-to-dock, key: show-apps-at-top, value: "true" }
+    - { schema: org.gnome.shell.extensions.dash-to-dock, key: dash-max-icon-size, value: "30" }
+    - { schema: org.gnome.shell.extensions.dash-to-dock, key: show-trash, value: "true" }
+    - { schema: org.gnome.shell.extensions.dash-to-dock, key: show-mounts, value: "false" }
+  loop_control:
+    label: "{{ item.key }}"
+  when: not (is_docker_build | default(false))
+  tags: [configs]

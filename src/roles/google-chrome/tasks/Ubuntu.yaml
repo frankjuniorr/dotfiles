@@ -28,3 +28,33 @@
   ansible.builtin.file:
     path: /tmp/google-chrome-stable_current_amd64.deb
     state: absent
+
+# Default browser: GNOME's default-web-browser (links opened from other apps,
+# xdg-open) plus the Debian x-www-browser / gnome-www-browser alternatives.
+- name: "Google Chrome | Check current default web browser"
+  ansible.builtin.command: xdg-settings get default-web-browser
+  register: chrome_default_browser
+  changed_when: false
+  failed_when: false
+  when: not (is_docker_build | default(false))
+  tags: [configs]
+
+- name: "Google Chrome | Set as default web browser (GNOME)"
+  ansible.builtin.command: xdg-settings set default-web-browser google-chrome.desktop
+  when:
+    - not (is_docker_build | default(false))
+    - chrome_default_browser.stdout | default('') != 'google-chrome.desktop'
+  changed_when: true
+  tags: [configs]
+
+- name: "Google Chrome | Register x-www-browser / gnome-www-browser alternatives"
+  become: yes
+  community.general.alternatives:
+    name: "{{ item }}"
+    path: /usr/bin/google-chrome-stable
+    link: "/usr/bin/{{ item }}"
+    priority: 200
+  loop:
+    - x-www-browser
+    - gnome-www-browser
+  when: not (is_docker_build | default(false))
