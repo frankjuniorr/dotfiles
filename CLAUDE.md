@@ -91,6 +91,20 @@ Omarchy owns `~/.config` by copying (`cp -R`/`cp -f` via `omarchy-refresh-config
 
 Full rationale and the file-by-file collision matrix live in the "Migração pro Omarchy" plan notes (not in this repo).
 
+### Package Installation Priority
+When a role needs to install a tool, look for it in this order and stop at the first source that has it:
+
+- **Arch / Omarchy:**
+  1. **mise** — check the registry first (`mise registry | grep <tool>`); install through `roles/common/tasks/mise_tool.yml`.
+  2. **Omarchy package manager** (`omarchy-pkg-add`, via `roles/common/tasks/omarchy_pkg.yml`) — covers official repos and AUR on Omarchy.
+  3. **pacman** (plain Arch, non-Omarchy path) — last resort.
+- **Ubuntu:**
+  1. **mise** — same as above.
+  2. **apt**.
+  3. **GitHub releases** of the tool — only when apt doesn't have it.
+
+Example: `nmap` is not in the mise registry, so it comes from the Omarchy package manager / pacman on Arch and from apt on Ubuntu (`system-base` role).
+
 ### Default Role Install Order
 System base → CLI tools → terminal/shell (zsh, tmux) → DevOps tools (docker, terraform, go) → Kubernetes stack (kubectl, k9s, helm) → GUI apps → config roles (dotfiles, omarchy)
 
