@@ -37,13 +37,10 @@ if [ -n "$MODE" ] && [ "$MODE" != "omarchy" ] && [ "$MODE" != "ubuntu" ]; then
 fi
 
 # get the environment var `ROLE`.
-# If `$ROLE` doens't exists, get the `$1`
+# If `$ROLE` doens't exists, get the `$1`.
+# The interactive prompt (needs gum) is deferred to MAIN, after check_dependencies,
+# so a fresh machine without gum can install it first.
 TAG_NAME="${ROLE:-$1}"
-
-if [ -z "$TAG_NAME" ]; then
-  TAG_NAME=$(gum input --placeholder "all" --prompt "Role > ")
-  [ -z "$TAG_NAME" ] && TAG_NAME='all'
-fi
 
 function show_header() {
   clear
@@ -237,6 +234,11 @@ update_ansible_galaxy() {
 os_name=$(grep "^NAME=" /etc/os-release | cut -d '=' -f2 | sed 's/"//g')
 
 check_dependencies
+
+if [ -z "$TAG_NAME" ]; then
+  TAG_NAME=$(gum input --placeholder "all" --prompt "Role > ")
+  [ -z "$TAG_NAME" ] && TAG_NAME='all'
+fi
 
 show_header
 
