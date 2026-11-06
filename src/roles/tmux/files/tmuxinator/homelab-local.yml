@@ -1,0 +1,8 @@
+name: homelab-local
+root: ~/Dropbox/code/01.github/homelab/homelab-local-no-git/
+
+windows:
+  - code: $EDITOR .
+  - IA: claude --continue
+  - docker: lazydocker
+  - logs: just logs
