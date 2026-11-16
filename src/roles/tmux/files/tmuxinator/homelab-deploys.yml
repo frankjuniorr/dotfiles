@@ -3,6 +3,5 @@ root: ~/Dropbox/code/01.github/homelab/homelab-deploys/
 
 windows:
   - code: $EDITOR .
-  - git: lazygit
   - IA: claude --continue
   - k9s: k9s

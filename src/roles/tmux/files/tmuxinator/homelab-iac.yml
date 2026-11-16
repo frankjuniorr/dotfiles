@@ -3,6 +3,5 @@ root: ~/Dropbox/code/01.github/homelab/homelab-iac
 
 windows:
   - code: $EDITOR .
-  - git: lazygit
   - servers: sshs --config ~/.ssh/config
   - IA: claude --continue
