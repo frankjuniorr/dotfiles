@@ -124,3 +124,8 @@ nerd_fonts_version: "v3.5.1"
 # fonts list used by me
 fonts_list:
   - "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DroidSansMono/DroidSansMNerdFont-Regular.otf"
+
+# Voxtype (Omarchy dictation) — multilingual model so pt-BR works; see
+# roles/omarchy/tasks/Archlinux.yaml. Omarchy's default is base.en / en.
+omarchy_voxtype_model: small
+omarchy_voxtype_language: pt

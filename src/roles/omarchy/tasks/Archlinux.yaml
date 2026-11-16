@@ -242,3 +242,56 @@
             "snippets": {"icon":"󰅩","label":"Snippets","aliases":["navi","cheatsheets"],"description":"navi cheatsheets","action":"omarchy-launch-tui {{ ansible_facts.user_dir }}/.bin/__navi_snippets"},
         create: yes
       tags: [configs]
+
+    # Voxtype dictation (Super+Ctrl+X): Omarchy installs the default
+    # config.toml once via `cp` (English-only: model "base.en", language "en"),
+    # so the file is Omarchy-owned — no symlink/template. Only the `model` and
+    # `language` keys are patched in place with lineinfile (anchored regexps;
+    # each key appears once, uncommented), keeping everything else (and any
+    # future upstream defaults) intact. Frank dictates in pt-BR, which needs a
+    # multilingual model (no `.en` suffix). The model file is fetched through
+    # Voxtype's own downloader (skipped if already present) and the user
+    # service is restarted only when the config or the model changed.
+    # Guarded on the voxtype binary + existing config so it no-ops where
+    # Voxtype isn't installed.
+    - name: "OMARCHY | Voxtype | Check install"
+      ansible.builtin.stat:
+        path: "{{ ansible_facts.user_dir }}/.config/voxtype/config.toml"
+      register: omarchy_voxtype_config
+      tags: [configs]
+
+    - name: "OMARCHY | Voxtype | Download multilingual whisper model"
+      ansible.builtin.command: "voxtype setup --download --model {{ omarchy_voxtype_model }} --no-post-install"
+      args:
+        creates: "{{ ansible_facts.user_dir }}/.local/share/voxtype/models/ggml-{{ omarchy_voxtype_model }}.bin"
+      register: omarchy_voxtype_download
+      when: omarchy_voxtype_config.stat.exists
+      tags: [configs]
+
+    - name: "OMARCHY | Voxtype | Set whisper model"
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/voxtype/config.toml"
+        regexp: '^model\s*='
+        line: 'model = "{{ omarchy_voxtype_model }}"'
+      register: omarchy_voxtype_model_cfg
+      when: omarchy_voxtype_config.stat.exists
+      tags: [configs]
+
+    - name: "OMARCHY | Voxtype | Set transcription language"
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_facts.user_dir }}/.config/voxtype/config.toml"
+        regexp: '^language\s*='
+        line: 'language = "{{ omarchy_voxtype_language }}"'
+      register: omarchy_voxtype_lang_cfg
+      when: omarchy_voxtype_config.stat.exists
+      tags: [configs]
+
+    - name: "OMARCHY | Voxtype | Restart user service"
+      ansible.builtin.systemd_service:
+        name: voxtype
+        scope: user
+        state: restarted
+      when:
+        - omarchy_voxtype_config.stat.exists
+        - omarchy_voxtype_download is changed or omarchy_voxtype_model_cfg is changed or omarchy_voxtype_lang_cfg is changed
+      tags: [configs]
